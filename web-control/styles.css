@@ -22,18 +22,18 @@ body {
   appearance: none; /* removes browser-specific styling */
   width: 300px; /* width of slider */
   height: 25px; /* height of slider */
-  background: #ff5c35; /* orange background */
+  background: #5555ff; /* orange background */
   outline: none; /* remove outline */
-  border-radius: 50px; /* round corners */
+  border-radius: 30px; /* round corners */
   margin-top: 40%;
   transform: rotate(270deg); /* rotate the element */
 }
 
 .slider::-webkit-slider-thumb {
   appearance: none; /* removes browser-specific styling */
-  width: 20px; /* handle width */
+  width: 40px; /* handle width */
   height: 20px; /* handle height */
-  border-radius: 50%; /* make it circular */
+  border-radius: 30%; /* make it circular */
   background: #ffffff; /* white color */
   cursor: pointer; /* cursor on hover */
 }
