@@ -14,15 +14,19 @@ body {
         -ms-filter: "FlipH";
 */
   position: absolute;
-  left: 200px;
-  top: -50px;
+  left: 300px;
+  top: 50px;
 }
 
 .slider {
+  position: absolute;
+  /*left: 200px;
+  top: -50px;*/
+
   appearance: none; /* removes browser-specific styling */
   width: 200px; /* width of slider */
   height: 30px; /* height of slider */
-  background: #5555ff; /* orange background */
+  background: #5555ff; /* blue background */
   outline: none; /* remove outline */
   border-radius: 30px; /* round corners */
   margin-top: 40%;
