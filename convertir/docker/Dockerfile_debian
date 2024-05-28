@@ -1,0 +1,42 @@
+FROM debian
+
+
+#ARG UID
+#ARG GID
+
+#RUN addgroup --gid $GID sebas
+#RUN adduser --uid $UID --gid $GID --quiet --disabled-password --gecos "" sebas 
+#RUN echo 'sebas ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+#run --user "sebas:sebas"
+
+
+RUN apt-get update
+
+RUN apt-get install -y wget 
+RUN apt-get install -y curl 
+RUN apt-get install -y mc
+#RUN apt-get install -y gcc-c++
+RUN apt-get install -y git
+RUN apt-get install -y unzip
+RUN apt-get install -y locate
+
+RUN apt-get install -y python3 
+RUN apt-get install -y python3-pip
+
+#creo link simbolico a python3 para que funcione el compilador
+RUN ln -s /bin/python3 /bin/python
+
+RUN apt-get install -y pipx
+RUN pipx ensurepath -f
+
+RUN pipx install "vpype[all]"
+
+RUN pipx inject vpype vpype-vectrace
+RUN pipx inject vpype deduplicate
+RUN pipx inject vpype vpype-pixelart
+RUN pipx inject vpype 'git+https://github.com/serycjon/vpype-flow-imager.git#egg=vpype-flow-imager[all]'
+RUN pipx install vpype-ttf --include-deps
+
+
+RUN alias convertir='/home/sebas/v-plotter/convertir/convertir_vpype.sh'

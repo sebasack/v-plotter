@@ -1,0 +1,28 @@
+FROM fedora:39
+
+
+RUN dnf install -y wget 
+RUN dnf install -y curl 
+RUN dnf install -y mc
+RUN dnf install -y gcc-c++
+RUN dnf install -y git
+RUN dnf install -y unzip
+
+
+RUN dnf install -y python3 
+RUN dnf install -y python3-pip
+RUN dnf install -y python3-devel 
+
+
+RUN python3 -m pip install pipx
+
+
+#creo link simbolico a python3 para que funcione el compilador
+RUN ln -s /bin/python3 /bin/python
+
+RUN pipx install "vpype[all]"
+
+
+RUN pipx inject vpype deduplicate
+RUN pipx inject vpype vpype-pixelart
+RUN pipx inject vpype 'git+https://github.com/serycjon/vpype-flow-imager.git#egg=vpype-flow-imager[all]'

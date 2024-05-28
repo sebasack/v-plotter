@@ -1,0 +1,21 @@
+version: "3"
+services:
+  vpype-cli:
+    build:
+#      args:
+#        UID: 1000
+#        GID: 1000
+      context: .
+#      dockerfile: Dockerfile_fedora
+      dockerfile: Dockerfile_debian
+    container_name: vpype
+#    user: sebas:sebas
+    volumes:
+      - /tmp:/tmp
+      - /home/sebas:/home/sebas
+#    restart: unless-stopped
+    #privileged: true
+    #network_mode: host
+
+    # esta linea es para que el contenedor no se muera y quede corriendo
+    tty: true

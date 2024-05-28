@@ -1,0 +1,99 @@
+ 
+
+
+                          ________________________                      
+                         |                        |                    ______________________      ________________________
+                         |o en                23 o| SD MOSI           /==                    |    |==                      |
+                         |o 36                22 o|                  /== 1 CS                |    |==  7 MISO              |
+                         |o 39      ESP32     01 o|                 |==  2 MOSI              |    |==  6 GND               |
+         BV     fin mB   |o 34   DOIT-DEVKIT  03 o|                 |==  3 GND               |    |==  5 SCLK              |
+         BV     fin mA   |o 35        V1      21 o|                 |==  4 VDD 3.3v          |    |==  4 VDD 3.3v          |
+         BM     in1 mA   |o 32                19 o| SD MISO         |==  5 SCLK              |    |==  3 GND               |
+         BA     in2 mA   |o 33                18 o| SD SCLK         |==  6                   |    |==  2 MOSI              |
+         V      in3 mA   |o 25                05 o| SD CS           |==  7 MISO              |     \== 1 CS                |
+         A      in4 mA   |o 26                17 o|                 |==______________________|      \==____________________|
+         BM     in1 mB   |o 27                16 o|
+         BA     in2 mB   |o 14                04 o|  
+         V      in3 mB   |o 12                02 o| buzzer
+         A      in4 mB   |o 13                15 o| servo             
+         M               |o GND              GND o| SD GND
+         N               |o VIN    ______    3V3 o| SD 3.3v     BN
+                         |___|O|__|      |__|O|___|
+
+
+
+           cables motores        cables servo 
+         BM BA V  A     M  N        N  M  A
+         __________     ____        _______
+         |  |  |  |     |  |        |  |  |           
+         1  2  3  4    GND 5v     GND 5v Señal
+
+
+GPIO  Input       Output      Notes
+00    pulled up   OK          outputs PWM signal at boot, must be LOW to enter flashing mode
+01    x (TX pin)  OK          debug output at boot
+02    OK (touch)  OK          connected to on-board LED, must be left floating or LOW to enter flashing mode
+03    OK          x (RX pin)  HIGH at boot
+04    OK (touch)  OK 
+05    OK          OK          outputs PWM signal at boot, strapping pin
+06    x           x           connected to the integrated SPI flash
+07    x           x           connected to the integrated SPI flash
+08    x           x           connected to the integrated SPI flash
+09    x           x           connected to the integrated SPI flash
+10    x           x           connected to the integrated SPI flash
+11    x           x           connected to the integrated SPI flash
+12    OK (touch)  OK          boot fails if pulled high, strapping pin
+13    OK (touch)  OK 
+14    OK (touch)  OK          outputs PWM signal at boot
+15    OK (touch)  OK          outputs PWM signal at boot, strapping pin
+16    OK          OK 
+17    OK          OK 
+18    OK          OK 
+19    OK          OK 
+21    OK          OK 
+22    OK          OK 
+23    OK          OK 
+25    OK          OK 
+26    OK          OK 
+27    OK (touch)  OK 
+32    OK (touch)  OK 
+33    OK (touch)  OK 
+34    OK          x           input only
+35    OK          x           input only
+36    OK          x           input only
+39    OK          x           input only
+
+referencia: https://randomnerdtutorials.com/esp32-pinout-reference-gpios/        
+
+PASOS:
+
+  
+
+   0. cortar placa perfoboard y limpiar pads con el soldador   LISTO
+   1. soldar pines del esp a la placa                          LISTO 
+   2. soldar ficha barrel a la placa                           LISTO
+   3. colocar servo en la gondola                              LISTO
+   4. soldar cables tarjeta SD, probar funcionamiento .        LISTO
+   5. soldar cables utp que van a los motores y servo          LISTO
+   6. soldar pines hembra a los cables de los motores y servo, LISTO
+      etiquetarlos para que se indique la posicion de conexion LISTO
+   7. soldar capacitor en esp32                                LISTO
+   8. armar estructura                                         LISTO
+   9. colocar motores, placa y trafo                           LISTO
+   10.colocar hilos y colgar                                   LISTO
+
+   11. poner buzzer y sensores de fin de carrera
+   12. programar paro de emergencia cuando se activen sensores 
+   
+   
+
+   ancho maquina 880mm
+   alto maquina 1275mm (1100 util)
+
+
+   
+
+
+         
+
+

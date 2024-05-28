@@ -1,0 +1,147 @@
+
+https://github.com/serycjon/vpype-flow-imager
+
+
+
+
+Usage: vpype [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+
+  Execute the sequence of commands passed in argument.
+
+  The available commands are listed below. Information on each command may be
+  obtained using:
+
+      vpype COMMAND --help
+
+  Some of vpype's commands or plug-ins may rely on a random number generator
+  (RNG). By default, vpype's RNG is seeded with the current time, such as to
+  produce pseudo-random behaviour. The seed can instead be set to a specific
+  value (using the `--seed` option) when reproducible behaviour is needed. For
+  example, the following always yields the exact same result:
+
+      vpype -s 0 random show
+
+  Include files (commonly named with the `.vpy` extension) can be used instead
+  passing commands in the command line, e.g.:
+
+      vpype read input.svg -I my_post_processing.vpy write.output.svg
+
+  Some commands and plug-in can be customized via a TOML configuration file.
+  If a file named `.vpype.toml` exists at the root of the user directory,
+  vpype will automatically load it. Alternatively, a custom configuration file
+  may be loaded with the `--config` option, e.g.:
+
+      vpype -c my_plotter_config.toml read input.svg write -d my_plotter
+      output.hpgl
+
+  When using the `--history` option, vpype will append its invocation (i.e.
+  the full command line) in a `vpype_history.txt` file in the current
+  directory (creating it if necessary). This may be useful to easily keep a
+  trace of how project might have been created or post-processed with vpype.
+
+  By default, vpype verbosity is low. It may be increased by using the `-v`
+  option once or twice to increase verbosity to info, respectively debug
+  level, e.g.:
+
+      vpype -vv [...]
+
+  Refer to the documentation at https://vpype.readthedocs.io/ for more
+  information.
+
+Options:
+  --version           Show the version and exit.
+  -h, --help          Show this message and exit.
+  -v, --verbose
+  -I, --include PATH  Load commands from a command file.
+  -H, --history       Record this command in a `vpype_history.txt` file in the
+                      current directory.
+  -s, --seed INTEGER  Specify the RNG seed.
+  -c, --config PATH   Load an additional config file.
+
+Commands:
+
+  Metadata:
+    alpha         Set the opacity of one or more layers.
+    color         Set the color for one or more layers.
+    name          Set the name for one or more layers.
+    pens          Apply a pen configuration.
+    penwidth      Set the pen width for one or more layers.
+    propclear     Remove all global or layer properties.
+    propdel       Remove a global or layer property.
+    propget       Print the value of a global or layer property.
+    proplist      Print a list the existing global or layer properties and...
+    propset       Set the value of a global or layer property.
+
+  Primitives:
+    arc           Generate lines approximating a circular arc.
+    circle        Generate lines approximating a circle.
+    ellipse       Generate lines approximating an ellipse.
+    line          Generate a single line.
+    rect          Generate a rectangle, with optional rounded angles.
+
+  Block control:
+    begin         Marks the start of a block.
+    end           Marks the end of a block.
+
+  Operations:
+    crop          Crop the geometries.
+    filter        Filter paths according to specified criterion.
+    layout        Layout the geometries on the provided page size.
+    linemerge     Merge lines whose endings and starts overlap or are very...
+    linesimplify  Reduce the number of segments in the geometries.
+    linesort      Sort lines to minimize the pen-up travel distance.
+    multipass     Add multiple passes to each line
+    pagerotate    Rotate the page by 90 degrees.
+    pagesize      Change the current page size.
+    reloop        Randomize the seam location of closed paths.
+    reverse       Reverse order of lines.
+    snap          Snap all points to a grid with with a spacing of PITCH.
+    splitall      Split all paths into their constituent segments.
+    splitdist     Split layers by drawing distance.
+    trim          Trim the geometries by some margin.
+
+  Expressions:
+    eval          Evaluate an expression.
+
+  Plugins:
+    flow_img      Generate flowline representation from an image.
+
+  Block processors:
+    forfile       Iterate over a file list.
+    forlayer      Iterate over each layer.
+    grid          Creates a NX by NY grid of geometry
+    repeat        Repeat geometries N times.
+
+  Generators:
+    frame         Add a single-line frame around the geometry.
+    random        Generate random lines.
+
+  Output:
+    gwrite        Write gcode or other ascii files for the vpype pipeline.
+    show          Display the geometry in an graphical user interface.
+    stat          Print human-readable statistics on the current geometries.
+    write         Save geometries to a file.
+
+  Layers:
+    lcopy         Copy the content of one or more layer(s) to another layer.
+    ldelete       Delete one or more layers.
+    lmove         Move the content of one or more layer(s) to another layer.
+    lreverse      Reverse the path order within one or more layers.
+    lswap         Swap the content between two layers
+
+  Input:
+    read          Extract geometries from an SVG file.
+    script        Call an external python script to generate geometries.
+
+  Transforms:
+    rotate        Rotate the geometries (clockwise positive).
+    scale         Scale the geometries by a factor.
+    scaleto       Scale the geometries to given dimensions.
+    skew          Skew the geometries.
+    translate     Translate the geometries.
+
+  Filters:
+    squiggles     Apply a squiggle filter to the geometries.
+
+  Text:
+    text          Generate text using Hershey fonts.
