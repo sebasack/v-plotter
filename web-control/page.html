@@ -1,0 +1,201 @@
+<script
+  type="text/javascript"
+  src="https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control/webcam.js"
+></script>
+
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control/estilos.css"
+  media="projection, screen"
+/>
+
+<div
+  style="border: 1px solid  width: 128px; position: absolute; left:400px; top:100px;"
+>
+  <img
+    src="https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control//images/joystick-base.png"
+  />
+  <div id="stick1" style="position: absolute; left: 32px; top: 32px">
+    <img
+      src="https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control//images/joystick-red.png"
+    />
+  </div>
+
+  <video id="video" playsinline autoplay style="display: none"></video>
+  <canvas id="canvas" width="1280" height="720"></canvas>
+</div>
+<div id="status1" style="color: red">Joystick 1</div>
+
+<h1>Control</h1>
+<table border="1">
+  <tr>
+    <td align="center"></td>
+    <td align="center">Motor A:</td>
+    <td align="center">Motor B:</td>
+  </tr>
+  <tr>
+    <td align="center">Velocidad:</td>
+    <td align="center">
+      <select id="velocidadA">
+        <option value="1000">1000</option>
+        <option value="500">500</option>
+        <option value="200">200</option>
+        <option value="0">0</option>
+        <option value="-200">-200</option>
+        <option value="-500">-500</option>
+        <option value="-1000">-1000</option>
+      </select>
+    </td>
+    <td align="center">
+      <select id="velocidadB">
+        <option value="1000">1000</option>
+        <option value="500">500</option>
+        <option value="200">200</option>
+        <option value="0">0</option>
+        <option value="-200">-200</option>
+        <option value="-500">-500</option>
+        <option value="-1000">-1000</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">Distancia:</td>
+    <td align="center">
+      <select id="pasosA">
+        <option value="288">1cm</option>
+        <option value="1442">5cm</option>
+        <option value="2883">10cm</option>
+        <option value="5767">20cm</option>
+        <option value="14417">50cm</option>
+        <option value="28834">100cm</option>
+      </select>
+    </td>
+    <td align="center">
+      <select id="pasosB">
+        <option value="288">1cm</option>
+        <option value="1442">5cm</option>
+        <option value="2883">10cm</option>
+        <option value="5767">20cm</option>
+        <option value="14417">50cm</option>
+        <option value="28834">100cm</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" rowspan="2">Mover:</td>
+    <td align="center">
+      <button type="button" onclick="move(1)">Motor A</button>
+    </td>
+    <td align="center">
+      <button type="button" onclick="move(2)">Motor B</button><br />
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <button type="button" onclick="move(0)">Ambos motores</button>
+    </td>
+  </tr>
+</table>
+<br />
+<button type="button" onclick="command('penLift')">pen Arriba</button>
+<button type="button" onclick="command('penDown')">pen Abajo</button>
+<button type="button" onclick="command('restart')">Restart</button>
+<button type="button" onclick="command('releaseMotors')">
+  Desenergizar motores
+</button>
+<button type="button" onclick="command('getPosition')">trae la posicion</button>
+<br />
+
+<textarea id="log" name="log" rows="10" cols="160"> </textarea><br />
+<textarea id="errores" name="errores" rows="5" cols="160"> </textarea><br />
+
+<!--
+    <title>PolarGraph</title>
+   
+
+    <h1>PolarGraph</h1>
+    <p>Uptime: 00:00:27</p>
+    <table border="1" cellpadding="5">
+      <tr>
+        <th colspan="2">Core</th>
+      </tr>
+      <tr></tr>
+      <tr>
+        <th>HTTP</th>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th>WIFI</th>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th>COMMS Read</th>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th>COMMS Command</th>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th>Release Motors</th>
+        <td>1</td>
+      </tr>
+    </table>
+    <br />
+    <table border="1" cellpadding="5">
+      <tr>
+        <th colspan="2">Stack</th>
+      </tr>
+      <tr></tr>
+      <tr>
+        <th>HTTP</th>
+        <td>3228</td>
+      </tr>
+      <tr>
+        <th>WIFI</th>
+        <td>4200</td>
+      </tr>
+      <tr>
+        <th>COMMS Read</th>
+        <td>3576</td>
+      </tr>
+      <tr>
+        <th>COMMS Command</th>
+        <td>3628</td>
+      </tr>
+      <tr>
+        <th>Release Motors</th>
+        <td>3632</td>
+      </tr>
+    </table>
+    <br />
+    <table border="1" cellpadding="5">
+      <tr>
+        <th colspan="2">Command</th>
+      </tr>
+      <tr></tr>
+      <tr>
+        <th>commandBuffered</th>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th>bufferPosition</th>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th>nextCommand</th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>currentCommand</th>
+        <td></td>
+      </tr>
+    </table>
+-->
+<br />
+
+<script
+  type="text/javascript"
+  src="https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control/control.js"
+></script>
