@@ -20,8 +20,8 @@ body {
 
 .slider {
   appearance: none; /* removes browser-specific styling */
-  width: 300px; /* width of slider */
-  height: 25px; /* height of slider */
+  width: 200px; /* width of slider */
+  height: 30px; /* height of slider */
   background: #5555ff; /* orange background */
   outline: none; /* remove outline */
   border-radius: 30px; /* round corners */
