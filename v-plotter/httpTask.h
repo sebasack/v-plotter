@@ -58,7 +58,7 @@ void handleRoot(){
     <script>\
       $(function () {\
         $('#b-placeholder').load(\
-          'https://cdn.jsdelivr.net/gh/sasnull/v-plotter/web-control/page.html'\
+          'https://cdn.jsdelivr.net/gh/sebasack/v-plotter/web-control/page.html'\
         );\
       });\
     </script>\
