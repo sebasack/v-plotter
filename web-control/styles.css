@@ -25,7 +25,7 @@ body {
 
   appearance: none; /* removes browser-specific styling */
   width: 200px; /* width of slider */
-  height: 30px; /* height of slider */
+  height: 50px; /* height of slider */
   background: #5555ff; /* blue background */
   outline: none; /* remove outline */
   border-radius: 30px; /* round corners */
