@@ -1,3 +1,29 @@
+<style>
+  .slider1 {
+    /* position: absolute;
+    left: 200px;
+  top: -50px;*/
+
+    appearance: none; /* removes browser-specific styling */
+    width: 200px; /* width of slider */
+    height: 20px; /* height of slider */
+    background: #5555ff; /* blue background */
+    outline: none; /* remove outline */
+    border-radius: 30px; /* round corners */
+    margin-top: 40%;
+    transform: rotate(270deg); /* rotate the element */
+  }
+
+  .slider1::-webkit-slider-thumb {
+    appearance: none; /* removes browser-specific styling */
+    width: 80px; /* handle width */
+    height: 20px; /* handle height */
+    border-radius: 30%; /* make it circular */
+    background: #ffffff; /* white color */
+    cursor: pointer; /* cursor on hover */
+  }
+</style>
+
 <script
   type="text/javascript"
   src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/webcam.js"
@@ -28,26 +54,26 @@
 <div id="status1" style="color: red">Joystick 1</div>
 
 <h1>Control</h1>
-<table border="1">
-  <input
-    id="slider1"
-    class="slider"
-    type="range"
-    min="-100"
-    max="100"
-    value="0"
-    ondragend="$('#slider1'.val(0));"
-  />
-  <input
-    id="slider2"
-    class="slider"
-    type="range"
-    min="-100"
-    max="100"
-    value="0"
-    ondragend="$('#slider2'.val(0));"
-  />
+<input
+  id="slider1"
+  class="slider1"
+  type="range"
+  min="-100"
+  max="100"
+  value="0"
+  ondragend="$('#slider1'.val(0));"
+/>
+<input
+  id="slider2"
+  class="slider1"
+  type="range"
+  min="-100"
+  max="100"
+  value="0"
+  ondragend="$('#slider2'.val(0));"
+/>
 
+<table border="1">
   <tr>
     <td align="center"></td>
     <td align="center">Motor A:</td>
