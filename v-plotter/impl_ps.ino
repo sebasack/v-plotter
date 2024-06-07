@@ -77,7 +77,7 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
   }else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE)){
     rove_drawRoveAreaFittedToImage();
   }else if (inCmd.startsWith(CMD_AUTO_CALIBRATE)){
-    //calibrate_doCalibration();
+    calibrate_doCalibration();
   }else if (inCmd.startsWith(CMD_SET_DEBUGCOMMS)){
     impl_setDebugComms();
   }else  {
