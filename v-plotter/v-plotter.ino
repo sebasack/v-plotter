@@ -6,6 +6,7 @@
 *  http://www.polargraph.co.uk
 *  https://github.com/euphy/polargraph_server_polarshield_esp32
 *  https://github.com/euphy/polargraph/wiki
+*  https://github.com/obstruse/PGNH/tree/main
 
 
 
@@ -331,25 +332,16 @@ const static String CMD_AUTO_CALIBRATE = "C48";
 
 /*  End stop pin definitions  */
 // there are no endstop switches, so this and the calibrate can be removed
-const int ENDSTOP_X_MAX = 17;
-const int ENDSTOP_X_MIN = 16;
-const int ENDSTOP_Y_MAX = 15;
-const int ENDSTOP_Y_MIN = 14;
+const int ENDSTOP_MOTORA = 34;
+const int ENDSTOP_MOTORB = 35;
 
-long ENDSTOP_X_MIN_POSITION = 130;
-long ENDSTOP_Y_MIN_POSITION = 130;
+long ENDSTOP_MOTORA_POSITION = 130;
+long ENDSTOP_MOTORB_POSITION = 130;
 
 long motorARestPoint = 0;
 long motorBRestPoint = 0;
 
-// This is the file name used to store the touch coordinate
-// calibration data. Cahnge the name to start a new calibration.
-#define CALIBRATION_FILE "/PolargraphCalData" // TouchCalData3
 
-// Set recalibrateTouchScreen to true instead of false to run calibration
-// again, otherwise it will only be done once.
-// Repeat calibration if you change the screen rotation.
-// boolean recalibrateTouchScreen = false;
 
 // size and location of rove area
 Rectangle roveAreaMm = {200, 120, 210, 297};

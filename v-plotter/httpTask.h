@@ -1,6 +1,5 @@
 #include <AccelStepper.h>
 
-#include <SD.h>
 
 
 TaskHandle_t httpHandle = NULL;
@@ -18,10 +17,13 @@ int httpCore = 0;
 
 extern int commsReadCore, commsCommandCore, impleReleaseMotorsCore;
 extern TaskHandle_t commsReadHandle, commsCommandHandle, impleReleaseMotorsHandle;
+bool loadFromSdCard(String path) ;
+void printDirectory();
+void handleDelete();
+void handleCreate();
+void handleFileUpload();
+void returnOK();
 
-
-
-File uploadFile;
 
 extern AccelStepper motorA, motorB;
 
@@ -232,16 +234,49 @@ void http(void *pvParameters){
 //--------------------------------------------
 //--------------------------------------------
 
+
+void handleNotFound(){
+    
+    if (cardPresent && loadFromSdCard(server.uri()))  {
+        return;
+    }
+
+    String message = "File Not Found\n\n";
+    message += "URI: ";
+    message += server.uri();
+    message += "\nMethod: ";
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
+    message += "\nArguments: ";
+    message += server.args();
+    message += "\n";
+
+    for (uint8_t i = 0; i < server.args(); i++)  {
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    }
+
+    server.send(404, "text/plain", message);
+}
+
+
 void httpTaskCreate(){
     Serial.println("in http...");
     Serial.print("Created task: Executing on core ");
     Serial.println(xPortGetCoreID());
 
   
+    server.on("/list", HTTP_GET, printDirectory);
+    server.on("/edit", HTTP_DELETE, handleDelete);
+    server.on("/edit", HTTP_PUT, handleCreate);
+    server.on("/edit", HTTP_POST, []() {
+        returnOK();
+    }, handleFileUpload);
+  
     server.on("/", handleRoot);
     //server.on("/stop", handleStop);
-    server.on("/control", handleControl);
 
+
+    server.on("/control", handleControl);
+    server.onNotFound(handleNotFound);
     
     server.begin();
     Serial.println("http started");

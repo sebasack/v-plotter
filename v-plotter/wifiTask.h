@@ -125,7 +125,7 @@ void wifiTaskCreate(){
 
   // WIFI setup
   WiFi.persistent(true);      // ESP32 onlyreads persistent at initialization !? (unlike ESP8266)
-  WiFi.setAutoConnect(false); // don't connect until I tell you to!
+  //WiFi.setAutoConnect(false); // don't connect until I tell you to!
   WiFi.setAutoReconnect(true);
   WiFi.mode(WIFI_STA);
   WiFi.hostname(IOTname);

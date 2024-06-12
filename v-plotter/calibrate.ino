@@ -20,6 +20,7 @@ distance from the sprocket.
    =============================================================================*/
    
 void calibrate_doCalibration(){
+
 /* pasos:
 
   levantar el pen
@@ -41,12 +42,22 @@ void calibrate_doCalibration(){
 
   setear el home
   
-
   liberar motores
-
-
-
 */
+
+  Serial.println("Calibrando...");
+
+  // raise pen
+  penlift_penUp();
+
+  // turn motors off
+  releaseMotors();
+
+  delay(1000);
+
+  int sensorAValue = analogRead(ENDSTOP_MOTORA);
+  int sensorBValue = analogRead(ENDSTOP_MOTORB);
+
 
 /*
   Serial.println("Doing calibration.");
