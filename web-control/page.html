@@ -1,29 +1,3 @@
-<style>
-  .slider1 {
-    /* position: absolute;
-    left: 200px;
-  top: -50px;*/
-
-    appearance: none; /* removes browser-specific styling */
-    width: 200px; /* width of slider */
-    height: 20px; /* height of slider */
-    background: #5555ff; /* blue background */
-    outline: none; /* remove outline */
-    border-radius: 30px; /* round corners */
-    margin-top: 40%;
-    transform: rotate(270deg); /* rotate the element */
-  }
-
-  .slider1::-webkit-slider-thumb {
-    appearance: none; /* removes browser-specific styling */
-    width: 80px; /* handle width */
-    height: 20px; /* handle height */
-    border-radius: 30%; /* make it circular */
-    background: #ffffff; /* white color */
-    cursor: pointer; /* cursor on hover */
-  }
-</style>
-
 <script
   type="text/javascript"
   src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/webcam.js"
@@ -37,7 +11,7 @@
 />
 
 <div
-  style="border: 1px solid  width: 128px; position: absolute; left:400px; top:100px;"
+  style="border: 1px solid  width: 128px; position: absolute; left:400px; top:20px;"
 >
   <img
     src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/images/joystick-base.png"
@@ -155,11 +129,11 @@
 <textarea id="log" name="log" rows="10" cols="120"> </textarea><br />
 <textarea id="errores" name="errores" rows="5" cols="120"> </textarea><br />
 
-<a
-  href="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/edit.html"
-  target="_blank"
-  >Editor de SD</a
->
+<input
+  type="button"
+  onclick="cargar_pagina('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/edit.html')"
+  value="cargar editor"
+/>
 
 <!--
     <title>PolarGraph</title>
