@@ -24,7 +24,10 @@ void handleCreate();
 void handleFileUpload();
 void returnOK();
 void calibrate_doCalibration();
+<<<<<<< HEAD
 void changeLength(float tA, float tB);
+=======
+>>>>>>> 2374bad (agrego comandos a control web)
 
 
 extern AccelStepper motorA, motorB;
@@ -141,7 +144,10 @@ void handleControl(){
           releaseMotors();          
       } else if (server.arg("command") == "calibrate")    { 
           calibrate_doCalibration();         
+<<<<<<< HEAD
      
+=======
+>>>>>>> 2374bad (agrego comandos a control web)
       }else if (server.arg("command") == "move")    {
        
           if (server.hasArg("speedA")){

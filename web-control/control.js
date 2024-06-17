@@ -198,12 +198,26 @@ function move(motor) {
   });
 }
 
-function command(comando) {
+function command(comando,param1,param2,param3,param4) {
   //  $('#log').val(comando+"..." + "\n"+ $('#log').val());
+
 
   params = {
     command: comando,
   };
+
+  if (param1!=='undefined'){
+    params.push({param1: param1});
+    if (param2!=='undefined'){
+      params.push({param2: param2});
+      if (param3!=='undefined'){
+        params.push({param3: param3});
+        if (param4!=='undefined'){
+          params.push({param4: param4});
+        }
+      }
+    }
+  }
 
   $.ajax({
     url: "/control",
