@@ -23,6 +23,8 @@ void handleDelete();
 void handleCreate();
 void handleFileUpload();
 void returnOK();
+void calibrate_doCalibration();
+void changeLength(float tA, float tB);
 
 
 extern AccelStepper motorA, motorB;
@@ -137,6 +139,9 @@ void handleControl(){
           // detenerMovimientoManual=true;
       } else if (server.arg("command") == "releaseMotors")    { 
           releaseMotors();          
+      } else if (server.arg("command") == "calibrate")    { 
+          calibrate_doCalibration();         
+     
       }else if (server.arg("command") == "move")    {
        
           if (server.hasArg("speedA")){
@@ -193,6 +198,8 @@ void handleControl(){
           reportPosition();   // output the SYNC message
           comms_ready(); // output the READY_200 message
       }else if (server.arg("command") == "getPosition")    {
+      }else{       
+        // exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
       }
 
       manualControlInProgress = false;

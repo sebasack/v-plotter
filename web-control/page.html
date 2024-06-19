@@ -117,9 +117,14 @@
   </tr>
 </table>
 <br />
-<button type="button" onclick="command('penLift')">pen Arriba</button>
-<button type="button" onclick="command('penDown')">pen Abajo</button>
+<button type="button" onclick="command('C14,123,END')">pen Arriba</button>
+<button type="button" onclick="command('C13,END')">pen Abajo</button>
 <button type="button" onclick="command('restart')">Restart</button>
+<button type="button" onclick="command('calibrate')">Calibrar</button>
+<button type="button" onclick="command('C09,15664,15664,END')">Set Home</button>
+<button type="button" onclick="command('C01,15664,15664,END')">
+  Return to Home
+</button>
 <button type="button" onclick="command('releaseMotors')">
   Desenergizar motores
 </button>
@@ -129,7 +134,7 @@
 <textarea id="log" name="log" rows="10" cols="120"> </textarea><br />
 <textarea id="errores" name="errores" rows="5" cols="120"> </textarea><br />
 
-<a href="edit.html" target="_blank">Editor de SD</a>
+<a href="/edit/index.htm" target="_blank">Editor de SD</a>
 
 <!--
     <title>PolarGraph</title>
