@@ -199,7 +199,7 @@ void handleControl(){
           comms_ready(); // output the READY_200 message
       }else if (server.arg("command") == "getPosition")    {
       }else{       
-        // exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
+        
       }
 
       manualControlInProgress = false;
