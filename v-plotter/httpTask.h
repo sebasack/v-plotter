@@ -24,14 +24,7 @@ void handleCreate();
 void handleFileUpload();
 void returnOK();
 void calibrate_doCalibration();
-<<<<<<< HEAD
-<<<<<<< HEAD
 void changeLength(float tA, float tB);
-=======
->>>>>>> 2374bad (agrego comandos a control web)
-=======
-void changeLength(float tA, float tB);
->>>>>>> c569ad4 (up)
 
 
 extern AccelStepper motorA, motorB;
