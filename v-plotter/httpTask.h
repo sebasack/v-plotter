@@ -147,15 +147,8 @@ void handleControl(){
       } else if (server.arg("command") == "releaseMotors")    { 
           releaseMotors();          
       } else if (server.arg("command") == "calibrate")    { 
-          calibrate_doCalibration();         
-<<<<<<< HEAD
-<<<<<<< HEAD
-     
-=======
->>>>>>> 2374bad (agrego comandos a control web)
-=======
-     
->>>>>>> c569ad4 (up)
+          calibrate_doCalibration();        
+
       }else if (server.arg("command") == "move")    {
        
           if (server.hasArg("speedA")){
@@ -212,12 +205,8 @@ void handleControl(){
           reportPosition();   // output the SYNC message
           comms_ready(); // output the READY_200 message
       }else if (server.arg("command") == "getPosition")    {
-      }else{       
-<<<<<<< HEAD
-        
-=======
+      }else{    
          exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
->>>>>>> c569ad4 (up)
       }
 
       manualControlInProgress = false;
