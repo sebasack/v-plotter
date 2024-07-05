@@ -120,15 +120,20 @@
 <button type="button" onclick="command('penLift')">pen Arriba</button>
 <button type="button" onclick="command('penDown')">pen Abajo</button>
 <button type="button" onclick="command('restart')">Restart</button>
-<button type="button" onclick="command('calibrate')">Calibrar</button>
-<button type="button" onclick="command('C09,15664,15664,END')">Set Home</button>
-<button type="button" onclick="command('C01,15664,15664,END')">
-  Return to Home
+<button type="button" onclick="command('setHome')">Set Home</button>
+<button type="button" onclick="command('goHome')">Return to Home</button>
+<button
+  type="button"
+  onclick="command('initialCalibrate')"
+  title="Ponga la gondola en Home manualmente antes del calibrado inicial"
+>
+  Calibrado inicial
 </button>
+<button type="button" onclick="command('calibrate')">Calibrar</button>
 <button type="button" onclick="command('releaseMotors')">
   Desenergizar motores
 </button>
-<button type="button" onclick="command('getPosition')">trae la posicion</button>
+<button type="button" onclick="command('getPosition')">Posicion actual</button>
 <br />
 
 <textarea id="log" name="log" rows="10" cols="120"> </textarea><br />

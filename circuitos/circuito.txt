@@ -2,16 +2,16 @@
 
 
                           ________________________                      
-                         |                        |                    ______________________      ________________________
-                         |o en                23 o| SD MOSI           /==                    |    |==                      |
-                         |o 36                22 o|                  /== 1 CS                |    |==  7 MISO              |
-                         |o 39      ESP32     01 o|                 |==  2 MOSI              |    |==  6 GND               |
-         BV     fin mB   |o 34   DOIT-DEVKIT  03 o|                 |==  3 GND               |    |==  5 SCLK              |
-         BV     fin mA   |o 35        V1      21 o|                 |==  4 VDD 3.3v          |    |==  4 VDD 3.3v          |
-         BM     in1 mA   |o 32                19 o| SD MISO         |==  5 SCLK              |    |==  3 GND               |
-         BA     in2 mA   |o 33                18 o| SD SCLK         |==  6                   |    |==  2 MOSI              |
+                         |                        |                    ______________________      ____    ________________
+                         |o en                23 o| SD MOSI           /==                    |    |==  ----                |
+                         |o 36                22 o|                  /== 1 CS              __|    |==  7 MISO           ...|
+                         |o 39      ESP32     01 o|                 |==  2 MOSI           |  |    |==  6 GND            .  |
+         BV     fin mB   |o 34   DOIT-DEVKIT  03 o|                 |==  3 GND            |  |    |==  5 SCLK           .  |
+         BV     fin mA   |o 35        V1      21 o|                 |==  4 VDD 3.3v       |  |    |==  4 VDD 3.3v       .  |
+         BM     in1 mA   |o 32                19 o| SD MISO         |==  5 SCLK           |  |    |==  3 GND            .  |
+         BA     in2 mA   |o 33                18 o| SD SCLK         |==  6                |__|    |==  2 MOSI           ...|
          V      in3 mA   |o 25                05 o| SD CS           |==  7 MISO              |     \== 1 CS                |
-         A      in4 mA   |o 26                17 o|                 |==______________________|      \==____________________|
+         A      in4 mA   |o 26                17 o|                 |==__----________________|      \==____________________|
          BM     in1 mB   |o 27                16 o|
          BA     in2 mB   |o 14                04 o|  
          V      in3 mB   |o 12                02 o| 
@@ -90,7 +90,16 @@ PASOS:
 
    
 
+Limit Switches
 
-         
+poner dos contactos antes de la entrada de hilos, una bolita de esponja envuelta en aluminio fijada al hilo a unos 10cm 
+ servira para unir los contactos y disparar una interrupcion.
+
+  __    __
+ | x|  |x |
+ | x|__|x |
+ |_|____|_|
+   |    |
+  grd   34 
 
 
