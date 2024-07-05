@@ -13,170 +13,299 @@ Experimental calibration routine.  It is designed to work with
 limit switches, triggered by the gondola being a fixed (known)
 distance from the sprocket.
 
+
+
 */
+
+static int trundleSpeed = 100;
 
 /* =============================================================================
    Here is the calibration routines
    =============================================================================*/
+
+
+
+   
+
+void calibrate_doInitialCalibration(){
+
+/* pasos para la calibracion inicial:
+   ---------------------------------
+
+
+    poner la gondola manualmente en home
+
+    iniciar calibracion:
+
+      levantar el pen
+
+      liberar motores      
+
+      liberar 5 cm de hilo del motorB 
+      mientras no se active la señal del motorA
+        liberar 1cm del motorB
+        recuperar 1cm del motorA      
+
+      mientras no se active la señal del motorB
+        liberar 1cm del motorA
+        recuperar 1cm del motorB
+
+      guardar en eeprom posiciones limites de motores
+    
+      mover la gondola a home.
+      
+      liberar motores*/
+
+    // limpio los limites para que los vuelva a buscar y guardar
+    eeprom_storeMotorLimits(0, 0);
+
+
+
+    Serial.println("Doing calibration.");
+    // raise pen
+    penlift_penUp();
+    // turn motors off
+    releaseMotors();
+    delay(1000);
+
+
+    /////////////////////////// LIBERACION DE SEGURIDAD DE HILO DEL MOTORB ANTES DE EMPEZAR ///////////////////////////
+
+    Serial.println("liberacion inicial de cuerda motorB...");
+
+    // hago la liberacion inicial de hilo del motorB para comenzar la calibracion
+
+    // energise motorA
+    motorB.enableOutputs();
+    motorB.setCurrentPosition(0);
+    motorB.move(CALIBRATE_INITIAL_RELEASE_MM);
+    motorB.setSpeed(trundleSpeed);
+    motorB.runSpeed();
+    
+    delay(400);
+
+    /////////////////////////// CALIBRO POSICION DEL SEÑALADOR DEL MOTOR A ///////////////////////////
+
+    Serial.println("Buscando señal en motorA...");
+
+    // energise motorA
+    motorA.enableOutputs();
+    motorA.setCurrentPosition(0);
+
+    byte endStopSignal = 1;
+    // so wind backwards until hitting the stop.
+    while (endStopSignal != 0)  {
+        
+        // libero en motorB
+        motorB.move(stepMultiplier);
+        motorB.setSpeed(trundleSpeed);
+        while (motorB.distanceToGo() != 0){
+            motorB.runSpeed();
+        }
+
+        // recojo en motorA
+        motorA.move(-stepMultiplier);
+        motorA.setSpeed(-trundleSpeed);
+        while (motorA.distanceToGo() != 0){
+            motorA.runSpeed();
+        }
+
+        endStopSignal = digitalRead(ENDSTOP_MOTORA);
+    }
+
+    Serial.println("Señal encontrada en motorA.");
+
+/*
+
+              11         5      6        10
+    MotorA-----------LA-----G------LB----------MotorB  
+    
+    limitStepsMotorA = 5
+    limitStepsMotorB = 6
+
+    startLengthStepsA = 11 + limitStepsMotorA
+    startLengthStepsB = 10 + limitStepsMotorB
+
+*/
+
+    limitStepsMotorA = abs(motorA.currentPosition()) ;
+    motorA.setCurrentPosition(limitStepsMotorA);
+
+    delay(1000);
+
+    /////////////////////////// CALIBRO POSICION DEL SEÑALADOR DEL MOTOR B  ///////////////////////////
+
+    Serial.println("Buscando señal en motorB...");
+
+    endStopSignal = 1;
+    // so wind backwards until hitting the stop.
+    while (endStopSignal != 0)  {
+        
+        // libero en motorB
+        motorA.move(stepMultiplier);
+        motorA.setSpeed(trundleSpeed);
+        while (motorA.distanceToGo() != 0){
+            motorA.runSpeed();
+        }
+
+        // recojo en motorB
+        motorB.move(-stepMultiplier);
+        motorB.setSpeed(-trundleSpeed);
+        while (motorB.distanceToGo() != 0){
+            motorB.runSpeed();
+        }
+
+        endStopSignal = digitalRead(ENDSTOP_MOTORB);
+    }
+
+    Serial.println("Señal encontrada en motorB.");
+
+    limitStepsMotorB = abs(motorA.currentPosition()) ;
+    motorB.setCurrentPosition(limitStepsMotorB);
+
+
+    Serial.println("Moviendo gondola a home...");
+
+    //guardo los limites en la eeeprom
+    eeprom_storeMotorLimits(limitStepsMotorA, limitStepsMotorB);
+
+
+    ////////////////////////////// MUEVO LA GONDOLA A HOME  //////////////////////////////
+    motorA.setMaxSpeed(currentMaxSpeed);
+    motorB.setMaxSpeed(currentMaxSpeed);
+    motorA.setAcceleration(currentAcceleration);
+    motorB.setAcceleration(currentAcceleration);
+
+    motorA.moveTo(startLengthStepsA);
+    motorB.moveTo(startLengthStepsB);
+    
+    while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)  {
+        motorA.run();
+        motorB.run();
+    }
+
+    Serial.println("fin de la calibracion.");        
+
+
+
+
+    reportPosition();
+    powerIsOn = true;
+    isCalibrated = true;
+  
+}
+
+
+
+
+
+
    
 void calibrate_doCalibration(){
 
-/* pasos:
-
-  levantar el pen
-
-  liberar motores
-
-  liberar 10 cm de hilo del motorB 
-  mientras no se active el sensorA
-    liberar 1cm del motorB
-    recuperar 1cm del motorA
-  
-  guardar la posicion del motorA
-
-  mientras no se active el sensorB
-    liberar 1cm del motorA
-    recuperar 1cm del motorB
-
-  liberar suficinte hilo del motorA y del motorB hasta que se llegue la home.
-
-  setear el home
-  
-  liberar motores
-*/
-
-  Serial.println("Calibrando...");
-
-  // raise pen
-  penlift_penUp();
-
-  // turn motors off
-  releaseMotors();
-
-  delay(1000);
-
-  int sensorAValue = analogRead(ENDSTOP_MOTORA);
-  int sensorBValue = analogRead(ENDSTOP_MOTORB);
-
-
 /*
-  Serial.println("Doing calibration.");
-  // raise pen
-  penlift_penUp();
-  // turn motors off
-  releaseMotors();
-  delay(1000);
-  int trundleSpeed = 100;
-  // energise motora
-  motorA.enableOutputs();
-  motorA.setCurrentPosition(0);
-  // get a baseline from the endstop detector in case it's already at the stop
-  byte endStopSignal = digitalRead(ENDSTOP_X_MIN);
-  Serial.print("Endstop:");
-  Serial.println(endStopSignal);
-  motorA.setAcceleration(10000);
-  if (endStopSignal == 0)  {
-    // it's already there! God what a mess!
-    // what we'll do is wind forwards until it changes back
-    Serial.println("Already 0");
-    while (endStopSignal == 0)    {
-      motorA.move(stepMultiplier);
-      motorA.setSpeed(trundleSpeed);
-      while (motorA.distanceToGo() != 0){
-        motorA.runSpeed();
-      }
-      endStopSignal = digitalRead(ENDSTOP_X_MIN);
-      Serial.println(endStopSignal);
-    }
-    // then jump a bit more - one rev
-    motorA.move(stepMultiplier * motorStepsPerRev);
-    while (motorA.distanceToGo() != 0){
-      motorA.run();
-    }
-  }
-  delay(400);
 
-  // so wind backwards until hitting the stop.
-  while (endStopSignal != 0)  {
-    motorA.move(-stepMultiplier);
-    motorA.setSpeed(-trundleSpeed);
-    while (motorA.distanceToGo() != 0){
-      motorA.runSpeed();
-    }
-    endStopSignal = digitalRead(ENDSTOP_X_MIN);
-  }
-  Serial.println("A End stop signalled");
-  motorARestPoint = abs(motorA.currentPosition()) + (ENDSTOP_X_MIN_POSITION * stepsPerMm);
-  motorA.setCurrentPosition(ENDSTOP_X_MIN_POSITION * stepsPerMm);
-  delay(1000);
-  
-  // wind out a machines-width of cord from motorA
-  motorA.moveTo(machineSizeSteps.x);
-  motorA.setAcceleration(currentAcceleration);
-  while (motorA.distanceToGo() != 0){
-    motorA.run();
-  }
-  // now do above for motorB
-  motorB.enableOutputs();
-  motorB.setCurrentPosition(0);
-  motorB.setAcceleration(10000);
-  // get a baseline from the endstop detector in case it's already at the stop
-  endStopSignal = digitalRead(ENDSTOP_Y_MIN);
+  go home automatico:
+  ------------------
 
-  if (endStopSignal == 0)  {
-    // it's already there! God what a mess!
-    // what we'll do is wind forwards until it changes back
-    while (endStopSignal == 0)    {
-      motorB.move(stepMultiplier);
-      motorB.setSpeed(trundleSpeed);
-      while (motorB.distanceToGo() != 0){
-        motorB.runSpeed();
-      }
-      endStopSignal = digitalRead(ENDSTOP_Y_MIN);
-    }
-    // then jump a bit more - one rev
-    motorB.move(stepMultiplier * motorStepsPerRev);
-    while (motorB.distanceToGo() != 0){
-      motorB.run();
-    }
-  }
+    si limitStepsMotorA y limitStepsMotorB son distintos de 0 proceder:
 
-  delay(400);
-  while (endStopSignal != 0)  {
-    motorB.move(-stepMultiplier);
-    motorB.setSpeed(-trundleSpeed);
-    while (motorB.distanceToGo() != 0){
-      motorB.runSpeed();
-    }
-    endStopSignal = digitalRead(ENDSTOP_Y_MIN);
-    Serial.print("Endstop signal: ");
-    Serial.println(endStopSignal);
-  }
-  Serial.println("B End stop signalled");
-  motorBRestPoint = abs(motorB.currentPosition()) + (ENDSTOP_Y_MIN_POSITION * stepsPerMm);
-  motorB.setCurrentPosition(ENDSTOP_Y_MIN_POSITION * stepsPerMm);
+      liberar 5 cm de hilo del motorB 
 
-  //reportPosition();
-  
-  // now return to the place where you started.
-  
-  motorA.setMaxSpeed(currentMaxSpeed);
-  motorB.setMaxSpeed(currentMaxSpeed);
-  motorA.setAcceleration(currentAcceleration);
-  motorB.setAcceleration(currentAcceleration);
+      mientras no se detecte limite del motorA
+        liberar 1cm del motorB
+        recuperar 1cm del motorA
 
-  motorA.moveTo(motorARestPoint);
-  motorB.moveTo(motorBRestPoint);
-  
-  while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)  {
-    motorA.run();
-    motorB.run();
-  }
+      mientras no se detecte limite del motorB
+        liberar 1cm del motorA
+        recuperar 1cm del motorB
+     
+      ir a home    
+
+    si son 0 no se hizo la calibracion inicial, no puedo proceder.
+        
 */
 
-  //reportPosition();
-  powerIsOn = true;
-  isCalibrated = true;
-  
+    if (limitStepsMotorA >0 and limitStepsMotorB >0){        
+        Serial.println("liberacion inicial de cuerda motorB...");
+
+        // hago la liberacion inicial de hilo del motorB para comenzar la calibracion
+
+        // energise motorA
+        motorB.enableOutputs();
+        motorB.setCurrentPosition(0);
+        motorB.move(CALIBRATE_INITIAL_RELEASE_MM);
+        motorB.setSpeed(trundleSpeed);
+        motorB.runSpeed();
+        
+        delay(400);
+
+        /////////////////////////// CALIBRO POSICION DEL SEÑALADOR DEL MOTOR A ///////////////////////////
+
+        Serial.println("Buscando señal en motorA...");
+
+        // energise motorA
+        motorA.enableOutputs();
+        motorA.setCurrentPosition(0);
+
+        byte endStopSignal = 1;
+        // so wind backwards until hitting the stop.
+        while (endStopSignal != 0)  {
+            
+            // libero en motorB
+            motorB.move(stepMultiplier);
+            motorB.setSpeed(trundleSpeed);
+            while (motorB.distanceToGo() != 0){
+                motorB.runSpeed();
+            }
+
+            // recojo en motorA
+            motorA.move(-stepMultiplier);
+            motorA.setSpeed(-trundleSpeed);
+            while (motorA.distanceToGo() != 0){
+                motorA.runSpeed();
+            }
+
+            endStopSignal = digitalRead(ENDSTOP_MOTORA);
+        }
+
+        Serial.println("Señal encontrada en motorA.");
+
+        limitStepsMotorA = abs(motorA.currentPosition()) ;
+        motorA.setCurrentPosition(limitStepsMotorA);
+
+        delay(1000);
+
+        /////////////////////////// CALIBRO POSICION DEL SEÑALADOR DEL MOTOR B  ///////////////////////////
+
+        Serial.println("Buscando señal en motorB...");
+
+        endStopSignal = 1;
+        // so wind backwards until hitting the stop.
+        while (endStopSignal != 0)  {
+            
+            // libero en motorB
+            motorA.move(stepMultiplier);
+            motorA.setSpeed(trundleSpeed);
+            while (motorA.distanceToGo() != 0){
+                motorA.runSpeed();
+            }
+
+            // recojo en motorB
+            motorB.move(-stepMultiplier);
+            motorB.setSpeed(-trundleSpeed);
+            while (motorB.distanceToGo() != 0){
+                motorB.runSpeed();
+            }
+
+            endStopSignal = digitalRead(ENDSTOP_MOTORB);
+        }
+
+        Serial.println("Señal encontrada en motorB.");
+
+    }else{
+        Serial.println(" No se puede calibrar, haga primero una calibracion inicial!");
+    }
 }
+
 

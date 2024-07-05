@@ -173,7 +173,7 @@ static long startLengthStepsB = 15664;//8000
 
 const float DEFAULT_MAX_SPEED = 1000.0;
 const float DEFAULT_ACCELERATION = 400.0;
-static float currentMaxSpeed = DEFAULT_MAX_SPEED;
+float currentMaxSpeed = DEFAULT_MAX_SPEED;
 static float currentAcceleration = DEFAULT_ACCELERATION;
 volatile static boolean usingAcceleration = true;
 
@@ -334,13 +334,10 @@ const static String CMD_AUTO_CALIBRATE = "C48";
 // there are no endstop switches, so this and the calibrate can be removed
 const int ENDSTOP_MOTORA = 34;
 const int ENDSTOP_MOTORB = 35;
+long CALIBRATE_INITIAL_RELEASE_MM = 50; //cantidad de mm de hilo liberado antes de la calibracion inicial
 
-long ENDSTOP_MOTORA_POSITION = 130;
-long ENDSTOP_MOTORB_POSITION = 130;
-
-long motorARestPoint = 0;
-long motorBRestPoint = 0;
-
+long limitStepsMotorA = 0;
+long limitStepsMotorB = 0;
 
 
 // size and location of rove area

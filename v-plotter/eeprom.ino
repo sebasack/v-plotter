@@ -37,6 +37,12 @@ const char* PREFKEY_PEN_WIDTH = "penWidth";
 const char* PREFKEY_PENLIFT_DOWN = "penliftDown";
 const char* PREFKEY_PENLIFT_UP = "penliftUp";
 
+// limits
+const char* PREFKEY_MOTORA_LIMIT = "mMotorALimit";
+const char* PREFKEY_MOTORB_LIMIT = "mMotorBLimit";
+
+
+
 
 void eeprom_resetEeprom(){
   preferences.clear();
@@ -157,6 +163,18 @@ void eeprom_loadPenWidth(){
   }
 }
 
+void eeprom_loadMotorLimits(){
+  limitStepsMotorA = preferences.getInt(PREFKEY_MOTORA_LIMIT, 0);
+  limitStepsMotorB = preferences.getInt(PREFKEY_MOTORB_LIMIT, 0);
+}
+
+
+void eeprom_storeMotorLimits(int motoA, int motoB){
+  preferences.putInt(PREFKEY_MOTORA_LIMIT, motoA);
+  preferences.putInt(PREFKEY_MOTORB_LIMIT, motoB);
+}
+
+
 void eeprom_loadMachineSpecFromEeprom(){
   //impl_loadMachineSpecFromEeprom();
 
@@ -166,6 +184,7 @@ void eeprom_loadMachineSpecFromEeprom(){
   eeprom_loadPenLiftRange();
   eeprom_loadSpeed();
   eeprom_loadPenWidth();
+  eeprom_loadMotorLimits();
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMm = multiplier(motorStepsPerRev) / mmPerRev;
@@ -182,11 +201,17 @@ void eeprom_loadMachineSpecFromEeprom(){
   Serial.print(machineSizeSteps.x);
   Serial.print(F(")"));
   Serial.println();
+  
   machineSizeSteps.y = machineSizeMm.y * stepsPerMm;
   Serial.print(F("Recalc machineSizeSteps.y in steps ("));
   Serial.print(machineSizeSteps.y);
   Serial.print(F(")"));
   Serial.println();
+
+  Serial.print(F("limitStepsMotorA "));
+  Serial.print(limitStepsMotorA);
+  Serial.print(F(" limitStepsMotorB"));
+  Serial.println(limitStepsMotorA);
 
   maxLength = 0;
 }

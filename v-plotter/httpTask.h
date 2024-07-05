@@ -16,6 +16,7 @@ int httpCore = 0;
 #endif
 
 extern int commsReadCore, commsCommandCore, impleReleaseMotorsCore;
+extern float currentMaxSpeed;
 extern TaskHandle_t commsReadHandle, commsCommandHandle, impleReleaseMotorsHandle;
 bool loadFromSdCard(String path) ;
 void printDirectory();
@@ -24,6 +25,7 @@ void handleCreate();
 void handleFileUpload();
 void returnOK();
 void calibrate_doCalibration();
+void calibrate_doInitialCalibration();
 void changeLength(float tA, float tB);
 
 
@@ -135,21 +137,15 @@ void handleControl(){
       } else if (server.arg("command") == "restart")    { 
           server.send(200, "text/plain", "{\"result_ok\":true}");
           ESP.restart();
-          //}else if (server.arg("command") == "stop")    { // stop motors
-          // detenerMovimientoManual=true;
+      } else if (server.arg("command") == "setHome")    { 
+      } else if (server.arg("command") == "goHome")    { 
       } else if (server.arg("command") == "releaseMotors")    { 
-          releaseMotors();          
+          releaseMotors();    
       } else if (server.arg("command") == "calibrate")    { 
           calibrate_doCalibration();        
-
-      }else if (server.arg("command") == "move")    {
-       
-          if (server.hasArg("speedA")){
-              speedA = server.arg("speedA").toInt();            
-          }
-          if (server.hasArg("speedB")){
-              speedB = server.arg("speedB").toInt();            
-          }
+      } else if (server.arg("command") == "initialCalibrate")    { 
+          calibrate_doInitialCalibration();               
+      }else if (server.arg("command") == "move")    {      
           if (server.hasArg("stepsA")){
               stepsA = server.arg("stepsA").toInt();            
           }
@@ -158,18 +154,13 @@ void handleControl(){
               stepsB = server.arg("stepsB").toInt();            
           }
 
-
-          Serial.print(" speedA: ");          
-          Serial.println(speedA);
-          Serial.print(" speedB: ");          
-          Serial.println(speedB);
           Serial.print(" stepsA: ");
           Serial.print(stepsA);
           Serial.print(" stepsB: ");
           Serial.print(stepsB);
         
-          motorA.setSpeed(speedA);
-          motorB.setSpeed(speedB);
+          motorA.setSpeed(currentMaxSpeed);
+          motorB.setSpeed(currentMaxSpeed);
 
           while (stepsA>0 or stepsB>0) {     
               if (stepsA>0){
@@ -189,17 +180,15 @@ void handleControl(){
               }              
           }
 
-
           Serial.println("");          
 
           releaseMotors(); 
-
      
           reportPosition();   // output the SYNC message
           comms_ready(); // output the READY_200 message
       }else if (server.arg("command") == "getPosition")    {
       }else{    
-         exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
+       //  exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
       }
 
       manualControlInProgress = false;
