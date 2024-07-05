@@ -137,17 +137,18 @@ function myTimer() {
 }
 
 function move(motor) {
-  let speedA = $("#velocidadA option:selected").val();
-  let stepsA = $("#pasosA option:selected").val();
-  let speedB = $("#velocidadB option:selected").val();
-  let stepsB = $("#pasosB option:selected").val();
+  //let stepsA = $("#pasosA option:selected").val();
+  //let stepsB = $("#pasosB option:selected").val();
+
+  let stepsA = $('input[name="pasosA"]:checked').val();
+  let stepsB = $('input[name="pasosB"]:checked').val();
 
   if (motor == 1) {
-    speedB = 0;
+    stepsA = 0;
   }
 
   if (motor == 2) {
-    speedA = 0;
+    stepsB = 0;
   }
 
   // console.log("speedA:" + speedA+ "\t pasosA:" + stepsA+  "\t speedB:" +speedB+ "\t pasosB:" + stepsB);
@@ -155,9 +156,7 @@ function move(motor) {
 
   params = {
     command: "move",
-    speedA: speedA,
     stepsA: stepsA,
-    speedB: speedB,
     stepsB: stepsB,
   };
 
@@ -201,12 +200,9 @@ function move(motor) {
 function command(comando) {
   //  $('#log').val(comando+"..." + "\n"+ $('#log').val());
 
-
   params = {
     command: comando,
   };
-
-  
 
   $.ajax({
     url: "/control",

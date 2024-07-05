@@ -53,52 +53,24 @@
     <td align="center">Motor A:</td>
     <td align="center">Motor B:</td>
   </tr>
-  <tr>
-    <td align="center">Velocidad:</td>
-    <td align="center">
-      <select id="velocidadA">
-        <option value="1000">1000</option>
-        <option value="500">500</option>
-        <option value="200">200</option>
-        <option value="0">0</option>
-        <option value="-200">-200</option>
-        <option value="-500">-500</option>
-        <option value="-1000">-1000</option>
-      </select>
-    </td>
-    <td align="center">
-      <select id="velocidadB">
-        <option value="1000">1000</option>
-        <option value="500">500</option>
-        <option value="200">200</option>
-        <option value="0">0</option>
-        <option value="-200">-200</option>
-        <option value="-500">-500</option>
-        <option value="-1000">-1000</option>
-      </select>
-    </td>
-  </tr>
+ 
   <tr>
     <td align="center">Distancia:</td>
     <td align="center">
-      <select id="pasosA">
-        <option value="288">1cm</option>
-        <option value="1442">5cm</option>
-        <option value="2883">10cm</option>
-        <option value="5767">20cm</option>
-        <option value="14417">50cm</option>
-        <option value="28834">100cm</option>
-      </select>
+      <input type="radio"   id="1cmA" name="pasosA" value="288" checked="checked">   <label for="1cmA">1 cm</label><br>
+      <input type="radio"   id="5cmA" name="pasosA" value="1442">  <label for="5cmA">5 cm</label><br>
+      <input type="radio"  id="10cmA" name="pasosA" value="2883">  <label for="10cmA">10 cm</label><br>
+      <input type="radio"  id="20cmA" name="pasosA" value="5767">  <label for="20cmA">20 cm</label><br>
+      <input type="radio"  id="50cmA" name="pasosA" value="14417"> <label for="50cmA">50 cm</label><br>
+      <input type="radio" id="100cmA" name="pasosA" value="28834"> <label for="100cmA">100 cm</label><br>    
     </td>
-    <td align="center">
-      <select id="pasosB">
-        <option value="288">1cm</option>
-        <option value="1442">5cm</option>
-        <option value="2883">10cm</option>
-        <option value="5767">20cm</option>
-        <option value="14417">50cm</option>
-        <option value="28834">100cm</option>
-      </select>
+    <td align="center">      
+      <input type="radio"   id="1cmB" name="pasosB" value="288" checked="checked">   <label for="1cmB">1 cm</label><br>
+      <input type="radio"   id="5cmB" name="pasosB" value="1442">  <label for="5cmB">5 cm</label><br>
+      <input type="radio"  id="10cmB" name="pasosB" value="2883">  <label for="10cmB">10 cm</label><br>
+      <input type="radio"  id="20cmB" name="pasosB" value="5767">  <label for="20cmB">20 cm</label><br>
+      <input type="radio"  id="50cmB" name="pasosB" value="14417"> <label for="50cmB">50 cm</label><br>
+      <input type="radio" id="100cmB" name="pasosB" value="28834"> <label for="100cmB">100 cm</label><br>
     </td>
   </tr>
   <tr>
@@ -122,26 +94,37 @@
 <button type="button" onclick="command('restart')">Restart</button>
 <button type="button" onclick="command('setHome')">Set Home</button>
 <button type="button" onclick="command('goHome')">Return to Home</button>
-<button
-  type="button"
-  onclick="command('initialCalibrate')"
-  title="Ponga la gondola en Home manualmente antes del calibrado inicial"
->
-  Calibrado inicial
-</button>
-<button type="button" onclick="command('calibrate')">Calibrar</button>
 <button type="button" onclick="command('releaseMotors')">
   Desenergizar motores
 </button>
 <button type="button" onclick="command('getPosition')">Posicion actual</button>
 <br />
 
-<textarea id="log" name="log" rows="10" cols="120"> </textarea><br />
-<textarea id="errores" name="errores" rows="5" cols="120"> </textarea><br />
+<fieldset>
+  <legend>Calibrado con marcadores</legend>
+  <button
+    type="button"
+    onclick="command('initialCalibrate')"
+    title="Ponga la gondola en Home manualmente antes del calibrado inicial"
+  >
+    Calibrado inicial
+  </button>
+  <button
+    type="button"
+    onclick="command('calibrate')"
+    title="Busca los marcadores de posicion y vuelve la gondola a su Home"
+  >
+    Recalibrar
+  </button>
 
-<a href="/edit/index.htm" target="_blank">Editor de SD</a>
+</fieldset>
 
-<!--
+    <textarea id="log" name="log" rows="10" cols="120"> </textarea><br />
+    <textarea id="errores" name="errores" rows="5" cols="120"> </textarea><br />
+
+    <a href="/edit/index.htm" target="_blank">Editor de SD</a>
+
+    <!--
     <title>PolarGraph</title>
    
 
@@ -224,9 +207,11 @@
       </tr>
     </table>
 -->
-<br />
+    <br />
 
-<script
-  type="text/javascript"
-  src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/control.js"
-></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/control.js"
+    ></script>
+  </fieldset>
+</fieldset>
