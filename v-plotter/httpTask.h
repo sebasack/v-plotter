@@ -28,6 +28,9 @@ void calibrate_doCalibration();
 void calibrate_doInitialCalibration();
 void changeLength(float tA, float tB);
 
+void set_home();
+void go_home();
+
 
 extern AccelStepper motorA, motorB;
 
@@ -138,7 +141,9 @@ void handleControl(){
           server.send(200, "text/plain", "{\"result_ok\":true}");
           ESP.restart();
       } else if (server.arg("command") == "setHome")    { 
+          set_home();
       } else if (server.arg("command") == "goHome")    { 
+          go_home();
       } else if (server.arg("command") == "releaseMotors")    { 
           releaseMotors();    
       } else if (server.arg("command") == "calibrate")    { 

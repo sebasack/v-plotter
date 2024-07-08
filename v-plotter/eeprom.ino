@@ -209,9 +209,9 @@ void eeprom_loadMachineSpecFromEeprom(){
   Serial.println();
 
   Serial.print(F("limitStepsMotorA "));
-  Serial.print(limitStepsMotorA);
-  Serial.print(F(" limitStepsMotorB"));
   Serial.println(limitStepsMotorA);
+  Serial.print(F("limitStepsMotorB "));
+  Serial.println(limitStepsMotorB);
 
   maxLength = 0;
 }

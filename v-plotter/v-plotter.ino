@@ -332,9 +332,8 @@ const static String CMD_AUTO_CALIBRATE = "C48";
 
 /*  End stop pin definitions  */
 // there are no endstop switches, so this and the calibrate can be removed
-const int ENDSTOP_MOTORA = 34;
-const int ENDSTOP_MOTORB = 35;
-long CALIBRATE_INITIAL_RELEASE_MM = 50; //cantidad de mm de hilo liberado antes de la calibracion inicial
+const int ENDSTOP_MOTORA_PIN = 34;
+const int ENDSTOP_MOTORB_PIN = 35;
 
 long limitStepsMotorA = 0;
 long limitStepsMotorB = 0;
@@ -453,6 +452,10 @@ void setup(){
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
   penlift_penUp();
+
+  /* set endstop motors pins */
+  pinMode(ENDSTOP_MOTORA_PIN, INPUT_PULLUP);
+  pinMode(ENDSTOP_MOTORB_PIN, INPUT_PULLUP);
 
   sd_autorunSD();
 }
