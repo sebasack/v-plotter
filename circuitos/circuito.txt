@@ -23,6 +23,7 @@
 
 
            cables motores        cables servo          limites calibracion
+<<<<<<< HEAD
          BM BA V  A     M  N        N  M  A              M     BV     BN
          __________     ____        _______              _______________
          |  |  |  |     |  |        |  |  |              |      |      | 
@@ -44,6 +45,25 @@ poner dos contactos antes de la entrada de hilos, una bolita de esponja envuelta
     | x|  |x |
     | x|__|x |
     |_|____|_|
+=======
+         BM BA V  A     M  N        N  M  A              M     BV    BN
+         __________     ____        _______              _____________
+         |  |  |  |     |  |        |  |  |              |     |     | 
+         1  2  3  4    GND 5v     GND 5v Señal          GND  señal  3.3v
+                                                         |     |     |
+            DRIVER MOTOR             SERVO               -220Ω-\     /
+                                                                \   /
+                                                                 o o
+                                                                 ---
+
+                                                               SWITCH
+                 |                                              
+     side view   O          top view
+        _________|___     ________ 
+     __/_____    |       |  ______|_______
+    | o    o |   |       | |______|_______
+    |________|           |________|
+>>>>>>> bcd93f4 (agrego auto calibrado)
       |    |
       |    |--- 34 (BV)
 (BN) 3.3v  |

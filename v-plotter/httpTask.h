@@ -159,13 +159,31 @@ void handleControl(){
               stepsB = server.arg("stepsB").toInt();            
           }
 
+
+          int sentidoA =1;
+          if (stepsA < 0 ){
+            sentidoA =-1;
+            stepsA=-stepsA;
+          }
+        
+          int sentidoB =1;
+          if (stepsB < 0 ){
+            sentidoB =-1;
+            stepsB=-stepsB;
+          }
+
+
           Serial.print(" stepsA: ");
           Serial.print(stepsA);
+          Serial.print(" sentidoA: ");
+          Serial.print(sentidoA);
           Serial.print(" stepsB: ");
           Serial.print(stepsB);
+          Serial.print(" sentidoB: ");
+          Serial.print(sentidoB);
         
-          motorA.setSpeed(currentMaxSpeed);
-          motorB.setSpeed(currentMaxSpeed);
+          motorA.setSpeed(currentMaxSpeed * sentidoA);
+          motorB.setSpeed(currentMaxSpeed * sentidoB);
 
           while (stepsA>0 or stepsB>0) {     
               if (stepsA>0){

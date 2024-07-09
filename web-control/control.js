@@ -97,7 +97,7 @@ class JoystickController {
       // reset everything
       self.value = { x: 0, y: 0 };
       self.touchId = null;
-      self.active = false;
+      self.active = false; 
     }
 
     stick.addEventListener("mousedown", handleDown);
@@ -144,11 +144,11 @@ function move(motor) {
   let stepsB = $('input[name="pasosB"]:checked').val();
 
   if (motor == 1) {
-    stepsA = 0;
+    stepsB = 0;
   }
 
   if (motor == 2) {
-    stepsB = 0;
+    stepsA = 0;
   }
 
   // console.log("speedA:" + speedA+ "\t pasosA:" + stepsA+  "\t speedB:" +speedB+ "\t pasosB:" + stepsB);

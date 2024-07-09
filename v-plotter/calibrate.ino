@@ -81,7 +81,11 @@ void calibrate_doInitialCalibration()
     byte endStopSignal = digitalRead(ENDSTOP_MOTORA_PIN);
 
     // so wind backwards until hitting the stop.
+<<<<<<< HEAD
     while (endStopSignal != HIGH && motorA.currentPosition() > 0)
+=======
+    while (endStopSignal != HIGH)
+>>>>>>> bcd93f4 (agrego auto calibrado)
     {
         // libero en motorB 0.25 mm
         motorB.move(stepMultiplier);
@@ -122,7 +126,11 @@ void calibrate_doInitialCalibration()
     endStopSignal = digitalRead(ENDSTOP_MOTORB_PIN);
 
     // so wind backwards until hitting the stop
+<<<<<<< HEAD
     while (endStopSignal != HIGH && motorB.currentPosition() > 0)
+=======
+    while (endStopSignal != HIGH )
+>>>>>>> bcd93f4 (agrego auto calibrado)
     {
 
         // libero en motorA   0.25 mm
