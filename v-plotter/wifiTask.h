@@ -25,7 +25,7 @@ const byte DNS_PORT = 53;
 DNSServer dnsServer;
 
 /* Soft AP network parameters */
-IPAddress apIP(192, 168, 0, 3);
+IPAddress apIP(192, 168, 4, 1);
 
 char IOTname[64];
 
@@ -46,7 +46,7 @@ void wifiAP(){
 
   WIFI.dns = true;
 
-  Serial.printf("AP started: %s (192.168.0.3)\n", IOTname);
+  Serial.printf("AP started: %s (192.168.4.1)\n", IOTname);
 }
 
 //--------------------------------------------
@@ -150,7 +150,7 @@ void wifiTaskCreate(){
   {
     Serial.printf("WiFi setup error: %d\n", WiFi.status());
     Serial.printf("SSID: %s PSK: %s\n", WiFi.SSID().c_str(), WiFi.psk().c_str());
-    Serial.printf("Unable to connect, setting up Access Point: %s (192.168.4.1\n", IOTname);
+    Serial.printf("Unable to connect, setting up Access Point: %s (192.168.4.1)\n", IOTname);
 
     wifiAP();
   }
