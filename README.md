@@ -125,3 +125,15 @@ vertical plotter esp32 + wifi polargraph
 
       * para entrar en la version dockerizada de vpype:
             docker exec -it vpype bash
+
+
+
+## Setear SSID y PASS de WIFI:
+
+1. Deshabilitar datos moviles del celular.
+2. Buscar la red llamada v-plotter y tratar de conecarse usando el pass 'carbondioxide' .
+3. Entrar en la ip 192.168.4.1/config y configurar ssid y pass, presionar connect
+4. el AP v-plotter deberia desconectarse y deberia conectarse al wifi asignado.
+5. reiniciar el v-plotter
+6. en caso de falla recargar el firmware con la opcion 'Erase all flash before sketch upload' en Enabled,
+   esto eliminara el ssid y pass guardados en la rom.
