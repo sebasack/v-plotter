@@ -55,8 +55,6 @@ void wifiSTA(){
 
   WiFi.mode(WIFI_AP_STA);
 
-  Serial.printf(" SSID: %s PSK: %s\n", WIFI.ssid, WIFI.psk);
-
   WiFi.begin(WIFI.ssid, WIFI.psk);
 
   WiFi.waitForConnectResult();
@@ -124,11 +122,11 @@ void wifiTaskCreate(){
   Serial.printf("IOTname: %s\n", IOTname);
 
   // WIFI setup
+  WiFi.hostname(IOTname);
   WiFi.persistent(true);      // ESP32 onlyreads persistent at initialization !? (unlike ESP8266)
   //WiFi.setAutoConnect(false); // don't connect until I tell you to!
   WiFi.setAutoReconnect(true);
   WiFi.mode(WIFI_STA);
-  WiFi.hostname(IOTname);
 
   WiFi.begin(); // use ssid/password from storage.
 
@@ -148,14 +146,23 @@ void wifiTaskCreate(){
     Serial.println(" ");
   }else
   {
-    Serial.printf("WiFi setup error: %d\n", WiFi.status());
-    Serial.printf("SSID: %s PSK: %s\n", WiFi.SSID().c_str(), WiFi.psk().c_str());
-    Serial.printf("Unable to connect, setting up Access Point: %s (192.168.4.1)\n", IOTname);
+    Serial.printf("-----------------------------------------------------------------------\n");
+    Serial.printf("| WiFi setup error: %d                                                 |\n", WiFi.status());
+    Serial.printf("| SSID: %s PSK: %s                                                        |\n", WiFi.SSID().c_str(), WiFi.psk().c_str());
+    Serial.printf("| Unable to connect, setting up Access Point: %s (192.168.4.1) |\n", IOTname);
+    Serial.printf("| Deshabilite datos moviles y conectese al WIFI v-plotter             |\n", WiFi.status());
+    Serial.printf("| Utilice el password 'carbondioxide' para conectarse                 |\n");
+    Serial.printf("| Abra un navegador y ponga la URL 192.168.4.1/config                 |\n");
+    Serial.printf("| Ingrese el ssid y pass de su wifi y guarde los cambios              |\n");
+    Serial.printf("| Si todo esta bien el v-plotter ya estara conectado a su wifi        |\n");
+    Serial.printf("-----------------------------------------------------------------------\n");
 
     wifiAP();
   }
 
-  Serial.println("WiFi started...");
+  Serial.print("WiFi started... IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
 
   xTaskCreate(wifi, "WiFi", 5000, NULL, 1, &wifiHandle);
 }
