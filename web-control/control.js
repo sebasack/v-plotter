@@ -342,8 +342,7 @@ let joystick1 = new JoystickController("stick1", 64, 8);
 window.onload = function () {
   alert('onload');
   if(document.getElementById("sdcard_present") !== null){
-     alert('sd card esta conectada');
-    $("#sdcard_present").html('<a href="/edit/index.htm" target="_blank">Editor de SD CDN</a>');
+    $("#sdcard_present").html('<a href="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/edit.html" target="_blank">Editor de SD CDN</a>');
   }
 
   loop();
