@@ -340,14 +340,17 @@ function cargar_pagina(url) {
 let joystick1 = new JoystickController("stick1", 64, 8);
 
 window.onload = function () {
-  loop();
-  mostrarCamara();
-  command("getPosition");
-
+  alertr('onload');
   if(document.getElementById("sdcard_present") !== null){
      alert('sd card esta conectada');
     $("#sdcard_present").html('<a href="/edit/index.htm" target="_blank">Editor de SD CDN</a>');
   }
+
+  loop();
+  mostrarCamara();
+  command("getPosition");
+
+ alertr('onload1');
 
 
 };
