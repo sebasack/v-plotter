@@ -74,9 +74,20 @@ void handleRoot(){
   </head>\
   <body>\
     <div id='b-placeholder'>loading html...</div>\
+");
+
+  server.sendContent(temp);
+
+  if (cardPresent){   
+        sprintf(temp,"<div id='sdcard_present'>Tarjeta SD Encontrada</div>");
+        server.sendContent(temp);
+  }
+
+   sprintf(temp,"\
   </body>\
 </html>\
 ");
+
   server.sendContent(temp);
 
 

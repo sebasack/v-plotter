@@ -343,4 +343,11 @@ window.onload = function () {
   loop();
   mostrarCamara();
   command("getPosition");
+
+  if(document.getElementById("sdcard_present") !== null){
+     alert('sd card esta conectada');
+    $("#sdcard_present").html('<a href="/edit/index.htm" target="_blank">Editor de SD CDN</a>');
+  }
+
+
 };

@@ -14,7 +14,7 @@ This version is for the Polarshield 3, which aggregates:
 
   * ESP32 DOIT-DEVKIT V1 
   * 2x UNL2003 stepper drivers   
-  * SD card reader      (Integrated into LCD panel, separate SPI buss) 
+  * SD card reader     
 
 **/
 
@@ -361,7 +361,7 @@ String commandFilename = "";
 
 // sd card stuff
 const int sdChipSelectPin = 05;
-boolean sdCardInit = false;
+//boolean sdCardInit = false;
 
 // set up variables using the SD utility library functions:
 File root;
