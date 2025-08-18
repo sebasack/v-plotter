@@ -555,6 +555,10 @@ function createEditor(element, file, lang, theme, type) {
     };
     return editor;
 }
+<<<<<<< HEAD
+=======
+/*
+>>>>>>> a4425d9 (cambio js editor)
 function onBodyLoad() {
     var vars = {};
     var parts = window.location.href.replace(
@@ -566,4 +570,8 @@ function onBodyLoad() {
     var editor = createEditor("editor", vars.file, vars.lang, vars.theme);
     var tree = createTree("tree", editor);
     createFileUploader("uploader", tree, editor);
+<<<<<<< HEAD
 }
+=======
+}*/
+>>>>>>> a4425d9 (cambio js editor)
