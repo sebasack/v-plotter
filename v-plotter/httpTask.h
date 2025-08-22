@@ -79,11 +79,15 @@ void handleRoot(){
   server.sendContent(temp);
 
   if (cardPresent){   
-        sprintf(temp,"<div id='sdcard_present'>Tarjeta SD Encontrada</div>");
-        server.sendContent(temp);
+      sprintf(temp,"<a href='/edit/index.htm' target='_blank'>Editor de SD</a>");    
+  }else{
+      sprintf(temp,"<div>Tarjeta SD no encontrada!</div>");        
   }
+    
+  server.sendContent(temp);     
 
-   sprintf(temp,"\
+
+  sprintf(temp,"\
   </body>\
 </html>\
 ");
