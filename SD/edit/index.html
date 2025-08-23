@@ -214,12 +214,14 @@
           var ext = /(?:\.([^.]+))?$/.exec(filename)[1];
           var name = /(.*)\.[^.]+$/.exec(filename)[1];
           if(typeof name !== undefined){
-            if(name.length > 8) name = name.substring(0, 8);
+            // quito restriccion de nombre de archivos 
+           // if(name.length > 8) name = name.substring(0, 8);
             filename = name;
           }
           if(typeof ext !== undefined){
-            if(ext === "html") ext = "htm";
-            else if(ext === "jpeg") ext = "jpg";
+            // quito restriccion de extension de archivos
+            //if(ext === "html") ext = "htm";
+            //else if(ext === "jpeg") ext = "jpg";
             filename = filename + "." + ext;
           }
           if(path.value === "/" || path.value.lastIndexOf("/") === 0){
