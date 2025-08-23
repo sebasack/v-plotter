@@ -79,7 +79,8 @@ void handleRoot(){
   server.sendContent(temp);
 
   if (cardPresent){   
-      sprintf(temp,"<a href='/edit/index.htm' target='_blank'>Editor de SD</a>");    
+      //sprintf(temp,"<a href='/edit/index.htm' target='_blank'>Editor de SD</a>");    
+      sprintf(temp,"<div id='sdcard_present'>tarjeta sd encontrada</div>");    
   }else{
       sprintf(temp,"<div>Tarjeta SD no encontrada!</div>");        
   }
@@ -165,6 +166,9 @@ void handleControl(){
           calibrate_doCalibration();        
       } else if (server.arg("command") == "initialCalibrate")    { 
           calibrate_doInitialCalibration();               
+      } else if (server.arg("command") == "getMachineSpecs")    { 
+            
+          
       }else if (server.arg("command") == "move")    {      
           if (server.hasArg("stepsA")){
               stepsA = server.arg("stepsA").toInt();            
