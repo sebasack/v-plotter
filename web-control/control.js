@@ -91,8 +91,8 @@ function rectangle(x, y, ancho, alto) {
 
 function draw_machine(ancho, alto) {
     // Cambiar dimensiones
-    canvas.width = ancho; // Ancho en píxeles
-    canvas.height = alto; // Alto en píxeles
+    canvas.width = ancho; // Ancho en pï¿½xeles
+    canvas.height = alto; // Alto en pï¿½xeles
 
     if (canvas.getContext) {
         //   ctx.fillRect(25, 25, 100, 100);
