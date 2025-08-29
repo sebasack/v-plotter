@@ -7,12 +7,13 @@
         <script>
             $(function () {
                 $("#b-placeholder").load(
-                    //"https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/page.html"
+                    //"https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/page.html"
                     "control.html"
                 );
 
                 // agrego y ejecuto el javascript de control
                 const script = document.createElement("script");
+                //script.src = "https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js";
                 script.src = "control.js";
                 script.onload = function () {
                     init();
