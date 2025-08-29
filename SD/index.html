@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Control v-plotter</title>
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+
+        <script>
+            $(function () {
+                $("#b-placeholder").load(
+                    //"https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/page.html"
+                    "control.html"
+                );
+
+                // agrego y ejecuto el javascript de control
+                const script = document.createElement("script");
+                script.src = "control.js";
+                script.onload = function () {
+                    init();
+                };
+                document.body.appendChild(script);
+            });
+        </script>
+    </head>
+    <body>
+        <div id="b-placeholder">loading html...</div>
+        <div id="sdcard_present"></div>
+    </body>
+</html>
