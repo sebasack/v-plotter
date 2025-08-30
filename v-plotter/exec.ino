@@ -20,6 +20,7 @@ routines are here.
 /**  This method looks only for the basic command set
  */
 
+
 boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
   // execute the execute of the implementation of the process... currentCommand -> lastParsedCommandRaw -> paramsExtracted -> inParam*
@@ -80,6 +81,13 @@ void exec_changeDrawingDirection()
   //  Serial.print(F(" and direction is "));
   //  Serial.println(globalDrawDirection);
 }
+
+void machineSpecs(){
+    sprintf(temp, "{\"result_ok\":true,\"x\":%d,\"y\":%d,\"mmPerRev\":%.2f,\"stepsPerRev\":%d,\"stepMultiplier\":%d,\"downPosition\":%d,\"upPosition\":%d,\"currentMaxSpeed\":%.2f,\"currentAcceleration\":%.2f,\"penWidth\":%.2f}",
+    machineSizeMm.x, machineSizeMm.y,mmPerRev,motorStepsPerRev,stepMultiplier,downPosition,upPosition,currentMaxSpeed,currentAcceleration,penWidth);
+    Serial.println(penWidth);
+    Serial.println("    envio parametros de la maquina ");
+};
 
 void exec_reportMachineSpec()
 {

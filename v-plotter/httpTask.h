@@ -27,6 +27,7 @@ void returnOK();
 void calibrate_doCalibration();
 void calibrate_doInitialCalibration();
 void changeLength(float tA, float tB);
+void machineSpecs( );
 
 void set_home();
 void go_home();
@@ -34,12 +35,12 @@ void go_home();
 
 extern AccelStepper motorA, motorB;
 
-extern boolean commandBuffered,cardPresent;
-extern volatile int bufferPosition;
-extern char nextCommand[];
-extern char currentCommandRaw[];
+extern boolean commandBuffered,cardPresent,paramsExtracted;
+//extern volatile int bufferPosition;
+//extern char nextCommand[];
+extern char currentCommand[];
 
-extern int commsWhere;
+//extern int commsWhere;
 
 boolean manualControlInProgress = false;
 //--------------------------------------------
@@ -62,10 +63,10 @@ void handleRoot(){
  <!DOCTYPE html>\
 <html>\
   <head>\
-    <title>Control v-plotter</title> \
-    <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script> \
-    <script>\
-      $(function () {\
+    <title>Control v-plotter</title>\
+    <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
+    <script>\      
+      $(function(){\
         $('#b-placeholder').load(\
           'https://cdn.jsdelivr.net/gh/sebasack/v-plotter/web-control/page.html'\
         );\
@@ -79,7 +80,10 @@ void handleRoot(){
   server.sendContent(temp);
 
   if (cardPresent){   
-      //sprintf(temp,"<a href='/edit/index.html' target='_blank'>Editor de SD</a>");    
+      // quitar estas lineas una vez que resuelva el link dinamico
+      sprintf(temp,"<a href='/edit/index.html' target='_blank'>Editor de SD</a><br><br>");    
+      server.sendContent(temp);     
+
       sprintf(temp,"<div id='sdcard_present'>tarjeta sd encontrada</div>");    
   }else{
       sprintf(temp,"<div>Tarjeta SD no encontrada!</div>");        
@@ -110,7 +114,11 @@ void handleStop(){
 }
 */
 
-// boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams);
+boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams);
+boolean comms_parseCommand(char *inS);
+void comms_executeParsedCommand(); 
+void comms_clearParams();
+
 
 void penlift_penUp();
 void penlift_penDown();
@@ -168,7 +176,12 @@ void handleControl(){
           calibrate_doInitialCalibration();               
       } else if (server.arg("command") == "getMachineSpecs")    { 
             
-          
+        // guardo en la variable temporal temp los datos de la maquina para luego retornarlos
+          machineSpecs();
+
+          server.send(200, "text/plain", temp);
+          return;
+
       }else if (server.arg("command") == "move")    {      
           if (server.hasArg("stepsA")){
               stepsA = server.arg("stepsA").toInt();            
@@ -229,8 +242,44 @@ void handleControl(){
           reportPosition();   // output the SYNC message
           comms_ready(); // output the READY_200 message
       }else if (server.arg("command") == "getPosition")    {
+
       }else{    
-       //  exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4")) 
+     
+         //exec_executeBasicCommand( server.arg("command"),  server.arg("param1"),  server.arg("param2"), server.arg("param3"), server.arg("param4"),4) ;
+
+
+         /**************** */
+        
+          //  commandBuffered = false; // commsRead can have the buffer now
+
+          //strcpy(currentCommand,server.arg("command")); // so HTTP can display, before the parsing messes it up
+          //currentCommand = server.arg("command").c_str();
+           server.arg("command").toCharArray(currentCommand, 91);// en lugar de 91 deberia decir INLENGTH+1, pero tengo que ver como ponerlo como global
+          
+
+          Serial.print("    recibo comando: (");
+          Serial.print(currentCommand);
+          Serial.println(") ");
+
+
+          paramsExtracted = comms_parseCommand(currentCommand);
+          if (paramsExtracted){
+            // execute parsed command:  currentCommand -> (lastParsedCommandRaw?) -> paramsExtracted  following C17
+            comms_executeParsedCommand(); // beginning of a long chain of calls to actually move the motors
+          
+            Serial.print("    comando ejecutado: (");
+            Serial.print(currentCommand);
+            Serial.println(") ");
+
+            comms_clearParams();
+            commandBuffered = false; // commsRead can have the buffer now
+          }else{
+            Serial.println(F("Command not parsed."));
+            comms_clearParams();
+            commandBuffered = false; // esta linea la copie yo para que no trate de parsear comandos vacios
+          }
+    
+         /****************** */
       }
 
       manualControlInProgress = false;
