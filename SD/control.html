@@ -1,41 +1,54 @@
-
-
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/webcam.js"></script>
 
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/styles.css"
-  media="projection, screen"
-/>
+<style>
+    textarea {
+        width:100%;
+        height:90%
+    }
 
+    body {
+        font-family: Courier, monospaced;
+        font-size: 16px;
+        font-weight: bold;
+    }
 
-  <video id="video" playsinline autoplay style="display: none"></video>
-  <canvas id="canvas" width="1280" height="720"></canvas>
-</div>
+    #canvas {
+    /*
+            -moz-transform: scaleX(-1);
+            -o-transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+            filter: FlipH;
+            -ms-filter: "FlipH";
+    */
+        position: absolute;
+        left: 300px;
+        top: 50px;
+    }
+</style>
 
-
+<video id="video" playsinline autoplay style="display: none"></video>
+<canvas id="canvas" width="1280" height="720"></canvas>
 
 
 <table border="1" width="100%" height="100%">
-  <tr>
-    <td align="center" width="20%" valign="top">
+    <tr>
+        <td align="center" width="20%" valign="top">
+            <br />
+            <button type="button" onclick="command('penLift')">pen Arriba</button>
+            <button type="button" onclick="command('penDown')">pen Abajo</button>
+            <button type="button" onclick="command('restart')">Restart</button>
+            <button type="button" onclick="command('setHome')">Set Home</button>
+            <button type="button" onclick="command('goHome')">Return to Home</button>
+            <button type="button" onclick="command('releaseMotors')">
+            Desenergizar motores
+            </button>
+            <button type="button" onclick="command('getPosition')">Posicion actual</button>
+            <button type="button" onclick="command('getMachineSpecs')">Obtener especificaciones de la maquina</button>
+            <br />
 
-        <br />
-        <button type="button" onclick="command('penLift')">pen Arriba</button>
-        <button type="button" onclick="command('penDown')">pen Abajo</button>
-        <button type="button" onclick="command('restart')">Restart</button>
-        <button type="button" onclick="command('setHome')">Set Home</button>
-        <button type="button" onclick="command('goHome')">Return to Home</button>
-        <button type="button" onclick="command('releaseMotors')">
-          Desenergizar motores
-        </button>
-        <button type="button" onclick="command('getPosition')">Posicion actual</button>
-        <button type="button" onclick="command('getMachineSpecs')">Obtener especificaciones de la maquina</button>
-        <br />
 
-
-            <table border="1">
+        <table border="1">
             <tr>
                 <td align="center"></td>
                 <td align="center">Motor A:</td>
@@ -85,63 +98,37 @@
             <tr>
                 <td align="center" colspan="2">
                 <button type="button" onclick="move(0)">Ambos motores</button>
-                </td>
-                
+                </td>                
             </tr>
-            </table>
-
-
-
-            <fieldset>
-            <legend>Calibrado con marcadores</legend>
-            <button
-                type="button"
-                onclick="command('initialCalibrate')"
-                title="Ponga la gondola en Home manualmente antes del calibrado inicial"
-            >
-                Calibrado inicial
-            </button>
-            <button
-                type="button"
-                onclick="command('calibrate')"
-                title="Busca los marcadores de posicion y vuelve la gondola a su Home"
-            >
-                Recalibrar
-            </button>
-
-            </fieldset>
-    </td>
-    <td align="center" width="50%" valign ="center">
-
-      <canvas id="machine" width="200" height="200" style="border:1px solid #000000;"></canvas>
-
-    </td>
-    <td align="center" valign="top">
-
+        </table>
 
         <fieldset>
-        <legend>Comandos GCODE</legend>
-        
-        <input id="comando" >
-        <button
-            type="button"
-            onclick="command($('#comando').val())"
-            title="ingrese un comando GCODE"
-        >
-            Enviar
-        </button>
-
+            <legend>Calibrado con marcadores</legend>
+            <button type="button" onclick="command('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial">
+                Calibrado inicial
+            </button>
+            <button type="button" onclick="command('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home">
+                Recalibrar
+            </button>
         </fieldset>
-
-
-        <textarea id="log" name="log" rows="20" cols="50"> </textarea><br />
-        <textarea id="errores" name="errores" rows="5" cols="50"> </textarea><br />
     </td>
-  </tr>
-  </table>
+        <td align="center" width="50%" valign ="center">
+            <canvas id="machine" width="200" height="200" style="border:1px solid #000000;"></canvas>
+        </td>
+        <td align="center" valign="top">
+            <fieldset>
+                <legend>Comandos GCODE</legend>            
+                <input id="comando" >
+                <button type="button" onclick="command($('#comando').val())" title="ingrese un comando GCODE">
+                    Enviar
+                </button>
+            </fieldset>
+            <textarea id="log" name="log" rows="20" cols="50"> </textarea><br />
+        </td>
+    </tr>
+</table>
 
 
 
 
-    
- 
+

@@ -27,7 +27,7 @@ void returnOK();
 void calibrate_doCalibration();
 void calibrate_doInitialCalibration();
 void changeLength(float tA, float tB);
-void machineSpecs( );
+void machineSpecs();
 
 void set_home();
 void go_home();
@@ -63,14 +63,16 @@ void handleRoot(){
  <!DOCTYPE html>\
 <html>\
   <head>\
-    <title>Control v-plotter</title>\
+    <title>Control v-plotter CDN</title>\
     <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
-    <script>\      
-      $(function(){\
-        $('#b-placeholder').load(\
-          'https://cdn.jsdelivr.net/gh/sebasack/v-plotter/web-control/page.html'\
-        );\
-      });\
+    <script>\
+        $(function () {\
+            $('#b-placeholder').load('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html');\
+            const script = document.createElement('script');\
+            script.src = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js';\
+            script.onload = function () {init();};\
+            document.body.appendChild(script);\
+        });\
     </script>\
   </head>\
   <body>\
@@ -81,7 +83,7 @@ void handleRoot(){
 
   if (cardPresent){   
       // quitar estas lineas una vez que resuelva el link dinamico
-      sprintf(temp,"<a href='/edit/index.html' target='_blank'>Editor de SD</a><br><br>");    
+      sprintf(temp,"<a href='index.html' target='_self'>Cargar controlador desde SD</a><br><br>");    
       server.sendContent(temp);     
 
       sprintf(temp,"<div id='sdcard_present'>tarjeta sd encontrada</div>");    

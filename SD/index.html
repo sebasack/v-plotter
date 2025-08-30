@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Control v-plotter</title>
-        <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+        <title>Control v-plotter SDs</title>
+        <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
 
         <script>
             $(function () {
-                $("#b-placeholder").load(
-                    //"https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/page.html"
-                    "control.html"
+                $('#b-placeholder').load(
+                    //'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html'
+                    'control.html'
                 );
 
                 // agrego y ejecuto el javascript de control
-                const script = document.createElement("script");
-                //script.src = "https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js";
-                script.src = "control.js";
+                const script = document.createElement('script');
+                //script.src = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js';
+                script.src = 'control.js';
                 script.onload = function () {
                     init();
                 };
                 document.body.appendChild(script);
+                
             });
+            
         </script>
     </head>
     <body>
-        <div id="b-placeholder">loading html...</div>
-        <div id="sdcard_present"></div>
+        <div id='b-placeholder'>loading html...</div>
+        <a href='/' target='_self'>Cargar controlador desde CDN</a><br><br>
+        <div id='sdcard_present'></div>
     </body>
 </html>

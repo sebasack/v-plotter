@@ -85,7 +85,6 @@ void exec_changeDrawingDirection()
 void machineSpecs(){
     sprintf(temp, "{\"result_ok\":true,\"x\":%d,\"y\":%d,\"mmPerRev\":%.2f,\"stepsPerRev\":%d,\"stepMultiplier\":%d,\"downPosition\":%d,\"upPosition\":%d,\"currentMaxSpeed\":%.2f,\"currentAcceleration\":%.2f,\"penWidth\":%.2f}",
     machineSizeMm.x, machineSizeMm.y,mmPerRev,motorStepsPerRev,stepMultiplier,downPosition,upPosition,currentMaxSpeed,currentAcceleration,penWidth);
-    Serial.println(penWidth);
     Serial.println("    envio parametros de la maquina ");
 };
 

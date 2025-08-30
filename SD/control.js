@@ -18,37 +18,37 @@ function command(comando) {
         contentType: "application/x-www-form-urlencoded",
         dataType: "json",
         error: function (objeto, quepaso, otroobj) {
-            console.log(
-                "No se pudo completar la operacion " + comando + ": " + quepaso
-            );
-            $("#errores").val(
+            $("#log").val(
                 "No se pudo completar la operacion " +
                     comando +
                     ": " +
                     quepaso +
                     "\n" +
-                    $("#errores").val()
+                    $("#log").val()+"\n"
             );
+
         },
         success: function (datos) {
+            
             if (datos.result_ok) {
                 $("#log").val(
                     comando +
                         "... " +
                         JSON.stringify(datos) +
                         " \n" +
-                        $("#log").val()
+                        $("#log").val()+"\n"
                 );
+            
             } else {
                 alert(datos.desc_error);
             }
+
+            console.log(datos);
         },
     });
 }
 
-function cargar_pagina(url) {
-    $("#b-placeholder").load(url);
-}
+
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
@@ -69,10 +69,13 @@ function rectangle(x, y, ancho, alto) {
     ctx.strokeRect(x, y, ancho, alto);
 }
 
-function draw_machine(ancho, alto) {
+function draw_machine(config) {
+console.log(config);
+    ancho = config.x;
+    alto=config.y;
     // Cambiar dimensiones
-    canvas.width = ancho; // Ancho en píxeles
-    canvas.height = alto; // Alto en píxeles
+    canvas.width = ancho; // Ancho en pï¿½xeles
+    canvas.height = alto; // Alto en pï¿½xeles
 
     if (canvas.getContext) {
         //   ctx.fillRect(25, 25, 100, 100);
@@ -95,6 +98,38 @@ function draw_machine(ancho, alto) {
     }
 }
 
+
+      
+async function ejecutar_comando(comando,funcionExito) {
+    try {
+        const params = new URLSearchParams();
+        params.append('command', comando);
+        
+        
+        const url = `http://v-plotter.duckdns.org/control?${params.toString()}`;
+        const response = await fetch(url);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Llama a la funciÃ³n de Ã©xito si existe
+            if (funcionExito && typeof funcionExito === 'function') {
+                funcionExito(data);
+            }
+            
+            return data;
+        } else {
+            throw new Error(`Error ${response.status}`);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+
+
+
 function init() {
     console.log("location href: " + location.href);
     console.log("window location:" + window.location);
@@ -109,7 +144,22 @@ function init() {
     // mostrarCamara();
     // command("getPosition");
 
-    draw_machine(400, 600);
+   
+
+// Uso
+    ejecutar_comando('getMachineSpecs',draw_machine);
+
+        
+        
+    
+
+    
+
+    
+}
+
+function updateMachine(){
+
 }
 
 window.onload = function () {
