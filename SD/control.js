@@ -1,52 +1,5 @@
-function command(comando) {
-    //  $('#log').val(comando+"..." + "\n"+ $('#log').val());
-
-    params = {
-        command: comando,
-    };
-
-    $.ajax({
-        url: "/control",
-        data: params,
-        type: "GET",
-        timeout: 10,
-        async: false,
-        cache: false,
-        global: true,
-        processData: true,
-        ifModified: false,
-        contentType: "application/x-www-form-urlencoded",
-        dataType: "json",
-        error: function (objeto, quepaso, otroobj) {
-            $("#log").val(
-                "No se pudo completar la operacion " +
-                    comando +
-                    ": " +
-                    quepaso +
-                    "\n" +
-                    $("#log").val()+"\n"
-            );
-
-        },
-        success: function (datos) {
-            
-            if (datos.result_ok) {
-                $("#log").val(
-                    comando +
-                        "... " +
-                        JSON.stringify(datos) +
-                        " \n" +
-                        $("#log").val()+"\n"
-                );
-            
-            } else {
-                alert(datos.desc_error);
-            }
-
-            console.log(datos);
-        },
-    });
-}
+machine_specs=[];
+pen_position=[];
 
 
 
@@ -69,36 +22,66 @@ function rectangle(x, y, ancho, alto) {
     ctx.strokeRect(x, y, ancho, alto);
 }
 
-function draw_machine(config) {
-console.log(config);
-    ancho = config.x;
-    alto=config.y;
-    // Cambiar dimensiones
-    canvas.width = ancho; // Ancho en p�xeles
-    canvas.height = alto; // Alto en p�xeles
+function text(text,x,y){
+        ctx.fillText(text, x, y);
+};
+
+function draw_machine() {
+    /*getMachineSpecs... 
+
+    {"machineSizeMm_x":882,
+     "machineSizeMm_y":1100,
+     "mmPerRev":126,
+     "stepsPerRev":4076,
+     "stepMultiplier":8,
+     "downPosition":90,
+     "upPosition":123,
+     "currentMaxSpeed":1000,
+     "currentAcceleration":400,
+     "penWidth":0.5
+     }
+     */
+
+     
+
+    // Cambiar dimensiones del canvas
+    canvas.width = machine_specs.machineSizeMm_x; // Ancho en pixeles
+    canvas.height =  machine_specs.machineSizeMm_y; // Alto en pixeles
+
 
     if (canvas.getContext) {
+
+        // dibujo el contorno de la maquina maquina
+        rectangle(0,0,  machine_specs.machineSizeMm_x,  machine_specs.machineSizeMm_y);
+        text("Machine: "+ machine_specs.machineSizeMm_x+'x'+  machine_specs.machineSizeMm_y,10,10);
+
         //   ctx.fillRect(25, 25, 100, 100);
         //ctx.clearRect(45, 45, 60, 60);
 
-        // dibujo los motores
-        rectangle(ancho - 21, 2, 20, 20);
-        rectangle(2, 2, 20, 20);
 
         // dibujo la hora centrada
-        rectangle(ancho / 2 - 210 / 2, 100, 210, 297);
+        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 100, 210, 297);
 
         // dibujo la gondola y el marcador
-        rectangle(ancho / 2 - 10, alto / 2 - 10, 20, 30);
-        circle(ancho / 2, alto / 2, 3);
+        rectangle(machine_specs.machineSizeMm_x / 2 - 10,  machine_specs.machineSizeMm_y / 2 - 10, 20, 30);
+        circle(machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2, 3);
 
         // dibujo los hilos de los motores a la gondola
-        line(20, 20, ancho / 2, alto / 2);
-        line(ancho - 21, 20, ancho / 2, alto / 2);
+        line(0, 0, machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2);
+        line(machine_specs.machineSizeMm_x, 0, machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2);
     }
 }
 
 
+function actualizar_machine_specs(specs){
+    machine_specs=specs;  
+    draw_machine();
+}
+
+function actualizar_pen_position(pen){
+    pen_position=pen;
+    draw_machine();
+}
       
 async function ejecutar_comando(comando,funcionExito) {
     try {
@@ -106,7 +89,7 @@ async function ejecutar_comando(comando,funcionExito) {
         params.append('command', comando);
         
         
-        const url = `http://v-plotter.duckdns.org/control?${params.toString()}`;
+        const url = `/control?${params.toString()}`;
         const response = await fetch(url);
         
         if (response.ok) {
@@ -143,24 +126,15 @@ function init() {
 
     // mostrarCamara();
     // command("getPosition");
-
    
+    // busco los parametros de la maquina y si los recibo ok llamo a la funcion de mostrar maquina
+    ejecutar_comando('getMachineSpecs',actualizar_machine_specs);      
 
-// Uso
-    ejecutar_comando('getMachineSpecs',draw_machine);
-
-        
-        
-    
-
-    
+    ejecutar_comando('getPosition',actualizar_pen_position);               
 
     
 }
 
-function updateMachine(){
-
-}
 
 window.onload = function () {
     init();

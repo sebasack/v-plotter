@@ -1,4 +1,4 @@
-<script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/web-control/webcam.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
 
 <style>
     textarea {
@@ -12,39 +12,24 @@
         font-weight: bold;
     }
 
-    #canvas {
-    /*
-            -moz-transform: scaleX(-1);
-            -o-transform: scaleX(-1);
-            -webkit-transform: scaleX(-1);
-            transform: scaleX(-1);
-            filter: FlipH;
-            -ms-filter: "FlipH";
-    */
-        position: absolute;
-        left: 300px;
-        top: 50px;
-    }
 </style>
 
 <video id="video" playsinline autoplay style="display: none"></video>
-<canvas id="canvas" width="1280" height="720"></canvas>
-
 
 <table border="1" width="100%" height="100%">
     <tr>
         <td align="center" width="20%" valign="top">
             <br />
-            <button type="button" onclick="command('penLift')">pen Arriba</button>
-            <button type="button" onclick="command('penDown')">pen Abajo</button>
-            <button type="button" onclick="command('restart')">Restart</button>
-            <button type="button" onclick="command('setHome')">Set Home</button>
-            <button type="button" onclick="command('goHome')">Return to Home</button>
-            <button type="button" onclick="command('releaseMotors')">
+            <button type="button" onclick="ejecutar_comando('penLift')">pen Arriba</button>
+            <button type="button" onclick="ejecutar_comando('penDown')">pen Abajo</button>
+            <button type="button" onclick="ejecutar_comando('restart')">Restart</button>
+            <button type="button" onclick="ejecutar_comando('setHome')">Set Home</button>
+            <button type="button" onclick="ejecutar_comando('goHome')">Return to Home</button>
+            <button type="button" onclick="ejecutar_comando('releaseMotors')">
             Desenergizar motores
             </button>
-            <button type="button" onclick="command('getPosition')">Posicion actual</button>
-            <button type="button" onclick="command('getMachineSpecs')">Obtener especificaciones de la maquina</button>
+            <button type="button" onclick="ejecutar_comando('getPosition',actualizar_pen_position)">Posicion actual</button>
+            <button type="button" onclick="ejecutar_comando('getMachineSpecs',actualizar_machine_specs)">Obtener especificaciones de la maquina</button>
             <br />
 
 
@@ -113,7 +98,7 @@
         </fieldset>
     </td>
         <td align="center" width="50%" valign ="center">
-            <canvas id="machine" width="200" height="200" style="border:1px solid #000000;"></canvas>
+            <canvas id="machine" width="0" height="0"></canvas>
         </td>
         <td align="center" valign="top">
             <fieldset>
