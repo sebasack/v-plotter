@@ -1,4 +1,4 @@
-machine_specs=[];
+machine_specs=[]
 pen_position=[];
 
 
@@ -69,18 +69,52 @@ function draw_machine() {
         // dibujo los hilos de los motores a la gondola
         line(0, 0, machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2);
         line(machine_specs.machineSizeMm_x, 0, machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2);
+
+
+
+        circle(0,0,484);
+
+        circle(882,0,484);
+
+        circle(0,0,pen_position.radius_A);
+        circle( machine_specs.machineSizeMm_x,0,pen_position.radius_B);
     }
 }
 
 
 function update_machine_specs(specs){
     machine_specs=specs;  
-   // draw_machine();
+    draw_machine();
 }
 
 function update_pen_position(pen){
-    pen_position=pen;
+  
+    // calculo la interseccion entre los circulos
+    //conviertos los pasos a px
+    pen_position.radius_A = pen.motorA/machine_specs.stepMultiplier;
+    pen_position.radius_B = pen.motorB/machine_specs.stepMultiplier;
+
+    console.log(pen_position);
+
+    //{"result_ok":true,"motorA":15664,"motorB":15664}
+/*
+      {"machineSizeMm_x":882,
+     "machineSizeMm_y":1100,
+     "mmPerRev":126,
+     "stepsPerRev":4076,
+     "stepMultiplier":8,
+     "downPosition":90,
+     "upPosition":123,
+     "currentMaxSpeed":1000,
+     "currentAcceleration":400,
+     "penWidth":0.5
+     }
+     */
+
+
     draw_machine();
+
+
 }
       
 async function ejecutar_comando(comando,funcionExito) {
@@ -125,7 +159,6 @@ function init() {
     }
 
     // mostrarCamara();
-    // command("getPosition");
    
     // busco los parametros de la maquina y si los recibo ok llamo a la funcion de mostrar maquina
     ejecutar_comando('getMachineSpecs',update_machine_specs);      
