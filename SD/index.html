@@ -6,52 +6,29 @@
 
         <script>
             $(function () {
-                /*
-                $('#b-placeholder').load(
-                    //'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html'
-                    'control.html'
-                );
-                
-
-                // agrego y ejecuto el javascript de control
-                const script = document.createElement('script');
-                //script.src = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js';
-                script.src = 'control.js';
-                script.onload = function () {
-                    init();
-                };
-                document.body.appendChild(script);
-                */
-
-
+               
                 //cdn = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';
                 cdn = '';
 
                 // Cargar HTML
-                $.get(cdn+'control.html')
-                    .done(function(html) {
-                        $('#b-placeholder').html(html);
-                        
-                        // Cargar y ejecutar JS
-                        $.getScript(cdn+'control.js')
-                            .done(function() {
-                                console.log('JavaScript cargado y ejecutado correctamente');
-                                init();                                
-                            })
-                            .fail(function(jqxhr, settings, exception) {
-                                console.error('Error al cargar JavaScript:', exception);
-                            });
-                    })
-                    .fail(function(jqxhr, textStatus, errorThrown) {
-                        console.error('Error al cargar HTML:', errorThrown);
-                        contenedor.html('<div style="color: red;">Error al cargar el contenido</div>');
-                    });                
+                $.get(cdn+'control.html').done(function(html) {
+                    $('#control-placeholder').html(html);                        
+                    // Cargar y ejecutar JS
+                    $.getScript(cdn+'control.js').done(function() {
+                        init();                                
+                    }).fail(function(jqxhr, settings, exception) {
+                        console.error('Error al cargar JavaScript:', exception);
+                    });
+                }).fail(function(jqxhr, textStatus, errorThrown) {
+                    console.error('Error al cargar HTML:', errorThrown);
+                    contenedor.html('<div style="color: red;">Error al cargar el contenido</div>');
+                });                
             });
             
         </script>
     </head>
     <body>
-        <div id='b-placeholder'>loading html...</div>
+        <div id='control-placeholder'>loading html...</div>
         <a href='/' target='_self'>Cargar controlador desde CDN</a><br><br>
         <div id='sdcard_present'></div>
     </body>

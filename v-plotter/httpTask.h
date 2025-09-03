@@ -67,16 +67,22 @@ void handleRoot(){
     <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
     <script>\
         $(function () {\
-            $('#b-placeholder').load('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html');\
-            const script = document.createElement('script');\
-            script.src = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js';\
-            script.onload = function () {init();};\
-            document.body.appendChild(script);\
+            $.get('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html').done(function(html) {\
+                $('#control-placeholder').html(html);\
+                $.getScript('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js').done(function() {\
+                    init();\
+                }).fail(function(jqxhr, settings, exception) {\
+                    console.error('Error al cargar JavaScript:', exception);\
+                });\
+              }).fail(function(jqxhr, textStatus, errorThrown) {\
+                  console.error('Error al cargar HTML:', errorThrown);\
+                  contenedor.html('<div style=\"color: red;\">Error al cargar el contenido</div>');\
+              });\
         });\
     </script>\
   </head>\
   <body>\
-    <div id='b-placeholder'>loading html...</div>\
+    <div id='control-placeholder'>loading html...</div>\
 ");
 
   server.sendContent(temp);

@@ -73,12 +73,12 @@ function draw_machine() {
 }
 
 
-function actualizar_machine_specs(specs){
+function update_machine_specs(specs){
     machine_specs=specs;  
-    draw_machine();
+   // draw_machine();
 }
 
-function actualizar_pen_position(pen){
+function update_pen_position(pen){
     pen_position=pen;
     draw_machine();
 }
@@ -128,14 +128,10 @@ function init() {
     // command("getPosition");
    
     // busco los parametros de la maquina y si los recibo ok llamo a la funcion de mostrar maquina
-    ejecutar_comando('getMachineSpecs',actualizar_machine_specs);      
+    ejecutar_comando('getMachineSpecs',update_machine_specs);      
 
-    ejecutar_comando('getPosition',actualizar_pen_position);               
+    ejecutar_comando('getPosition',update_pen_position);               
 
     
 }
 
-
-window.onload = function () {
-    init();
-};
