@@ -243,12 +243,10 @@ void moveB(int dist){
 
 void reportPosition(){
   if (reportingPosition)  {
-    long p = motorA.currentPosition();
+
     
     PGclient.print(OUT_CMD_SYNC_STR);
-    PGclient.print(p);
-    PGclient.print(COMMA);
-    PGclient.print(divider(p));
+    PGclient.print(divider(motorA.currentPosition()));
     PGclient.print(COMMA);
     PGclient.print(divider(motorB.currentPosition()));
     PGclient.println(CMD_END);
@@ -256,9 +254,7 @@ void reportPosition(){
 
     Serial.print("    envio sync: ");
     Serial.print(OUT_CMD_SYNC_STR);
-    Serial.print(p);
-    Serial.print(COMMA);
-    Serial.print(divider(p));
+    Serial.print(divider(motorA.currentPosition()));
     Serial.print(COMMA);
     Serial.print(divider(motorB.currentPosition()));
     Serial.println(CMD_END);

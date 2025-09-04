@@ -28,6 +28,8 @@ void calibrate_doCalibration();
 void calibrate_doInitialCalibration();
 void changeLength(float tA, float tB);
 void machineSpecs();
+void getPosition();
+
 
 void set_home();
 void go_home();
@@ -294,12 +296,11 @@ void handleControl(){
 
       Serial.println("comando ok");      
 
-
-
-  
-      position = position+",\"motorA\":" + motorA.currentPosition()  + ",\"motorB\":" + motorB.currentPosition();
+     // position = position+",\"motorA\":" + motorA.currentPosition()  + ",\"motorB\":" + motorB.currentPosition();
  
-      server.send(200, "text/plain", "{\"result_ok\":true" +position+"}");
+      //server.send(200, "text/plain", "{\"result_ok\":true" +position+"}");
+      getPosition();
+         server.send(200, "text/plain", temp);
 
   } else  {
       Serial.println("comando no valido ");

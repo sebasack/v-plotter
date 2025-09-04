@@ -88,6 +88,14 @@ void machineSpecs(){
     Serial.println("    envio parametros de la maquina ");
 };
 
+
+void getPosition(){
+     
+    sprintf(temp, "{\"result_ok\":true,\"motorA\":%d,\"motorB\":%d}",
+    divider( motorA.currentPosition()),divider( motorB.currentPosition()));
+    Serial.println("    envio posicion pen");
+};
+
 void exec_reportMachineSpec()
 {
   PGclient.print(F("PGSIZE,"));

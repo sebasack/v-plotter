@@ -60,7 +60,7 @@ function draw_machine() {
 
 
         // dibujo la hora centrada
-        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 100, 210, 297);
+        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297);
 
         // dibujo la gondola y el marcador
         rectangle(machine_specs.machineSizeMm_x / 2 - 10,  machine_specs.machineSizeMm_y / 2 - 10, 20, 30);
@@ -71,13 +71,12 @@ function draw_machine() {
         line(machine_specs.machineSizeMm_x, 0, machine_specs.machineSizeMm_x / 2,  machine_specs.machineSizeMm_y / 2);
 
 
-
+/*
         circle(0,0,484);
-
         circle(882,0,484);
-
-        circle(0,0,pen_position.radius_A);
-        circle( machine_specs.machineSizeMm_x,0,pen_position.radius_B);
+*/
+        circle(0,0,pen_position.motorA);
+        circle( machine_specs.machineSizeMm_x,0,pen_position.motorB);
     }
 }
 
@@ -88,28 +87,12 @@ function update_machine_specs(specs){
 }
 
 function update_pen_position(pen){
-  
-    // calculo la interseccion entre los circulos
-    //conviertos los pasos a px
-    pen_position.radius_A = pen.motorA/machine_specs.stepMultiplier;
-    pen_position.radius_B = pen.motorB/machine_specs.stepMultiplier;
 
-    console.log(pen_position);
+    pen_position=pen;    
+  
 
     //{"result_ok":true,"motorA":15664,"motorB":15664}
-/*
-      {"machineSizeMm_x":882,
-     "machineSizeMm_y":1100,
-     "mmPerRev":126,
-     "stepsPerRev":4076,
-     "stepMultiplier":8,
-     "downPosition":90,
-     "upPosition":123,
-     "currentMaxSpeed":1000,
-     "currentAcceleration":400,
-     "penWidth":0.5
-     }
-     */
+
 
 
     draw_machine();
@@ -131,6 +114,14 @@ async function ejecutar_comando(comando,funcionExito) {
             
             // Llama a la función de éxito si existe
             if (funcionExito && typeof funcionExito === 'function') {
+                  $("#log").val(
+                    comando +
+                        "... " +
+                        JSON.stringify(data) +
+                        " \n\n" +
+                        $("#log").val()
+                );
+
                 funcionExito(data);
             }
             
