@@ -123,12 +123,15 @@ function move(motor) {
     // console.log("speedA:" + speedA+ "\t pasosA:" + stepsA+  "\t speedB:" +speedB+ "\t pasosB:" + stepsB);
     // $('#log').val("speedA:" + speedA+ "\t pasosA:" + stepsA+ "\t speedB:" +speedB+ "\t pasosB:" + stepsB +"\n"+ $('#log').val());
 
-    params = {
+    parametros = {
         command: "move",
         stepsA: stepsA,
         stepsB: stepsB,
     };
 
+    ejecutar_comando(parametros, update_pen_position);
+
+    /*
     $.ajax({
         url: "/control",
         data: params,
@@ -163,14 +166,22 @@ function move(motor) {
                 alert(datos.desc_error);
             }
         },
-    });
+    });*/
 }
 
-async function ejecutar_comando(comando, funcionExito) {
-    try {
+async function ejecutar_comando(parametros, funcionExito) {
+    /*parametros va en la forma 
+            "getPosition"                         cuando es solo el comando sin otros parametros
+            {command:move, motorA:55, motorB:-66} cuando es un comando y lleva varios parametros 
+    */
+    if (typeof parametros === "string" || parametros instanceof String) {
         const params = new URLSearchParams();
-        params.append("command", comando);
+        params.append("command", parametros);
+    } else {
+        params = parametros;
+    }
 
+    try {
         const url = `/control?${params.toString()}`;
         const response = await fetch(url);
 
@@ -183,7 +194,7 @@ async function ejecutar_comando(comando, funcionExito) {
                     comando +
                         "... " +
                         JSON.stringify(data) +
-                        " \n\n" +
+                        " \n\n " +
                         $("#log").val()
                 );
 
