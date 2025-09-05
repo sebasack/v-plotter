@@ -48,20 +48,8 @@ function draw_machine() {
 
     if (canvas.getContext) {
         // dibujo el contorno de la maquina maquina
-        rectangle(
-            0,
-            0,
-            machine_specs.machineSizeMm_x,
-            machine_specs.machineSizeMm_y
-        );
-        text(
-            "Machine: " +
-                machine_specs.machineSizeMm_x +
-                "x" +
-                machine_specs.machineSizeMm_y,
-            10,
-            10
-        );
+        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y);
+        text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
 
         //   ctx.fillRect(25, 25, 100, 100);
         //ctx.clearRect(45, 45, 60, 60);
@@ -70,31 +58,12 @@ function draw_machine() {
         rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297);
 
         // dibujo la gondola y el marcador
-        rectangle(
-            machine_specs.machineSizeMm_x / 2 - 10,
-            machine_specs.machineSizeMm_y / 2 - 10,
-            20,
-            30
-        );
-        circle(
-            machine_specs.machineSizeMm_x / 2,
-            machine_specs.machineSizeMm_y / 2,
-            3
-        );
+        rectangle(machine_specs.machineSizeMm_x / 2 - 10,machine_specs.machineSizeMm_y / 2 - 10,20,30);
+        circle(machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2,3);
 
         // dibujo los hilos de los motores a la gondola
-        line(
-            0,
-            0,
-            machine_specs.machineSizeMm_x / 2,
-            machine_specs.machineSizeMm_y / 2
-        );
-        line(
-            machine_specs.machineSizeMm_x,
-            0,
-            machine_specs.machineSizeMm_x / 2,
-            machine_specs.machineSizeMm_y / 2
-        );
+        line(0,0,machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2);
+        line(machine_specs.machineSizeMm_x,0,machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2);
 
         /*
         circle(0,0,484);
