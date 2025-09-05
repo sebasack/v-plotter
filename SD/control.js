@@ -119,16 +119,16 @@ function update_pen_position(pen) {
 }
 
 function move(motor) {
-    let stepsA = $("input[type='radio'][name='pasosA']:checked").val();
-    let stepsB = $("input[type='radio'][name='pasosB']:checked").val();
+    let pasosA = $("input[type='radio'][name='pasosA']:checked").val();
+    let pasosB = $("input[type='radio'][name='pasosB']:checked").val();
 
     // console.log("speedA:" + speedA+ "\t pasosA:" + stepsA+  "\t speedB:" +speedB+ "\t pasosB:" + stepsB);
     // $('#log').val("speedA:" + speedA+ "\t pasosA:" + stepsA+ "\t speedB:" +speedB+ "\t pasosB:" + stepsB +"\n"+ $('#log').val());
 
     parametros = {
         command: "move",
-        stepsA: stepsA,
-        stepsB: stepsB,
+        stepsA: pasosA,
+        stepsB: pasosB,
     };
 
     ejecutar_comando(parametros, update_pen_position);
@@ -200,10 +200,8 @@ async function ejecutar_comando(parametros, funcionExito) {
                         " \n\n " +
                         $("#log").val()
                 );
-
                 funcionExito(data);
             }
-
             return data;
         } else {
             throw new Error(`Error ${response.status}`);

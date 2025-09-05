@@ -78,7 +78,6 @@ void handleRoot(){
                 });\
               }).fail(function(jqxhr, textStatus, errorThrown) {\
                   console.error('Error al cargar HTML:', errorThrown);\
-                  contenedor.html('<div style=\"color: red;\">Error al cargar el contenido</div>');\
               });\
         });\
     </script>\
