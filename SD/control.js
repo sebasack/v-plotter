@@ -91,7 +91,7 @@ function move(motor) {
     let pasosA = $("input[type='radio'][name='pasosA']:checked").val();
     let pasosB = $("input[type='radio'][name='pasosB']:checked").val();
     
-    parametros = "move&stepsA="+ pasosA + "stepsB=" + pasosB;
+    parametros = "move&stepsA="+ pasosA + "&stepsB=" + pasosB;
     
     ejecutar_comando(parametros, update_pen_position);
 }
@@ -102,7 +102,6 @@ async function ejecutar_comando(parametros, funcionExito) {
             "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros 
     */
    
-
     try {
         const url = `/control?command=`+parametros;
         const response = await fetch(url);
