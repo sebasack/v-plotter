@@ -1,4 +1,4 @@
-$("#version").append(".1");
+$("#version").append(".1"); // agrego la version del js
 
 machine_specs = [];
 pen_position = [];
