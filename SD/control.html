@@ -2,8 +2,8 @@
 
 <style>
     textarea {
-        width:100%;
-        height:90%
+        width: 100%;
+        height: 90%;
     }
 
     body {
@@ -11,7 +11,6 @@
         font-size: 16px;
         font-weight: bold;
     }
-
 </style>
 
 <video id="video" playsinline autoplay style="display: none"></video>
@@ -19,92 +18,275 @@
 <table border="1" width="100%" height="100%">
     <tr>
         <td align="center" width="20%" valign="top">
+            <div style="text-align: left; font-size: 10px" id="version">
+                version:
+            </div>
             <br />
-            <button type="button" onclick="ejecutar_comando('penLift')">pen Arriba</button>
-            <button type="button" onclick="ejecutar_comando('penDown')">pen Abajo</button>
-            <button type="button" onclick="ejecutar_comando('restart')">Restart</button>
-            <button type="button" onclick="ejecutar_comando('setHome')">Set Home</button>
-            <button type="button" onclick="ejecutar_comando('goHome')">Return to Home</button>
+            <button type="button" onclick="ejecutar_comando('penLift')">
+                pen Arriba
+            </button>
+            <button type="button" onclick="ejecutar_comando('penDown')">
+                pen Abajo
+            </button>
+            <button type="button" onclick="ejecutar_comando('restart')">
+                Restart
+            </button>
+            <button type="button" onclick="ejecutar_comando('setHome')">
+                Set Home
+            </button>
+            <button type="button" onclick="ejecutar_comando('goHome')">
+                Return to Home
+            </button>
             <button type="button" onclick="ejecutar_comando('releaseMotors')">
-            Desenergizar motores
+                Desenergizar motores
             </button>
-            <button type="button" onclick="ejecutar_comando('getPosition',update_pen_position)">Posicion actual</button>
-            <button type="button" onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)">Obtener especificaciones de la maquina</button>
+            <button
+                type="button"
+                onclick="ejecutar_comando('getPosition',update_pen_position)"
+            >
+                Posicion actual
+            </button>
+            <button
+                type="button"
+                onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)"
+            >
+                Obtener especificaciones de la maquina
+            </button>
             <br />
 
+            <table border="1">
+                <tr>
+                    <td align="center"></td>
+                    <td align="center">Motor A:</td>
+                    <td align="center">Motor B:</td>
+                </tr>
 
-        <table border="1">
-            <tr>
-                <td align="center"></td>
-                <td align="center">Motor A:</td>
-                <td align="center">Motor B:</td>
-            </tr>
-            
-            <tr>
-                <td align="center">Dist:</td>
-                <td align="center">
-                <input type="radio"   id="-1cmA" name="pasosA" value="-288" checked="checked">   <label for="-1cmA">-1 cm</label><br>
-                <input type="radio"   id="-5cmA" name="pasosA" value="-1442">  <label for="-5cmA">-5 cm</label><br> 
-                <input type="radio"  id="-10cmA" name="pasosA" value="-2883">  <label for="-10cmA">-10 cm</label><br>
-                <input type="radio"  id="-20cmA" name="pasosA" value="-5767">  <label for="-20cmA">-20 cm</label><br>
-                <input type="radio"  id="-50cmA" name="pasosA" value="-14417"> <label for="-50cmA">-50 cm</label><br>
-                <input type="radio" id="-100cmA" name="pasosA" value="-28834"> <label for="-100cmA">-100 cm</label><br>   
-                <input type="radio" id="100cmA" name="pasosA" value="28834"> <label for="100cmA">100 cm</label><br>    
-                <input type="radio"  id="50cmA" name="pasosA" value="14417"> <label for="50cmA">50 cm</label><br>
-                <input type="radio"  id="20cmA" name="pasosA" value="5767">  <label for="20cmA">20 cm</label><br>
-                <input type="radio"  id="10cmA" name="pasosA" value="2883">  <label for="10cmA">10 cm</label><br>   
-                <input type="radio"   id="5cmA" name="pasosA" value="1442">  <label for="5cmA">5 cm</label><br>
-                <input type="radio"   id="1cmA" name="pasosA" value="288">   <label for="1cmA">1 cm</label><br>  
-                </td>
-                <td align="center">      
-                <input type="radio"   id="-1cmB" name="pasosB" value="-288" checked="checked">   <label for="-1cmB">-1 cm</label><br>
-                <input type="radio"   id="-5cmB" name="pasosB" value="-1442">  <label for="-5cmB">-5 cm</label><br>
-                <input type="radio"  id="-10cmB" name="pasosB" value="-2883">  <label for="-10cmB">-10 cm</label><br>
-                <input type="radio"  id="-20cmB" name="pasosB" value="-5767">  <label for="-20cmB">-20 cm</label><br>
-                <input type="radio"  id="-50cmB" name="pasosB" value="-14417"> <label for="-50cmB">-50 cm</label><br>
-                <input type="radio" id="-100cmB" name="pasosB" value="-28834"> <label for="-100cmB">-100 cm</label><br>
-                <input type="radio" id="100cmB" name="pasosB" value="28834"> <label for="100cmB">100 cm</label><br>
-                <input type="radio"  id="50cmB" name="pasosB" value="14417"> <label for="50cmB">50 cm</label><br>
-                <input type="radio"  id="20cmB" name="pasosB" value="5767">  <label for="20cmB">20 cm</label><br>
-                <input type="radio"  id="10cmB" name="pasosB" value="2883">  <label for="10cmB">10 cm</label><br>
-                <input type="radio"   id="5cmB" name="pasosB" value="1442">  <label for="5cmB">5 cm</label><br>
-                <input type="radio"   id="1cmB" name="pasosB" value="288">   <label for="1cmB">1 cm</label><br>
-                </td>
-            </tr>
-            <tr>
-                <td align="center" rowspan="2">Mover:</td>
-                <td align="center">
-                <button type="button" onclick="move(1)">Motor A</button>
-                </td>
-                <td align="center">
-                <button type="button" onclick="move(2)">Motor B</button><br />
-                </td>
-            </tr>
-            <tr>
-                <td align="center" colspan="2">
-                <button type="button" onclick="move(0)">Ambos motores</button>
-                </td>                
-            </tr>
-        </table>
+                <tr>
+                    <td align="center">Dist:</td>
+                    <td align="center">
+                        <input
+                            type="radio"
+                            id="-1cmA"
+                            name="pasosA"
+                            value="-288"
+                            checked="checked"
+                        />
+                        <label for="-1cmA">-1 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-5cmA"
+                            name="pasosA"
+                            value="-1442"
+                        />
+                        <label for="-5cmA">-5 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-10cmA"
+                            name="pasosA"
+                            value="-2883"
+                        />
+                        <label for="-10cmA">-10 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-20cmA"
+                            name="pasosA"
+                            value="-5767"
+                        />
+                        <label for="-20cmA">-20 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-50cmA"
+                            name="pasosA"
+                            value="-14417"
+                        />
+                        <label for="-50cmA">-50 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-100cmA"
+                            name="pasosA"
+                            value="-28834"
+                        />
+                        <label for="-100cmA">-100 cm</label><br />
+                        <input
+                            type="radio"
+                            id="100cmA"
+                            name="pasosA"
+                            value="28834"
+                        />
+                        <label for="100cmA">100 cm</label><br />
+                        <input
+                            type="radio"
+                            id="50cmA"
+                            name="pasosA"
+                            value="14417"
+                        />
+                        <label for="50cmA">50 cm</label><br />
+                        <input
+                            type="radio"
+                            id="20cmA"
+                            name="pasosA"
+                            value="5767"
+                        />
+                        <label for="20cmA">20 cm</label><br />
+                        <input
+                            type="radio"
+                            id="10cmA"
+                            name="pasosA"
+                            value="2883"
+                        />
+                        <label for="10cmA">10 cm</label><br />
+                        <input
+                            type="radio"
+                            id="5cmA"
+                            name="pasosA"
+                            value="1442"
+                        />
+                        <label for="5cmA">5 cm</label><br />
+                        <input
+                            type="radio"
+                            id="1cmA"
+                            name="pasosA"
+                            value="288"
+                        />
+                        <label for="1cmA">1 cm</label><br />
+                    </td>
+                    <td align="center">
+                        <input
+                            type="radio"
+                            id="-1cmB"
+                            name="pasosB"
+                            value="-288"
+                            checked="checked"
+                        />
+                        <label for="-1cmB">-1 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-5cmB"
+                            name="pasosB"
+                            value="-1442"
+                        />
+                        <label for="-5cmB">-5 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-10cmB"
+                            name="pasosB"
+                            value="-2883"
+                        />
+                        <label for="-10cmB">-10 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-20cmB"
+                            name="pasosB"
+                            value="-5767"
+                        />
+                        <label for="-20cmB">-20 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-50cmB"
+                            name="pasosB"
+                            value="-14417"
+                        />
+                        <label for="-50cmB">-50 cm</label><br />
+                        <input
+                            type="radio"
+                            id="-100cmB"
+                            name="pasosB"
+                            value="-28834"
+                        />
+                        <label for="-100cmB">-100 cm</label><br />
+                        <input
+                            type="radio"
+                            id="100cmB"
+                            name="pasosB"
+                            value="28834"
+                        />
+                        <label for="100cmB">100 cm</label><br />
+                        <input
+                            type="radio"
+                            id="50cmB"
+                            name="pasosB"
+                            value="14417"
+                        />
+                        <label for="50cmB">50 cm</label><br />
+                        <input
+                            type="radio"
+                            id="20cmB"
+                            name="pasosB"
+                            value="5767"
+                        />
+                        <label for="20cmB">20 cm</label><br />
+                        <input
+                            type="radio"
+                            id="10cmB"
+                            name="pasosB"
+                            value="2883"
+                        />
+                        <label for="10cmB">10 cm</label><br />
+                        <input
+                            type="radio"
+                            id="5cmB"
+                            name="pasosB"
+                            value="1442"
+                        />
+                        <label for="5cmB">5 cm</label><br />
+                        <input
+                            type="radio"
+                            id="1cmB"
+                            name="pasosB"
+                            value="288"
+                        />
+                        <label for="1cmB">1 cm</label><br />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" rowspan="2">Mover:</td>
+                    <td align="center">
+                        <button type="button" onclick="move(1)">Motor A</button>
+                    </td>
+                    <td align="center">
+                        <button type="button" onclick="move(2)">Motor B</button
+                        ><br />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2">
+                        <button type="button" onclick="move(0)">
+                            Ambos motores
+                        </button>
+                    </td>
+                </tr>
+            </table>
 
-        <fieldset>
-            <legend>Calibrado con marcadores</legend>
-            <button type="button" onclick="ejecutar_comando('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial">
-                Calibrado inicial
-            </button>
-            <button type="button" onclick="ejecutar_comando('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home">
-                Recalibrar
-            </button>
-        </fieldset>
-    </td>
-        <td align="center" width="50%" valign ="center">
+            <fieldset>
+                <legend>Calibrado con marcadores</legend>
+                <button
+                    type="button"
+                    onclick="ejecutar_comando('initialCalibrate')"
+                    title="Ponga la gondola en Home manualmente antes del calibrado inicial"
+                >
+                    Calibrado inicial
+                </button>
+                <button
+                    type="button"
+                    onclick="ejecutar_comando('calibrate')"
+                    title="Busca los marcadores de posicion y vuelve la gondola a su Home"
+                >
+                    Recalibrar
+                </button>
+            </fieldset>
+        </td>
+        <td align="center" width="50%" valign="center">
             <canvas id="machine" width="0" height="0"></canvas>
         </td>
         <td align="center" valign="top">
             <fieldset>
-                <legend>Comandos GCODE</legend>            
-                <input id="comando" >
-                <button type="button" onclick="ejecutar_comando($('#comando').val())" title="ingrese un comando GCODE">
+                <legend>Comandos GCODE</legend>
+                <input id="comando" />
+                <button
+                    type="button"
+                    onclick="ejecutar_comando($('#comando').val())"
+                    title="ingrese un comando GCODE"
+                >
                     Enviar
                 </button>
             </fieldset>
@@ -112,8 +294,3 @@
         </td>
     </tr>
 </table>
-
-
-
-
-

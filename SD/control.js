@@ -1,3 +1,5 @@
+$("#version").text("version: 0.0.1");
+
 machine_specs = [];
 pen_position = [];
 
@@ -174,8 +176,9 @@ async function ejecutar_comando(parametros, funcionExito) {
             "getPosition"                         cuando es solo el comando sin otros parametros
             {command:move, motorA:55, motorB:-66} cuando es un comando y lleva varios parametros 
     */
+    let params;
     if (typeof parametros === "string" || parametros instanceof String) {
-        const params = new URLSearchParams();
+        params = new URLSearchParams();
         params.append("command", parametros);
     } else {
         params = parametros;
