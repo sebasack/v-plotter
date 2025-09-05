@@ -90,71 +90,21 @@ function update_pen_position(pen) {
 function move(motor) {
     let pasosA = $("input[type='radio'][name='pasosA']:checked").val();
     let pasosB = $("input[type='radio'][name='pasosB']:checked").val();
-
-    // console.log("speedA:" + speedA+ "\t pasosA:" + stepsA+  "\t speedB:" +speedB+ "\t pasosB:" + stepsB);
-    // $('#log').val("speedA:" + speedA+ "\t pasosA:" + stepsA+ "\t speedB:" +speedB+ "\t pasosB:" + stepsB +"\n"+ $('#log').val());
-
-    parametros = {
-        command: "move",
-        stepsA: pasosA,
-        stepsB: pasosB,
-    };
-
+    
+    parametros = "move&stepsA="+ pasosA + "stepsB=" + pasosB;
+    
     ejecutar_comando(parametros, update_pen_position);
-
-    /*
-    $.ajax({
-        url: "/control",
-        data: params,
-        type: "GET",
-        timeout: 10,
-        async: false,
-        cache: false,
-        global: true,
-        processData: true,
-        ifModified: false,
-        contentType: "application/x-www-form-urlencoded",
-        dataType: "json",
-        error: function (objeto, quepaso, otroobj) {
-            console.log("No se pudo completar la operacion: " + quepaso);
-            $("#errores").val(
-                "No se pudo completar la operacion: " +
-                    quepaso +
-                    "\n" +
-                    $("#errores").val()
-            );
-        },
-        success: function (datos) {
-            if (datos.result_ok) {
-                $("#log").val(
-                    JSON.stringify(params) +
-                        " " +
-                        JSON.stringify(datos) +
-                        "\n" +
-                        $("#log").val()
-                );
-            } else {
-                alert(datos.desc_error);
-            }
-        },
-    });*/
 }
 
 async function ejecutar_comando(parametros, funcionExito) {
     /*parametros va en la forma 
-            "getPosition"                         cuando es solo el comando sin otros parametros
-            {command:move, motorA:55, motorB:-66} cuando es un comando y lleva varios parametros 
+            "getPosition"                  cuando es solo el comando sin otros parametros
+            "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros 
     */
-    let params;
-    if (typeof parametros === "string" || parametros instanceof String) {
-        params = new URLSearchParams();
-        params.append("command", parametros);
-    } else {
-        params = parametros;
-    }
+   
 
     try {
-        const url = `/control?${params.toString()}`;
+        const url = `/control?command=`+parametros;
         const response = await fetch(url);
 
         if (response.ok) {
