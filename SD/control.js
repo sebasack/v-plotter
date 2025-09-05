@@ -1,4 +1,4 @@
-$("#version").text("version: 0.0.1");
+$("#version").append(".1");
 
 machine_specs = [];
 pen_position = [];
