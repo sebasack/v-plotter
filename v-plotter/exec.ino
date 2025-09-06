@@ -92,7 +92,8 @@ void machineSpecs(){
 void getPosition(){
      
     sprintf(temp, "{\"result_ok\":true,\"motorA\":%d,\"motorB\":%d}",
-    divider( motorA.currentPosition()),divider( motorB.currentPosition()));
+    motorA.currentPosition(), motorB.currentPosition());
+   // divider( motorA.currentPosition()),divider( motorB.currentPosition()));
     Serial.println("    envio posicion pen");
 };
 

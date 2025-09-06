@@ -408,12 +408,12 @@ void set_home(){
 void go_home(){
 
     Serial.print("Return to home.");
-
+/*
         Serial.print("  Pos motorA: ");
         Serial.print(motorA.currentPosition());
         Serial.print(" Pos motorB: ");
         Serial.println(motorB.currentPosition());
-
+*/
 
     // raise pen
     penlift_penUp();
@@ -435,12 +435,12 @@ void go_home(){
         while (motorA.distanceToGo() != 0)        {
             motorA.runSpeed();
         }    
-        
+        /*
         Serial.print("Pos motorA: ");
         Serial.print(motorA.currentPosition());
         Serial.print(" Pos motorB: ");
         Serial.println(motorB.currentPosition());
-
+*/
         delay(1);
     }   
 
@@ -453,12 +453,12 @@ void go_home(){
         while (motorA.distanceToGo() != 0)        {
             motorA.runSpeed();
         }    
-        
+        /*
         Serial.print("Pos motorA: ");
         Serial.print(motorA.currentPosition());
         Serial.print(" Pos motorB: ");
         Serial.println(motorB.currentPosition());
-
+*/
         delay(1);
     }   
 
@@ -472,12 +472,12 @@ void go_home(){
         while (motorB.distanceToGo() != 0)        {
             motorB.runSpeed();
         }    
-        
+        /*
         Serial.print("Pos motorA: ");
         Serial.print(motorA.currentPosition());
         Serial.print(" Pos motorB: ");
         Serial.println(motorB.currentPosition());
-
+*/
         delay(1);
     }   
 
@@ -490,12 +490,12 @@ void go_home(){
         while (motorB.distanceToGo() != 0)        {
             motorB.runSpeed();
         }    
-        
+        /*
         Serial.print("Pos motorA: ");
         Serial.print(motorA.currentPosition());
         Serial.print(" Pos motorB: ");
         Serial.println(motorB.currentPosition());
-
+*/
         delay(1);
     }   
 

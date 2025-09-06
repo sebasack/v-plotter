@@ -259,15 +259,15 @@ void reportPosition(){
     Serial.print(divider(motorB.currentPosition()));
     Serial.println(CMD_END);
 
-
-  //  int cX = getCartesianX();
-  //  int cY = getCartesianY(cX, motorA.currentPosition());
-  //  Serial.print(OUT_CMD_CARTESIAN);
-  //  Serial.print(cX*mmPerStep);
-  //  Serial.print(COMMA);
-  //  Serial.print(cY*mmPerStep);
-  //  Serial.println(CMD_END);
-
+/*
+    int cX = getCartesianX();
+    int cY = getCartesianY(cX, motorA.currentPosition());
+    Serial.print("     cartesian sync: ");
+    Serial.print(cX*mmPerStep);
+    Serial.print(COMMA);
+    Serial.print(cY*mmPerStep);
+    Serial.print(CMD_END);
+*/
   }
 }
 

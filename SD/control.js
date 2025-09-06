@@ -40,6 +40,14 @@ function draw_machine() {
      "currentAcceleration":400,
      "penWidth":0.5
      }
+
+     getPosition... 
+     {"motorA":142208,
+      "motorB":121096,
+      "x":441,
+      "Y":200
+      }
+
      */
 
     // Cambiar dimensiones del canvas
@@ -54,23 +62,23 @@ function draw_machine() {
         //   ctx.fillRect(25, 25, 100, 100);
         //ctx.clearRect(45, 45, 60, 60);
 
-        // dibujo la hora centrada
+        // dibujo la hoja centrada
         rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297);
 
         // dibujo la gondola y el marcador
-        rectangle(machine_specs.machineSizeMm_x / 2 - 10,machine_specs.machineSizeMm_y / 2 - 10,20,30);
-        circle(machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2,3);
+        rectangle(pen_position.x -10,pen_position.y - 10,20,30);
+        circle(pen_position.x ,pen_position.y ,3);
 
         // dibujo los hilos de los motores a la gondola
-        line(0,0,machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2);
-        line(machine_specs.machineSizeMm_x,0,machine_specs.machineSizeMm_x / 2,machine_specs.machineSizeMm_y / 2);
+        line(0,0,pen_position.x ,pen_position.y);
+        line(machine_specs.machineSizeMm_x,0,pen_position.x ,pen_position.y);
 
         /*
         circle(0,0,484);
         circle(882,0,484);
 */
-        circle(0, 0, pen_position.motorA);
-        circle(machine_specs.machineSizeMm_x, 0, pen_position.motorB);
+      //  circle(0, 0, pen_position.motorA/32);
+      //  circle(machine_specs.machineSizeMm_x, 0, pen_position.motorB/32);
     }
 }
 
@@ -79,12 +87,41 @@ function update_machine_specs(specs) {
     draw_machine();
 }
 
+
+
+function multiplier(en){
+  return en * machine_specs.stepMultiplier;
+}  
+
+function getCartesianX(){
+    stepsPerMm = multiplier(machine_specs.stepsPerRev) / machine_specs.mmPerRev;
+    machineSizeStepsX= machine_specs.machineSizeMm_x * stepsPerMm;
+    calcX = (Math.pow(machineSizeStepsX, 2) - Math.pow(pen_position.motorB, 2) + Math.pow(pen_position.motorA, 2)) / (machineSizeStepsX*2);
+    return calcX;
+}
+
+function getCartesianY( cX,  aPos){
+    calcY = Math.sqrt(Math.pow(aPos,2)-Math.pow(cX,2));
+    return calcY;
+}
+
 function update_pen_position(pen) {
-    pen_position = pen;
 
-    //{"result_ok":true,"motorA":15664,"motorB":15664}
+    if (pen.result_ok){
+    
+        pen_position = pen;
 
-    draw_machine();
+        // calculo las coordenadas cartesianas de la gondola
+        mmPerStep = machine_specs.mmPerRev / multiplier( machine_specs.stepsPerRev);
+        cartesianX=getCartesianX();
+        pen_position.x =cartesianX*mmPerStep;
+        pen_position.y =getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;
+
+        //{"result_ok":true,"motorA":15664,"motorB":15664}
+        console.log(pen_position);
+
+        draw_machine();
+    }
 }
 
 function move(motor) {
@@ -99,20 +136,16 @@ function move(motor) {
 async function ejecutar_comando(parametros, funcionExito) {
     /*parametros va en la forma 
             "getPosition"                  cuando es solo el comando sin otros parametros
-            "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros 
-    */
-   
+            "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros  */   
     try {
         const url = `/control?command=`+parametros;
         const response = await fetch(url);
-
         if (response.ok) {
             const data = await response.json();
-
             // Llama a la función de éxito si existe
             if (funcionExito && typeof funcionExito === "function") {
                 $("#log").val(
-                    comando +
+                    parametros +
                         "... " +
                         JSON.stringify(data) +
                         " \n\n " +
