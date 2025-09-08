@@ -259,7 +259,7 @@ void reportPosition(){
     Serial.print(divider(motorB.currentPosition()));
     Serial.println(CMD_END);
 
-/*
+
     int cX = getCartesianX();
     int cY = getCartesianY(cX, motorA.currentPosition());
     Serial.print("     cartesian sync: ");
@@ -267,7 +267,7 @@ void reportPosition(){
     Serial.print(COMMA);
     Serial.print(cY*mmPerStep);
     Serial.print(CMD_END);
-*/
+
   }
 }
 

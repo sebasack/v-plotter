@@ -101,7 +101,9 @@ function getCartesianX(){
 }
 
 function getCartesianY( cX,  aPos){
+    console.log("getCartesianY "+cX+" " + aPos);
     calcY = Math.sqrt(Math.pow(aPos,2)-Math.pow(cX,2));
+    console.log(calcY);
     return calcY;
 }
 

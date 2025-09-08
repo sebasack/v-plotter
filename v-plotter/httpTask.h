@@ -32,7 +32,6 @@ void getPosition();
 
 
 void set_home();
-void go_home();
 
 
 extern AccelStepper motorA, motorB;
@@ -175,8 +174,7 @@ void handleControl(){
           ESP.restart();
       } else if (server.arg("command") == "setHome")    { 
           set_home();
-      } else if (server.arg("command") == "goHome")    { 
-          go_home();
+     
       } else if (server.arg("command") == "releaseMotors")    { 
           releaseMotors();    
       } else if (server.arg("command") == "calibrate")    { 
