@@ -6,23 +6,33 @@ pen_position = [];
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
 
-function line(x, y, x1, y1) {
+function line(x, y, x1, y1,line='#00000000') {    
+    ctx.strokeStyle =line;
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
     ctx.stroke();
 }
 
-function circle(x, y, radio) {
+function circle(x, y, radio,line='#000',color=false) {
+    ctx.strokeStyle =line;
+    if (color){
+        ctx.fillStyle = color;
+    }
     ctx.beginPath();
     ctx.arc(x, y, radio, 0, 2 * Math.PI);
     ctx.stroke();
 }
 
-function rectangle(x, y, ancho, alto) {
+function rectangle(x, y, ancho, alto,line='#000',color=false) {
+    ctx.strokeStyle =line;
+    if (color){
+        ctx.fillStyle = color;
+    }
     ctx.strokeRect(x, y, ancho, alto);
 }
 
-function text(text, x, y) {
+function text(text, x, y,color='#00000000') {
+    ctx.strokeStyle =line;
     ctx.fillText(text, x, y);
 }
 
@@ -56,18 +66,23 @@ function draw_machine() {
 
     if (canvas.getContext) {
         // dibujo el contorno de la maquina maquina
-        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y);
+        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y,'#000',"#c77");
         text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
 
         //   ctx.fillRect(25, 25, 100, 100);
         //ctx.clearRect(45, 45, 60, 60);
 
+        //dibujo las lineas que indican el home
+        line(0,  machine_specs.home_pos_y , machine_specs.home_pos_x, machine_specs.home_pos_y,'#888');
+        line( machine_specs.home_pos_x,0, machine_specs.home_pos_x,machine_specs.home_pos_y,'#888');
+        
+
         // dibujo la hoja centrada
-        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297);
+        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297,'#000','#ccc');
 
         // dibujo la gondola y el marcador
-        rectangle(pen_position.x -10,pen_position.y - 10,20,30);
-        circle(pen_position.x ,pen_position.y ,3);
+        rectangle(pen_position.x -10,pen_position.y - 10,20,30,'#000','#000');
+        circle(pen_position.x ,pen_position.y ,3,'#000','#fff');
 
         // dibujo los hilos de los motores a la gondola
         line(0,0,pen_position.x ,pen_position.y);
@@ -84,6 +99,8 @@ function draw_machine() {
 
 function update_machine_specs(specs) {
     machine_specs = specs;
+    machine_specs.home_pos_x = $("#home_pos_x").val();
+    machine_specs.home_pos_y = $("#home_pos_y").val();
     draw_machine();
 }
 
@@ -166,8 +183,15 @@ async function ejecutar_comando(parametros, funcionExito) {
 }
 
 function return_to_home(){
-    motorA = 15664;
-    motorB = 15664;
+    home_pos_x = $("#home_pos_x").val();
+    home_pos_y = $("#home_pos_y").val();
+
+    console.log(home_pos_x);
+    console.log(home_pos_y);
+    // calculo la hipotenusa
+
+    motorA = Math.sqrt(Math.pow(home_pos_x,2) + Math.pow(home_pos_y)) ;
+    motorB = motorA;
 
     ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position);
 
