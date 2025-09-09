@@ -165,6 +165,14 @@ async function ejecutar_comando(parametros, funcionExito) {
     }
 }
 
+function return_to_home(){
+    motorA = 15664;
+    motorB = 15664;
+
+    ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position);
+
+}
+
 function init() {
     console.log("location href: " + location.href);
     console.log("window location:" + window.location);
