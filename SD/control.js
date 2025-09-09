@@ -6,14 +6,14 @@ pen_position = [];
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
 
-function line(x, y, x1, y1,line='#00000000') {    
+function line(x, y, x1, y1,line='#000000') {    
     ctx.strokeStyle =line;
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
     ctx.stroke();
 }
 
-function circle(x, y, radio,line='#000',color=false) {
+function circle(x, y, radio,line='#000000',color=false) {
     ctx.strokeStyle =line;
     if (color){
         ctx.fillStyle = color;
@@ -23,16 +23,17 @@ function circle(x, y, radio,line='#000',color=false) {
     ctx.stroke();
 }
 
-function rectangle(x, y, ancho, alto,line='#000',color=false) {
+function rectangle(x, y, ancho, alto,line='#000000',color=false) {
     ctx.strokeStyle =line;
     if (color){
         ctx.fillStyle = color;
+        ctx.fillRect(x, y, ancho, alto);
     }
     ctx.strokeRect(x, y, ancho, alto);
 }
 
-function text(text, x, y,color='#00000000') {
-    ctx.strokeStyle =line;
+function text(text, x, y,line='#000000') {
+    ctx.fillStyle = line;
     ctx.fillText(text, x, y);
 }
 
@@ -66,23 +67,23 @@ function draw_machine() {
 
     if (canvas.getContext) {
         // dibujo el contorno de la maquina maquina
-        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y,'#000',"#c77");
+        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y,'#000000',"#FFE6C9");
         text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
 
         //   ctx.fillRect(25, 25, 100, 100);
         //ctx.clearRect(45, 45, 60, 60);
 
         //dibujo las lineas que indican el home
-        line(0,  machine_specs.home_pos_y , machine_specs.home_pos_x, machine_specs.home_pos_y,'#888');
-        line( machine_specs.home_pos_x,0, machine_specs.home_pos_x,machine_specs.home_pos_y,'#888');
+        line(0,  machine_specs.home_pos_y , machine_specs.machineSizeMm_x, machine_specs.home_pos_y,'#888');
+        line( machine_specs.home_pos_x,0, machine_specs.home_pos_x,machine_specs.machineSizeMm_y,'#888');
         
 
         // dibujo la hoja centrada
-        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297,'#000','#ccc');
+        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297,'#000000','#ffffff');
 
         // dibujo la gondola y el marcador
-        rectangle(pen_position.x -10,pen_position.y - 10,20,30,'#000','#000');
-        circle(pen_position.x ,pen_position.y ,3,'#000','#fff');
+        rectangle(pen_position.x -10,pen_position.y - 10,20,30,'#000000','#000000');
+        circle(pen_position.x ,pen_position.y ,3,'#000000','#ffffff');
 
         // dibujo los hilos de los motores a la gondola
         line(0,0,pen_position.x ,pen_position.y);

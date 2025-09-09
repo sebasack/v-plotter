@@ -23,9 +23,21 @@
             <button type="button" onclick="ejecutar_comando('penDown')">pen Abajo</button> <br/>
             <button type="button" onclick="ejecutar_comando('restart')">Restart</button> <br/>
             <button type="button" onclick="ejecutar_comando('setHome')">Set Home</button> <br/>
-            X:<input id="home_pos_x" size="4" value="441"/>
-            Y:<input id="home_pos_y" size="4" value="200"/>
-            <button type="button" onclick="return_to_home()">Return to Home</button> <br/>
+             <fieldset>
+                <legend>Home</legend>
+                X:<input id="home_pos_x" size="4" value="441"/>
+                Y:<input id="home_pos_y" size="4" value="200"/>
+                <button type="button" onclick="return_to_home()">Return to Home</button> <br/>
+             </fieldset>
+            <fieldset>
+                <legend>Pagina</legend>
+                Ancho:<input id="page_y" size="4" value="210"/>
+                Alto:<input id="page_x" size="4" value="297"/><br/>
+                posX:<input id="page_pos_x" size="4" value="335"/>
+                posY:<input id="page_pos_y" size="4" value="200"/><br/>
+                <button type="button" onclick="centrar_pagina()">Centrar</button> 
+            </fieldset>
+            
             <button type="button" onclick="ejecutar_comando('releaseMotors')">Desenergizar motores</button> <br/>
             <button type="button" onclick="ejecutar_comando('getPosition',update_pen_position)">Posicion actual</button> <br/>
             <button type="button" onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)">Obtener especificaciones de la maquina</button><br/>
