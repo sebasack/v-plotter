@@ -156,8 +156,13 @@ function draw_machine() {
 
 function update_machine_specs(specs) {
     machine_specs = specs;
-    machine_specs.home_pos_x = $("#home_pos_x").val();
-    machine_specs.home_pos_y = $("#home_pos_y").val();
+
+    $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
+    $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
+    $("#mmPerRev").val(machine_specs.mmPerRev);
+    $("#stepMultiplier").val(machine_specs.stepMultiplier);
+
+    
     draw_machine();
 }
 
