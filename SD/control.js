@@ -63,10 +63,18 @@ function guardar_parametros(){
     localStorage.setItem('machine_specs', JSON.stringify(machine_specs));
     localStorage.setItem('pen', JSON.stringify(pen));
     localStorage.setItem('page', JSON.stringify(page));
+
+    console.log("parametros guardados");
 }
 
 
 function recuperar_parametros(){
+
+
+    if (localStorage.getItem('machine_specs') === null) {   
+        guardar_parametros();
+    }
+
     datosGuardados = localStorage.getItem('machine_specs')
     machine_specs =JSON.parse( datosGuardados);    
 
@@ -76,7 +84,13 @@ function recuperar_parametros(){
     datosGuardados = localStorage.getItem('page')
     page = JSON.parse( datosGuardados);
 
+   
 
+
+    console.log(machine_specs);
+    console.log(pen);
+    console.log(page);
+  
     $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
     $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
     $("#mmPerRev").val(machine_specs.mmPerRev);
@@ -91,6 +105,9 @@ function recuperar_parametros(){
 
     $("#x").val(pen.x);
     $("#y").val(pen.y);
+
+
+    console.log("parametros recuperados de localStore");
 }
 
 function draw_machine() {
@@ -258,8 +275,8 @@ function return_to_home(){
 }
 
 function init() {
-    console.log("location href: " + location.href);
-    console.log("window location:" + window.location);
+    //console.log("location href: " + location.href);
+    //console.log("window location:" + window.location);
 
     if ($("#sdcard_present") != null) {
         console.log("cargo edit");
