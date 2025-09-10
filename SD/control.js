@@ -1,7 +1,8 @@
 $("#version").append(".1"); // agrego la version del js
 
 machine_specs = [];
-pen_position = [];
+pen = [];
+page = [];
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
@@ -35,6 +36,61 @@ function rectangle(x, y, ancho, alto,line='#000000',color=false) {
 function text(text, x, y,line='#000000') {
     ctx.fillStyle = line;
     ctx.fillText(text, x, y);
+}
+
+function guardar_parametros(){
+
+    machine_specs.machineSizeMm_x = $("#machineSizeMm_x").val();
+    machine_specs.machineSizeMm_y = $("#machineSizeMm_y").val();
+    machine_specs.mmPerRev = $("#mmPerRev").val();
+    machine_specs.stepMultiplier = $("#stepMultiplier").val();
+    //machine_specs.currentMaxSpeed = $("#currentMaxSpeed").val();
+    //machine_specs.currentAcceleration = $("#currentAcceleration").val();
+
+
+    page.page_width = $("#page_width").val();
+    page.page_height = $("#page_height").val();
+    page.page_pos_x = $("#page_pos_x").val();
+    page.page_pos_y = $("#page_pos_y").val();
+
+
+    pen.x =  $("#x").val();
+    pen.y =  $("#y").val();
+    //pen.downPosition = $("#downPosition").val();
+    //pen.upPosition = $("#upPosition").val();
+    //pen.penWidth = $("#penWidth").val();
+
+    localStorage.setItem('machine_specs', JSON.stringify(machine_specs));
+    localStorage.setItem('pen', JSON.stringify(pen));
+    localStorage.setItem('page', JSON.stringify(page));
+}
+
+
+function recuperar_parametros(){
+    datosGuardados = localStorage.getItem('machine_specs')
+    machine_specs =JSON.parse( datosGuardados);    
+
+    datosGuardados = localStorage.getItem('pen')
+    pen = JSON.parse( datosGuardados);    
+
+    datosGuardados = localStorage.getItem('page')
+    page = JSON.parse( datosGuardados);
+
+
+    $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
+    $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
+    $("#mmPerRev").val(machine_specs.mmPerRev);
+    $("#stepMultiplier").val(machine_specs.stepMultiplier);
+
+
+    $("#page_width").val(page.page_width);
+    $("#page_height").val(page.page_height);
+    $("#page_pos_x").val(page.page_pos_x);
+    $("#page_pos_y").val(page.page_pos_y);
+
+
+    $("#x").val(pen.x);
+    $("#y").val(pen.y);
 }
 
 function draw_machine() {
@@ -82,19 +138,19 @@ function draw_machine() {
         rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297,'#000000','#ffffff');
 
         // dibujo la gondola y el marcador
-        rectangle(pen_position.x -10,pen_position.y - 10,20,30,'#000000','#000000');
-        circle(pen_position.x ,pen_position.y ,3,'#000000','#ffffff');
+        rectangle(pen.x -10,pen.y - 10,20,30,'#000000','#000000');
+        circle(pen.x ,pen.y ,3,'#000000','#ffffff');
 
         // dibujo los hilos de los motores a la gondola
-        line(0,0,pen_position.x ,pen_position.y);
-        line(machine_specs.machineSizeMm_x,0,pen_position.x ,pen_position.y);
+        line(0,0,pen.x ,pen.y);
+        line(machine_specs.machineSizeMm_x,0,pen.x ,pen.y);
 
         /*
         circle(0,0,484);
         circle(882,0,484);
 */
-      //  circle(0, 0, pen_position.motorA/32);
-      //  circle(machine_specs.machineSizeMm_x, 0, pen_position.motorB/32);
+      //  circle(0, 0, pen.motorA/32);
+      //  circle(machine_specs.machineSizeMm_x, 0, pen.motorB/32);
     }
 }
 
@@ -114,7 +170,7 @@ function multiplier(en){
 function getCartesianX(){
     stepsPerMm = multiplier(machine_specs.stepsPerRev) / machine_specs.mmPerRev;
     machineSizeStepsX= machine_specs.machineSizeMm_x * stepsPerMm;
-    calcX = (Math.pow(machineSizeStepsX, 2) - Math.pow(pen_position.motorB, 2) + Math.pow(pen_position.motorA, 2)) / (machineSizeStepsX*2);
+    calcX = (Math.pow(machineSizeStepsX, 2) - Math.pow(pen.motorB, 2) + Math.pow(pen.motorA, 2)) / (machineSizeStepsX*2);
     return calcX;
 }
 
@@ -125,20 +181,18 @@ function getCartesianY( cX,  aPos){
     return calcY;
 }
 
-function update_pen_position(pen) {
+function update_pen_position(pen_position) {
 
-    if (pen.result_ok){
-    
-        pen_position = pen;
+    if (pen_position.result_ok){          
 
         // calculo las coordenadas cartesianas de la gondola
         mmPerStep = machine_specs.mmPerRev / multiplier( machine_specs.stepsPerRev);
         cartesianX=getCartesianX();
-        pen_position.x =cartesianX*mmPerStep;
-        pen_position.y =getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;
+        pen.x =cartesianX*mmPerStep;
+        pen.y =getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;
 
         //{"result_ok":true,"motorA":15664,"motorB":15664}
-        console.log(pen_position);
+        console.log(pen);
 
         draw_machine();
     }
@@ -212,7 +266,8 @@ function init() {
     // mostrarCamara();
 
     // busco los parametros de la maquina y si los recibo ok llamo a la funcion de mostrar maquina
-    ejecutar_comando("getMachineSpecs", update_machine_specs);
 
-    ejecutar_comando("getPosition", update_pen_position);
+    recuperar_parametros();
+    //ejecutar_comando("getMachineSpecs", update_machine_specs);
+    //ejecutar_comando("getPosition", update_pen_position);
 }
