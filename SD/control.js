@@ -1,21 +1,175 @@
-$("#version").append(".1"); // agrego la version del js
+$("#version").append(".2"); // agrego la version del js
 
 machine_specs = [];
 pen = [];
 page = [];
+home = [];
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
 
-function line(x, y, x1, y1,line='#000000') {    
-    ctx.strokeStyle =line;
+
+
+
+// Add a click event listener to the canvas
+canvas.addEventListener('click', function(event) {
+    // Calculate the mouse coordinates relative to the canvas
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Log the coordinates or perform actions based on the click
+    //console.log(`Mouse clicked at X: ${x}, Y: ${y}`);
+
+    // guardo la nueva posicion
+
+    pen.x = Math.round(x);
+    pen.y = Math.round(y);
+
+    $("#x").val(pen.x);
+    $("#y").val(pen.y);
+
+
+    guardar_parametros();    
+
+
+    /*
+    // Example: Draw a circle at the clicked location
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.closePath();
+    */
+});
+
+function guardar_parametros(){
+
+    const machine_specs_tmp = {
+        machineSizeMm_x : $("#machineSizeMm_x").val(),
+        machineSizeMm_y : $("#machineSizeMm_y").val(),
+        mmPerRev        : $("#mmPerRev").val(),
+        stepMultiplier  : $("#stepMultiplier").val()
+      //currentMaxSpeed:  $("#currentMaxSpeed").val(),
+      //urrentAcceleration:    $("#currentAcceleration").val()
+    };
+
+    const page_tmp = {
+        page_width  : $("#page_width").val(),
+        page_height : $("#page_height").val(),
+        page_pos_x  : $("#page_pos_x").val(),
+        page_pos_y  : $("#page_pos_y").val()
+    }
+
+    const pen_tmp = {
+        x : $("#x").val(),
+        y : $("#y").val()
+        //downPosition : $("#downPosition").val(),
+        //upPosition: $("#upPosition").val(),
+        //penWidth : $("#penWidth").val()
+    }
+
+    const home_tmp = {
+        x : $("#home_pos_x").val(),
+        y : $("#home_pos_y").val()
+    }
+
+    machine_specs = machine_specs_tmp;
+    pen = pen_tmp;
+    page = page_tmp;
+    home = home_tmp;
+
+    console.log(machine_specs_tmp);
+    console.log(pen_tmp);
+    console.log(page_tmp);
+    console.log(home_tmp);
+
+    localStorage.setItem('machine_specs', JSON.stringify(machine_specs_tmp));
+    localStorage.setItem('pen', JSON.stringify(pen_tmp));
+    localStorage.setItem('page', JSON.stringify(page_tmp));
+    localStorage.setItem('home', JSON.stringify(home_tmp));
+
+    console.log("parametros guardados");
+    draw_machine() ;
+}
+
+
+function recuperar_parametros(){
+
+    //localStorage.clear();
+    if (localStorage.length == 0) {           
+        console.log("no hay parametros guardados, se usaran los default");        
+        guardar_parametros();       
+    }
+
+    machine_specs_guardados = localStorage.getItem('machine_specs')
+    machine_specs =JSON.parse( machine_specs_guardados);    
+
+    pen_guardado = localStorage.getItem('pen')
+    pen = JSON.parse( pen_guardado);    
+
+    page_guardado = localStorage.getItem('page')
+    page = JSON.parse( page_guardado);
+   
+    home_guardado = localStorage.getItem('home')
+    home = JSON.parse( home_guardado);
+   
+    console.log(machine_specs);
+    console.log(pen);
+    console.log(page);  
+    console.log(home);
+  
+    $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
+    $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
+    $("#mmPerRev").val(machine_specs.mmPerRev);
+    $("#stepMultiplier").val(machine_specs.stepMultiplier);
+
+    $("#page_width").val(page.page_width);
+    $("#page_height").val(page.page_height);
+    $("#page_pos_x").val(page.page_pos_x);
+    $("#page_pos_y").val(page.page_pos_y);
+
+    $("#x").val(pen.x);
+    $("#y").val(pen.y);
+
+    //calculo posicion de motores a partir de x e y
+
+    $("#motorA").html(calc_motorA());
+    $("#motorB").html(calc_motorB());
+
+
+    $("#home_pos_x").val(home.x);
+    $("#home_pos_y").val(home.y);
+
+    console.log("parametros recuperados de localStore");
+}
+
+function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
+    ctx.lineWidth = 0.5;
+    ctx.strokeStyle =line_color; 
+    ctx.fillStyle = line_color;
+    ctx.setLineDash([ancho_punto,acho_separacion]);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+
+    ctx.setLineDash([]); // reestablezco linea solida
+
+}
+
+function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
+     ctx.lineWidth = lineWidth;
+
+    ctx.strokeStyle =line_color;
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
     ctx.stroke();
 }
 
-function circle(x, y, radio,line='#000000',color=false) {
-    ctx.strokeStyle =line;
+function circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
     if (color){
         ctx.fillStyle = color;
     }
@@ -24,8 +178,11 @@ function circle(x, y, radio,line='#000000',color=false) {
     ctx.stroke();
 }
 
-function rectangle(x, y, ancho, alto,line='#000000',color=false) {
-    ctx.strokeStyle =line;
+function rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
+
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
+    ctx.fillStyle = line_color;
     if (color){
         ctx.fillStyle = color;
         ctx.fillRect(x, y, ancho, alto);
@@ -33,106 +190,73 @@ function rectangle(x, y, ancho, alto,line='#000000',color=false) {
     ctx.strokeRect(x, y, ancho, alto);
 }
 
-function text(text, x, y,line='#000000') {
-    ctx.fillStyle = line;
+function text(text, x, y,line_color='#000000') {
+    ctx.fillStyle = line_color;
     ctx.fillText(text, x, y);
 }
 
-function guardar_parametros(){
 
-    machine_specs.machineSizeMm_x = $("#machineSizeMm_x").val();
-    machine_specs.machineSizeMm_y = $("#machineSizeMm_y").val();
-    machine_specs.mmPerRev = $("#mmPerRev").val();
-    machine_specs.stepMultiplier = $("#stepMultiplier").val();
-    //machine_specs.currentMaxSpeed = $("#currentMaxSpeed").val();
-    //machine_specs.currentAcceleration = $("#currentAcceleration").val();
-
-
-    page.page_width = $("#page_width").val();
-    page.page_height = $("#page_height").val();
-    page.page_pos_x = $("#page_pos_x").val();
-    page.page_pos_y = $("#page_pos_y").val();
-
-
-    pen.x =  $("#x").val();
-    pen.y =  $("#y").val();
-    //pen.downPosition = $("#downPosition").val();
-    //pen.upPosition = $("#upPosition").val();
-    //pen.penWidth = $("#penWidth").val();
-
-    localStorage.setItem('machine_specs', JSON.stringify(machine_specs));
-    localStorage.setItem('pen', JSON.stringify(pen));
-    localStorage.setItem('page', JSON.stringify(page));
-
-    console.log("parametros guardados");
-}
-
-
-function recuperar_parametros(){
-
-
-    if (localStorage.getItem('machine_specs') === null) {   
-        guardar_parametros();
-    }
-
-    datosGuardados = localStorage.getItem('machine_specs')
-    machine_specs =JSON.parse( datosGuardados);    
-
-    datosGuardados = localStorage.getItem('pen')
-    pen = JSON.parse( datosGuardados);    
-
-    datosGuardados = localStorage.getItem('page')
-    page = JSON.parse( datosGuardados);
-
-   
-
-
-    console.log(machine_specs);
-    console.log(pen);
-    console.log(page);
-  
-    $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
-    $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
-    $("#mmPerRev").val(machine_specs.mmPerRev);
-    $("#stepMultiplier").val(machine_specs.stepMultiplier);
-
-
-    $("#page_width").val(page.page_width);
-    $("#page_height").val(page.page_height);
-    $("#page_pos_x").val(page.page_pos_x);
-    $("#page_pos_y").val(page.page_pos_y);
-
-
-    $("#x").val(pen.x);
-    $("#y").val(pen.y);
-
-
-    console.log("parametros recuperados de localStore");
-}
 
 function draw_machine() {
-    /*getMachineSpecs... 
+    /*
+    machine_specs = {
+        "machineSizeMm_x":882,
+        "machineSizeMm_y":1100,
+        "mmPerRev":126,
+        "stepsPerRev":4076,
+        "stepMultiplier":8,
+        "downPosition":90,
+        "upPosition":123,
+        "currentMaxSpeed":1000,
+        "currentAcceleration":400,
+        "penWidth":0.5
+    }
 
-    {"machineSizeMm_x":882,
-     "machineSizeMm_y":1100,
-     "mmPerRev":126,
-     "stepsPerRev":4076,
-     "stepMultiplier":8,
-     "downPosition":90,
-     "upPosition":123,
-     "currentMaxSpeed":1000,
-     "currentAcceleration":400,
-     "penWidth":0.5
-     }
+    pen = {
+        "motorA":142208,
+        "motorB":121096,
+        "x":441,
+        "Y":200
+    }
 
-     getPosition... 
-     {"motorA":142208,
-      "motorB":121096,
-      "x":441,
-      "Y":200
-      }
+    page = {
+        page_width  : 210,
+        page_height : 297,
+        page_pos_x  : 335,
+        page_pos_y  : 200
+    }
+    */
 
-     */
+
+    // Cargar la imagen de fondo del mapa de fuerzas
+    /*
+     Colors designate:
+        Orange: poor resolution
+        Light Blue: too little tension in one of the lines
+        Dark Blue: too much tension in one of the lines (and poor resolution)
+        White: drawing area candidate 
+    */
+
+    const img = new Image();
+    img.onload = function() {
+        // Establecer transparencia global
+        ctx.globalAlpha = 0.1;    
+
+        // Calcular dimensiones manteniendo la proporción
+        const aspectRatio = img.height / (img.width+30);
+        const newWidth = canvas.width+30;
+        const newHeight = (canvas.width+30) * aspectRatio;        
+        
+        // Dibujar la imagen manteniendo proporción
+        ctx.drawImage(img, -15, -15, newWidth, newHeight);
+        
+        // Restaurar opacidad para las líneas
+        ctx.globalAlpha = 1.0;        
+    };
+
+    img.src = 'vPlotterMap.png';
+    //img.src = './../svg/grace.svg';
+
 
     // Cambiar dimensiones del canvas
     canvas.width = machine_specs.machineSizeMm_x; // Ancho en pixeles
@@ -140,22 +264,18 @@ function draw_machine() {
 
     if (canvas.getContext) {
         // dibujo el contorno de la maquina maquina
-        rectangle(0,0,machine_specs.machineSizeMm_x,machine_specs.machineSizeMm_y,'#000000',"#FFE6C9");
-        text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
-
-        //   ctx.fillRect(25, 25, 100, 100);
-        //ctx.clearRect(45, 45, 60, 60);
+        rectangle(1,1,machine_specs.machineSizeMm_x-1,machine_specs.machineSizeMm_y-1,'#000000',"#FFE6C9");
+        //text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
+       
+        // dibujo la hoja
+        rectangle(page.page_pos_x, page.page_pos_y, page.page_width, page.page_height,'#000000','#ffffff');
 
         //dibujo las lineas que indican el home
-        line(0,  machine_specs.home_pos_y , machine_specs.machineSizeMm_x, machine_specs.home_pos_y,'#888');
-        line( machine_specs.home_pos_x,0, machine_specs.home_pos_x,machine_specs.machineSizeMm_y,'#888');
-        
-
-        // dibujo la hoja centrada
-        rectangle(machine_specs.machineSizeMm_x / 2 - 210 / 2, 200, 210, 297,'#000000','#ffffff');
+        linedash(0, home.y, machine_specs.machineSizeMm_x, home.y,5,5,'#777');
+        linedash( home.x,0, home.x,machine_specs.machineSizeMm_y,5,5,'#777');
 
         // dibujo la gondola y el marcador
-        rectangle(pen.x -10,pen.y - 10,20,30,'#000000','#000000');
+        rectangle(pen.x -10,pen.y - 10,20,30,'#000000','#ccc');
         circle(pen.x ,pen.y ,3,'#000000','#ffffff');
 
         // dibujo los hilos de los motores a la gondola
@@ -183,10 +303,17 @@ function update_machine_specs(specs) {
     draw_machine();
 }
 
+function calc_motorA(){
+    return 'NaN';
+};
 
 
-function multiplier(en){
-  return en * machine_specs.stepMultiplier;
+function calc_motorB(){
+    return 'NaN';
+};
+
+function multiplier(valor){
+  return valor * machine_specs.stepMultiplier;
 }  
 
 function getCartesianX(){
@@ -205,15 +332,21 @@ function getCartesianY( cX,  aPos){
 
 function update_pen_position(pen_position) {
 
-    if (pen_position.result_ok){          
-
-        // calculo las coordenadas cartesianas de la gondola
-        mmPerStep = machine_specs.mmPerRev / multiplier( machine_specs.stepsPerRev);
-        cartesianX=getCartesianX();
-        pen.x =cartesianX*mmPerStep;
-        pen.y =getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;
+    if (pen_position.result_ok){         
 
         //{"result_ok":true,"motorA":15664,"motorB":15664}
+        pen.motorA = pen_position.motorA;
+        pen.motorB = pen_position.motorB;
+
+        $("motorA").html(pen.motorA);
+        $("motorA").html(pen.motorB);
+
+        // calculo las coordenadas cartesianas de la gondola
+        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
+        cartesianX = getCartesianX();
+        pen.x = cartesianX*mmPerStep;
+        pen.y = getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;        
+
         console.log(pen);
 
         draw_machine();
@@ -260,6 +393,16 @@ async function ejecutar_comando(parametros, funcionExito) {
 }
 
 function return_to_home(){
+    pen.x = home.x;
+    pen.y = home.y;
+
+    $("#x").val(pen.x);
+    $("#y").val(pen.y);
+
+    guardar_parametros();    
+
+
+    /*
     home_pos_x = $("#home_pos_x").val();
     home_pos_y = $("#home_pos_y").val();
 
@@ -271,8 +414,15 @@ function return_to_home(){
     motorB = motorA;
 
     ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position);
+    */
 
 }
+
+function centrar_pagina_x(){  
+    page.page_pos_x = (machine_specs.machineSizeMm_x / 2) - (page.page_width / 2);    
+    $("#page_pos_x").val(page.page_pos_x);
+    guardar_parametros();
+};
 
 function init() {
     //console.log("location href: " + location.href);
@@ -287,9 +437,10 @@ function init() {
 
     // mostrarCamara();
 
-    // busco los parametros de la maquina y si los recibo ok llamo a la funcion de mostrar maquina
+    // busco los parametros de la maquina y llamo a la funcion de mostrar maquina
 
     recuperar_parametros();
+    draw_machine() ;
     //ejecutar_comando("getMachineSpecs", update_machine_specs);
     //ejecutar_comando("getPosition", update_pen_position);
 }
