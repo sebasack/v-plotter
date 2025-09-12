@@ -168,8 +168,10 @@ static int stepMultiplier = DEFAULT_STEP_MULTIPLIER;
 
 static Coord2D machineSizeMm = {DEFAULT_MACHINE_WIDTH, DEFAULT_MACHINE_HEIGHT};
 
-static long startLengthStepsA = 15664;//8000
-static long startLengthStepsB = 15664;//8000
+ // float startLength = ((float) startLengthMM / (float) mmPerRev) * (float) motorStepsPerRev;^M
+ //                   =               
+static long startLengthStepsA = 125312;// 15664 * 8
+static long startLengthStepsB = 125312;// 15664 * 8
 
 const float DEFAULT_MAX_SPEED = 1000.0;
 const float DEFAULT_ACCELERATION = 400.0;

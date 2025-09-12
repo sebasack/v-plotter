@@ -265,6 +265,9 @@ bool loadFromSdCard(String path) {
 	    Serial.println(F("Sent less data than expected!"));
   }
 
+  Serial.print("sirvo archivo:");
+  Serial.println(path);
+
   dataFile.close();
 
   return true;

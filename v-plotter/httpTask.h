@@ -15,9 +15,9 @@ int httpCore = 0;
 
 #endif
 
-extern int commsReadCore, commsCommandCore, impleReleaseMotorsCore;
+//extern int commsReadCore, commsCommandCore, impleReleaseMotorsCore;
 extern float currentMaxSpeed;
-extern TaskHandle_t commsReadHandle, commsCommandHandle, impleReleaseMotorsHandle;
+//extern TaskHandle_t commsReadHandle, commsCommandHandle, impleReleaseMotorsHandle;
 bool loadFromSdCard(String path) ;
 void printDirectory();
 void handleDelete();
@@ -26,7 +26,7 @@ void handleFileUpload();
 void returnOK();
 void calibrate_doCalibration();
 void calibrate_doInitialCalibration();
-void changeLength(float tA, float tB);
+//void changeLength(float tA, float tB);
 void machineSpecs();
 void getPosition();
 
@@ -188,7 +188,7 @@ void handleControl(){
 
           server.send(200, "text/plain", temp);
           return;
-
+/*
       }else if (server.arg("command") == "move")    {      
           if (server.hasArg("stepsA")){
               stepsA = server.arg("stepsA").toInt();            
@@ -248,6 +248,7 @@ void handleControl(){
      
           reportPosition();   // output the SYNC message
           comms_ready(); // output the READY_200 message
+          */
       }else if (server.arg("command") == "getPosition")    {
 
       }else{    
@@ -296,7 +297,8 @@ void handleControl(){
      // position = position+",\"motorA\":" + motorA.currentPosition()  + ",\"motorB\":" + motorB.currentPosition();
  
       //server.send(200, "text/plain", "{\"result_ok\":true" +position+"}");
-      getPosition();
+
+      getPosition(); // este comando guarda el resultado en la variable temp
       server.send(200, "text/plain", temp);
 
   } else  {

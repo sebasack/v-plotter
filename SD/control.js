@@ -1,9 +1,10 @@
-$("#version").append(".2"); // agrego la version del js
+$("#version").append(".3"); // agrego la version del js
 
 machine_specs = {};
 pen = {};
 page = {};
 home = {};
+config = {};
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
@@ -17,29 +18,15 @@ canvas.addEventListener('click', function(event) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Log the coordinates or perform actions based on the click
-    //console.log(`Mouse clicked at X: ${x}, Y: ${y}`);
-
     // guardo la nueva posicion
-
     pen.x = Math.round(x);
     pen.y = Math.round(y);
 
     $("#x").val(pen.x);
     $("#y").val(pen.y);
 
-
     guardar_parametros();    
-
-
-    /*
-    // Example: Draw a circle at the clicked location
-    ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = 'red';
-    ctx.fill();
-    ctx.closePath();
-    */
+   
 });
 
 function guardar_parametros(){
@@ -50,7 +37,7 @@ function guardar_parametros(){
         mmPerRev        : $("#mmPerRev").val(),
         stepMultiplier  : $("#stepMultiplier").val()
       //currentMaxSpeed:  $("#currentMaxSpeed").val(),
-      //urrentAcceleration:    $("#currentAcceleration").val()
+      //currentAcceleration:    $("#currentAcceleration").val()
     };
 
     const page_tmp = {
@@ -73,25 +60,36 @@ function guardar_parametros(){
         y : $("#home_pos_y").val()
     }
 
+    const config_tmp = {
+        mapa_tension : $("#mapa_tension").prop('checked')
+    }
+
     machine_specs = machine_specs_tmp;
     pen = pen_tmp;
     page = page_tmp;
     home = home_tmp;
-
+    config = config_tmp;
+/*
     console.log(machine_specs_tmp);
     console.log(pen_tmp);
     console.log(page_tmp);
     console.log(home_tmp);
-
+    console.log(config_tmp);
+*/
     localStorage.setItem('machine_specs', JSON.stringify(machine_specs_tmp));
     localStorage.setItem('pen', JSON.stringify(pen_tmp));
     localStorage.setItem('page', JSON.stringify(page_tmp));
     localStorage.setItem('home', JSON.stringify(home_tmp));
+    localStorage.setItem('config', JSON.stringify(config_tmp));
 
     console.log("parametros guardados");
     draw_machine() ;
 }
 
+function config_default(){
+    localStorage.clear();
+    document.location.reload(true); // fuerza recarga de valores default cargados en los input de la pagina
+}
 
 function recuperar_parametros(){
 
@@ -106,19 +104,23 @@ function recuperar_parametros(){
     machine_specs =JSON.parse( machine_specs_guardados);    
 
     pen_guardado = localStorage.getItem('pen')
-    pen = JSON.parse( pen_guardado);    
+    pen = JSON.parse(pen_guardado);    
 
     page_guardado = localStorage.getItem('page')
-    page = JSON.parse( page_guardado);
+    page = JSON.parse(page_guardado);
    
     home_guardado = localStorage.getItem('home')
-    home = JSON.parse( home_guardado);
+    home = JSON.parse(home_guardado);
    
+    config_guardado = localStorage.getItem('config')
+    config = JSON.parse(config_guardado);
+/*
     console.log(machine_specs);
     console.log(pen);
     console.log(page);  
     console.log(home);
-  
+    console.log(config);
+  */
     $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
     $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
     $("#mmPerRev").val(machine_specs.mmPerRev);
@@ -141,6 +143,8 @@ function recuperar_parametros(){
     $("#home_pos_x").val(home.x);
     $("#home_pos_y").val(home.y);
 
+    $("#mapa_tension").prop('checked',config.mapa_tension)
+
     console.log("parametros recuperados de localStore");
 }
 
@@ -153,14 +157,11 @@ function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#0000
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
     ctx.stroke();
-
     ctx.setLineDash([]); // reestablezco linea solida
-
 }
 
 function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
-     ctx.lineWidth = lineWidth;
-
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle =line_color;
     ctx.moveTo(x, y);
     ctx.lineTo(x1, y1);
@@ -179,7 +180,6 @@ function circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
 }
 
 function rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
-
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle =line_color;
     ctx.fillStyle = line_color;
@@ -228,34 +228,30 @@ function draw_machine() {
     */
 
 
-    // Cargar la imagen de fondo del mapa de fuerzas
-    /*
-     Colors designate:
-        Orange: poor resolution
-        Light Blue: too little tension in one of the lines
-        Dark Blue: too much tension in one of the lines (and poor resolution)
-        White: drawing area candidate 
-    */
-
-    const img = new Image();
-    img.onload = function() {
-        // Establecer transparencia global
-        ctx.globalAlpha = 0.1;    
-
-        // Calcular dimensiones manteniendo la proporci�n
-        const aspectRatio = img.height / (img.width+30);
-        const newWidth = canvas.width+30;
-        const newHeight = (canvas.width+30) * aspectRatio;        
-        
-        // Dibujar la imagen manteniendo proporci�n
-        ctx.drawImage(img, -15, -15, newWidth, newHeight);
-        
-        // Restaurar opacidad para las l�neas
-        ctx.globalAlpha = 1.0;        
-    };
-
-    img.src = 'vPlotterMap.png';
-    //img.src = './../svg/grace.svg';
+    if (config.mapa_tension){ // muestra el mapa de tension si esta habilitado
+        // Cargar la imagen de fondo del mapa de fuerzas
+        /*
+        Colors designate:
+            Orange: poor resolution
+            Light Blue: too little tension in one of the lines
+            Dark Blue: too much tension in one of the lines (and poor resolution)
+            White: drawing area candidate 
+        */
+        const img = new Image();
+        img.onload = function() {
+            // Establecer transparencia global
+            ctx.globalAlpha = 0.1;
+            // Calcular dimensiones manteniendo la proporcion
+            const aspectRatio = img.height / (img.width+30);
+            const newWidth = canvas.width+30;
+            const newHeight = (canvas.width+30) * aspectRatio;
+            // Dibujar la imagen manteniendo proporcion
+            ctx.drawImage(img, -15, -15, newWidth, newHeight);
+            // Restaurar opacidad para las l�neas
+            ctx.globalAlpha = 1.0;        
+        };
+        img.src = 'vPlotterMap.png';
+    }
 
 
     // Cambiar dimensiones del canvas
@@ -266,7 +262,7 @@ function draw_machine() {
         // dibujo el contorno de la maquina maquina
         rectangle(1,1,machine_specs.machineSizeMm_x-1,machine_specs.machineSizeMm_y-1,'#000000',"#FFE6C9");
         //text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
-       
+
         // dibujo la hoja
         rectangle(page.page_pos_x, page.page_pos_y, page.page_width, page.page_height,'#000000','#ffffff');
 
@@ -281,25 +277,15 @@ function draw_machine() {
         // dibujo los hilos de los motores a la gondola
         line(0,0,pen.x ,pen.y);
         line(machine_specs.machineSizeMm_x,0,pen.x ,pen.y);
-
-        /*
-        circle(0,0,484);
-        circle(882,0,484);
-*/
-      //  circle(0, 0, pen.motorA/32);
-      //  circle(machine_specs.machineSizeMm_x, 0, pen.motorB/32);
     }
 }
 
 function update_machine_specs(specs) {
     machine_specs = specs;
-
     $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
     $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
     $("#mmPerRev").val(machine_specs.mmPerRev);
-    $("#stepMultiplier").val(machine_specs.stepMultiplier);
-
-    
+    $("#stepMultiplier").val(machine_specs.stepMultiplier);    
     draw_machine();
 }
 
@@ -324,15 +310,15 @@ function getCartesianX(){
 }
 
 function getCartesianY( cX,  aPos){
-    console.log("getCartesianY "+cX+" " + aPos);
+    //console.log("getCartesianY "+cX+" " + aPos);
     calcY = Math.sqrt(Math.pow(aPos,2)-Math.pow(cX,2));
-    console.log(calcY);
+    //console.log(calcY);
     return calcY;
 }
 
 function update_pen_position(pen_position) {
 
-    if (pen_position.result_ok){         
+    if (pen_position.result_ok){
 
         //{"result_ok":true,"motorA":15664,"motorB":15664}
         pen.motorA = pen_position.motorA;
@@ -345,7 +331,7 @@ function update_pen_position(pen_position) {
         mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
         cartesianX = getCartesianX();
         pen.x = cartesianX*mmPerStep;
-        pen.y = getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;        
+        pen.y = getCartesianY(cartesianX,pen_position.motorA)*mmPerStep;
 
         console.log(pen);
 
@@ -363,8 +349,9 @@ function move(motor) {
 }
 
 async function ejecutar_comando(parametros, funcionExito) {
-    /*parametros va en la forma 
+    /*parametros va en la forma
             "getPosition"                  cuando es solo el comando sin otros parametros
+            "C06,15664,15664,END"          cuando es gcode
             "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros  */   
     try {
         const url = `/control?command=`+parametros;
