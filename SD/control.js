@@ -1,13 +1,12 @@
 $("#version").append(".2"); // agrego la version del js
 
-machine_specs = [];
-pen = [];
-page = [];
-home = [];
+machine_specs = {};
+pen = {};
+page = {};
+home = {};
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
-
 
 
 
@@ -97,6 +96,7 @@ function guardar_parametros(){
 function recuperar_parametros(){
 
     //localStorage.clear();
+
     if (localStorage.length == 0) {           
         console.log("no hay parametros guardados, se usaran los default");        
         guardar_parametros();       
@@ -242,15 +242,15 @@ function draw_machine() {
         // Establecer transparencia global
         ctx.globalAlpha = 0.1;    
 
-        // Calcular dimensiones manteniendo la proporción
+        // Calcular dimensiones manteniendo la proporciï¿½n
         const aspectRatio = img.height / (img.width+30);
         const newWidth = canvas.width+30;
         const newHeight = (canvas.width+30) * aspectRatio;        
         
-        // Dibujar la imagen manteniendo proporción
+        // Dibujar la imagen manteniendo proporciï¿½n
         ctx.drawImage(img, -15, -15, newWidth, newHeight);
         
-        // Restaurar opacidad para las líneas
+        // Restaurar opacidad para las lï¿½neas
         ctx.globalAlpha = 1.0;        
     };
 
@@ -429,7 +429,7 @@ function init() {
     //console.log("window location:" + window.location);
 
     if ($("#sdcard_present") != null) {
-        console.log("cargo edit");
+        //console.log("cargo edit");
         $("#sdcard_present").html(
             '<a href="edit.html" target="_blank">Editor de SD</a>'
         );
