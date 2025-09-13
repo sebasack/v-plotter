@@ -27,13 +27,13 @@
             <fieldset>
                 <legend>Maquina</legend>
                 <table>
-                    <tr><td align="right">Ancho:</td><td><input id="machineSizeMm_x" size="4" value="600" onchange="guardar_parametros()"/></td></tr>
-                    <tr><td align="right">Alto:</td><td><input id="machineSizeMm_y" size="4" value="800" onchange="guardar_parametros()"/></td></tr>
+                    <tr><td align="right">Ancho:</td><td><input id="machineSizeMm_x" size="4" value="882" onchange="guardar_parametros()"/></td></tr>
+                    <tr><td align="right">Alto:</td><td><input id="machineSizeMm_y" size="4" value="1100" onchange="guardar_parametros()"/></td></tr>
                     <tr><td align="right">Mult. Pasos:</td><td><input id="stepMultiplier" size="4" value="8" onchange="guardar_parametros()"/></td></tr>
                     <tr><td align="right">MM por rev.:</td><td><input id="mmPerRev" size="4" value="126" onchange="guardar_parametros()"/></td></tr>
                     <tr><td align="right">Pasos x Rev.:</td><td><input id="stepsPerRev" size="4" value="4076" onchange="guardar_parametros()"/></td></tr>
                 </table>
-                <button type="button" onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)">Obtener esp. de la maquina</button><br/>
+                <button type="button" onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
                 <button type="button" onclick="ejecutar_comando('releaseMotors')">Desenergizar motores</button> <br/>
                 <button type="button" onclick="ejecutar_comando('restart')">Restart ESP32</button> <br/>
             </fieldset>
@@ -42,33 +42,35 @@
                 <table>
                     <tr><td align="right">Ancho:</td><td><input id="page_width" size="4" value="210" onchange="guardar_parametros()"/></td><td></td></tr>
                     <tr><td align="right">Alto:</td><td><input id="page_height" size="4" value="297" onchange="guardar_parametros()"/></td><td></td></tr>
-                    <tr><td align="right">posX:</td><td><input id="page_pos_x" size="4" value="195" onchange="guardar_parametros()"/></td><td><button type="button" onclick="centrar_pagina_x()">Centrar</button> </td></tr>
-                    <tr><td align="right">posY:</td><td><input id="page_pos_y" size="4" value="100" onchange="guardar_parametros()"/></td><td></td></tr>
+                    <tr><td align="right">posX:</td><td><input id="page_pos_x" size="4" value="336" onchange="guardar_parametros()"/></td><td><button type="button" onclick="centrar_pagina_x()">Centrar</button> </td></tr>
+                    <tr><td align="right">posY:</td><td><input id="page_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td><td></td></tr>
                 </table>
             </fieldset>
             <fieldset>
                 <legend>Home</legend>
-                X:<input id="home_pos_x" size="4" value="300" onchange="guardar_parametros()"/><br/>
-                Y:<input id="home_pos_y" size="4" value="100" onchange="guardar_parametros()"/><br/>
+                X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/><br/>
+                Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/><br/>
                 <button type="button" onclick="ejecutar_comando('setHome')">Set Home</button> <br/>
             </fieldset>
             <fieldset>
                 <legend>Pen</legend>
                 <table>
-                    <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="300" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
-                    <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="100" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>
-                </table>
-                <button type="button" onclick="return_to_home()">Return to Home</button> <br/>
-                <button type="button" onclick="ejecutar_comando('penLift')">Arriba</button>
-                <button type="button" onclick="ejecutar_comando('penDown')">Abajo</button><br/>
+                    <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
+                    <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
+                    <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td> <button type="button" onclick="pen_up()">Arriba</button></td></tr>
+                    <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td><td><button type="button" onclick="pen_down()">Abajo</button><br/></td></tr>               
+                 </table>
+                <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
                 <button type="button" onclick="ejecutar_comando('getPosition',update_pen_position)">Posicion actual</button> <br/>
-                Calibrado:<br>
+                Mover gondola:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
+               <hr>
                 <button type="button" onclick="ejecutar_comando('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
                 <button type="button" onclick="ejecutar_comando('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
+               
             </fieldset>      
             <fieldset>
                 <legend>Interface</legend>     
-                Mostrar mapa tension:<input type="checkbox" id="mapa_tension" name="preference"  onchange="guardar_parametros()">          
+                Mostrar mapa tension:<input type="checkbox" id="mapa_tension"  onchange="guardar_parametros()">          
                 <button type="button" onclick="config_default()">Recargar Config default</button><br/>               
             </fieldset>                 
         </td>

@@ -86,6 +86,7 @@ void machineSpecs(){
     sprintf(temp, "{\"result_ok\":true,\"machineSizeMm_x\":%d,\"machineSizeMm_y\":%d,\"mmPerRev\":%.2f,\"stepsPerRev\":%d,\"stepMultiplier\":%d,\"downPosition\":%d,\"upPosition\":%d,\"currentMaxSpeed\":%.2f,\"currentAcceleration\":%.2f,\"penWidth\":%.2f}",
     machineSizeMm.x, machineSizeMm.y,mmPerRev,motorStepsPerRev,stepMultiplier,downPosition,upPosition,currentMaxSpeed,currentAcceleration,penWidth);
     Serial.println("    envio parametros de la maquina ");
+
 };
 
 

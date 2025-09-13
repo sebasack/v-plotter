@@ -24,13 +24,18 @@ var ctx = canvas.getContext("2d");
     motorB = (1/C24) * SQRT(     (C21 * (C24 * C23 / C22))^2 +      (SQRT(C62^2 + C63^2) / (C22/(C23*C24)))^2 -      (2 * C21 * (C24 * C23 / C22) * C62) / (C22/(C23*C24)) )
      
 */
-function calc_motorA(){
-   return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(pen.x,2) + Math.pow(pen.y,2))) / machine_specs.mmPerRev);
+function calc_motorA(x,y){
+   return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(x,2) + Math.pow(y,2))) / machine_specs.mmPerRev);
 };
 
-function calc_motorB(){
-    return Math.round((1/machine_specs.stepMultiplier) * Math.sqrt(Math.pow((machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev)),2) + Math.pow( (Math.sqrt( Math.pow(pen.x,2) + Math.pow(pen.y,2)) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier))),2) - (2 * machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev) * pen.x) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier)) ));
+function calc_motorB(x,y){
+    return Math.round((1/machine_specs.stepMultiplier) * Math.sqrt(Math.pow((machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev)),2) + Math.pow( (Math.sqrt( Math.pow(x,2) + Math.pow(y,2)) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier))),2) - (2 * machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev) * x) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier)) ));
 };
+
+function move_to_xy(){
+    ejecutar_comando('C01,'+pen.motorA+','+pen.motorB+',END',update_pen_position)
+};
+
 
 // Add a click event listener to the canvas
 canvas.addEventListener('click', function(event) {
@@ -46,14 +51,17 @@ canvas.addEventListener('click', function(event) {
     $("#pen_x").val(pen.x);
     $("#pen_y").val(pen.y);
 
-    pen.motorA = calc_motorA();
-    pen.motorB = calc_motorB();
+    pen.motorA = calc_motorA(pen.x,pen.y);
+    pen.motorB = calc_motorB(pen.x,pen.y);
 
     $("#pen_motorA").html(pen.motorA);
     $("#pen_motorB").html(pen.motorB);
 
-    console.log("valores pen:");
-console.log(pen);
+    if (config.mover_gondola){
+        ejecutar_comando('C14,'+ pen.upPosition +',END',move_to_xy);    
+    }
+
+    //console.log("valores pen:");    console.log(pen);
 
     guardar_parametros();    
    
@@ -81,10 +89,10 @@ function guardar_parametros(){
     const pen_tmp = {
         x : $("#pen_x").val(),
         y : $("#pen_y").val(),
-        motorA : $("#pen_motorA").val(),
-        motorB : $("#pen_motorB").val()
-        //downPosition : $("#downPosition").val(),
-        //upPosition: $("#upPosition").val(),
+        motorA : $("#pen_motorA").html(),
+        motorB : $("#pen_motorB").html(),
+        downPosition : $("#downPosition").val(),
+        upPosition: $("#upPosition").val()
         //penWidth : $("#penWidth").val()
     }
 
@@ -94,7 +102,8 @@ function guardar_parametros(){
     }
 
     const config_tmp = {
-        mapa_tension : $("#mapa_tension").prop('checked')
+        mapa_tension : $("#mapa_tension").prop('checked'),
+        mover_gondola : $("#mover_gondola").prop('checked')
     }
 
     machine_specs = machine_specs_tmp;
@@ -102,18 +111,13 @@ function guardar_parametros(){
     page = page_tmp;
     home = home_tmp;
     config = config_tmp;
-/*
-    console.log("machine_specs");
-    console.log(machine_specs_tmp);
-    console.log("pen");
-    console.log(pen_tmp);
-    console.log("page");
-    console.log(page_tmp);
-    console.log("home");
-    console.log(home_tmp);
-    console.log("config");
-    console.log(config_tmp);
-*/
+
+    //console.log("machine_specs");    console.log(machine_specs_tmp);
+    //console.log("pen");    console.log(pen_tmp);
+    //console.log("page");    console.log(page_tmp);
+    //console.log("home");    console.log(home_tmp);
+    //console.log("config");    console.log(config_tmp);
+
     localStorage.setItem('machine_specs', JSON.stringify(machine_specs_tmp));
     localStorage.setItem('pen', JSON.stringify(pen_tmp));
     localStorage.setItem('page', JSON.stringify(page_tmp));
@@ -153,11 +157,11 @@ function recuperar_parametros(){
     config_guardado = localStorage.getItem('config')
     config = JSON.parse(config_guardado);
 
-    console.log(machine_specs);
-    console.log(pen);
-    console.log(page);  
-    console.log(home);
-    console.log(config);
+    //console.log(machine_specs);
+    //console.log(pen);
+    //console.log(page);  
+    //console.log(home);
+    //console.log(config);
   
     $("#machineSizeMm_x").val(machine_specs.machineSizeMm_x);
     $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
@@ -175,12 +179,14 @@ function recuperar_parametros(){
     $("#pen_y").val(pen.y);
     $("#pen_motorA").html(pen.motorA);
     $("#pen_motorB").html(pen.motorB);
-
+    $("#downPosition").val(pen.downPosition);   
+    $("#upPosition").val(pen.upPosition);   
 
     $("#home_pos_x").val(home.x);
     $("#home_pos_y").val(home.y);
 
-    $("#mapa_tension").prop('checked',config.mapa_tension)
+    $("#mapa_tension").prop('checked',config.mapa_tension);
+    $("#mover_gondola").prop('checked',config.mover_gondola);
 
     console.log("parametros recuperados de localStore");
 }
@@ -242,11 +248,13 @@ function draw_machine() {
         "mmPerRev":126,
         "stepsPerRev":4076,
         "stepMultiplier":8,
+
         "downPosition":90,
         "upPosition":123,
+        "penWidth":0.5,
+
         "currentMaxSpeed":1000,
-        "currentAcceleration":400,
-        "penWidth":0.5
+        "currentAcceleration":400
     }
 
     pen = {
@@ -348,7 +356,7 @@ function update_pen_position(pen_position) {
         pen.y = Math.round(getCartesianY(cartesianX,pen.motorA)*mmPerStep);
 
 
-        console.log(pen);
+       // console.log(pen);
 
         $("#pen_motorA").html(pen.motorA);
         $("#pen_motorB").html(pen.motorB);
@@ -357,6 +365,7 @@ function update_pen_position(pen_position) {
         $("#pen_y").val(pen.y);
    
         draw_machine();
+        guardar_parametros();
     }
 }
 
@@ -367,7 +376,12 @@ function update_machine_specs(specs) {
     $("#machineSizeMm_y").val(machine_specs.machineSizeMm_y);
     $("#mmPerRev").val(machine_specs.mmPerRev);
     $("#stepMultiplier").val(machine_specs.stepMultiplier);    
-    $("#stepsPerRev").val(machine_specs.stepsPerRev);    
+    $("#stepsPerRev").val(machine_specs.stepsPerRev);   
+
+    $("#downPosition").val(machine_specs.downPosition);   
+    $("#upPosition").val(machine_specs.upPosition);   
+    
+    
     draw_machine();
 }
 
@@ -385,15 +399,19 @@ async function ejecutar_comando(parametros, funcionExito) {
             data= {"result_ok":true,"motorA":15664,"motorB":15664};       
         }else if (parametros=='getMachineSpecs'){
             data=  {"result_ok":true,"machineSizeMm_x":882,"machineSizeMm_y":1100,"mmPerRev":126,"stepsPerRev":4076,"stepMultiplier":8,"downPosition":90,"upPosition":123,"currentMaxSpeed":1000,"currentAcceleration":400,"penWidth":0.5} 
+        }else if (parametros.includes(',END')){  // es un gcode
+            data= {"result_ok":true,"motorA":15664,"motorB":15664};       
         }
-        $("#log").val("EC1-"+
-                        parametros +
+        $("#log").val(
+                        parametros+ " (LOCAL)" +
                             "... " +
                             JSON.stringify(data) +
                             " \n\n " +
                             $("#log").val()
                     );
-        funcionExito(data);
+        if (funcionExito && typeof funcionExito === "function") {
+            funcionExito(data);
+        }
         return;
     }
 
@@ -403,15 +421,16 @@ async function ejecutar_comando(parametros, funcionExito) {
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
-            // Llama a la función de éxito si existe
-            if (funcionExito && typeof funcionExito === "function") {
-                $("#log").val(
+            // logueo llamado y respuesta
+            $("#log").val(
                     parametros +
                         "... " +
                         JSON.stringify(data) +
                         " \n\n " +
                         $("#log").val()
-                );
+            );
+            // Llama a la función de éxito si existe
+            if (funcionExito && typeof funcionExito === "function") {                
                 funcionExito(data);
             }
             return data;
@@ -424,30 +443,23 @@ async function ejecutar_comando(parametros, funcionExito) {
     }
 }
 
-function return_to_home(){
-    pen.x = home.x;
-    pen.y = home.y;
 
-    $("#pen_x").val(pen.x);
-    $("#pen_y").val(pen.y);
+function pen_up(){
+     ejecutar_comando('C14,'+ pen.upPosition +',END');   
+}
 
-    guardar_parametros();    
+function pen_down(){
+     ejecutar_comando('C13,'+ pen.downPosition +',END');   
+}
 
+function return_to_home_(){
+    motorA = calc_motorA(home.x,home.y);
+    motorB = calc_motorB(home.x,home.y);
+    ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position)
+}
 
-    /*
-    home_pos_x = $("#home_pos_x").val();
-    home_pos_y = $("#home_pos_y").val();
-
-    console.log(home_pos_x);
-    console.log(home_pos_y);
-    // calculo la hipotenusa
-
-    motorA = Math.sqrt(Math.pow(home_pos_x,2) + Math.pow(home_pos_y)) ;
-    motorB = motorA;
-
-    ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position);
-    */
-
+function return_to_home(){  // hasta que arme una cola lo hago en dos partes
+    ejecutar_comando('C14,'+ pen.upPosition +',END',return_to_home_);          
 }
 
 function centrar_pagina_x(){  

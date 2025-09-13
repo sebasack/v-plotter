@@ -122,17 +122,17 @@ void handleStop(){
 }
 */
 
-boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams);
+//boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams);
 boolean comms_parseCommand(char *inS);
 void comms_executeParsedCommand(); 
 void comms_clearParams();
 
 
-void penlift_penUp();
-void penlift_penDown();
+//void penlift_penUp();
+//void penlift_penDown();
 void releaseMotors();
 void reportPosition();   
-void comms_ready(); 
+//void comms_ready(); 
 
 
 void handleControl(){
@@ -164,17 +164,17 @@ void handleControl(){
       }
 
        manualControlInProgress = true;
-
+      /*
       if (server.arg("command") == "penLift")    {
           penlift_penUp();
       } else if (server.arg("command") == "penDown")    {
           penlift_penDown();
-      } else if (server.arg("command") == "restart")    { 
+      } else*/
+       if (server.arg("command") == "restart")    { 
           server.send(200, "text/plain", "{\"result_ok\":true}");
           ESP.restart();
       } else if (server.arg("command") == "setHome")    { 
-          set_home();
-     
+          set_home();     
       } else if (server.arg("command") == "releaseMotors")    { 
           releaseMotors();    
       } else if (server.arg("command") == "calibrate")    { 
