@@ -168,8 +168,9 @@ static int stepMultiplier = DEFAULT_STEP_MULTIPLIER;
 
 static Coord2D machineSizeMm = {DEFAULT_MACHINE_WIDTH, DEFAULT_MACHINE_HEIGHT};
 
- // float startLength = ((float) startLengthMM / (float) mmPerRev) * (float) motorStepsPerRev;^M
- //                   =               
+ // float startLength = ((float) startLengthMM / (float) mmPerRev) * (float) motorStepsPerRev;
+ //                   =         484,23238223   /   125.66          * 4076
+ //                   =                   15704.828
 static long startLengthStepsA = 125312;// 15664 * 8
 static long startLengthStepsB = 125312;// 15664 * 8
 
@@ -446,7 +447,7 @@ void setup(){
   //externalControlCreate();
 
 
-  Serial.println("create task: remoteDebug"); // actualiza debug
+//  Serial.println("create task: remoteDebug"); // actualiza debug
 //  Serial.remoteDebugCreate();
 
   //*-----------------------------------------------------------------*/
