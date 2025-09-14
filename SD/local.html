@@ -71,7 +71,7 @@
                     <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td><td><button type="button" onclick="pen_down()">Abajo</button><br/></td></tr>               
                  </table>
                 <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
-                <button type="button" onclick="encolar_tarea('getPosition')">Posicion actual</button> <br/>
+                <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button> <br/>
                 Mover gondola:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
                <hr>
                 <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
@@ -92,10 +92,15 @@
         <td align="center"  width="25%" valign="center">
             <canvas id="machine" width="0" height="0"></canvas>
         </td>
-        <td align="center"  valign="top">           
-            <div id ="estado_cola"></div>
-            <textarea id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
-            <textarea id="log" name="log" rows="20" cols="50"> </textarea><br/>
+        <td align="center"  valign="top">       
+            <table width="100%">
+                <tr><td  align="left"><div id ="estado_cola"></div></td>
+                    <td> <button type="button" onclick="limpiar_cola()">Limpiar Cola</button></td>
+                </tr>
+            </table>            
+                          
+            <textarea readonly id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
+            <textarea readonly id="log" name="log" rows="20" cols="50"> </textarea><br/>
         </td>
     </tr>
 </table>

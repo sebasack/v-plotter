@@ -13,7 +13,7 @@ class ColaTareasAuto {
         };
 
         this.tareas.push(tareaObj);
-        console.log(`➕ Tarea agregada: ${nombre}`);
+        //console.log(`➕ Tarea agregada: ${nombre}`);
 
         // Intentar procesar inmediatamente si no está pausado
         if (!this.pausado && !this.procesando) {
@@ -32,7 +32,7 @@ class ColaTareasAuto {
         const { tarea, nombre, id } = this.tareas.shift();
 
         try {
-            $("#estado_cola").text(`🚀 Iniciando: ${nombre}`);
+            $("#estado_cola").text(`🚀 Ejecutando: ${nombre}`);
             const resultado = await tarea();
             $("#estado_cola").text(`✅ Completado: ${nombre}`, resultado);
         } catch (error) {
@@ -51,7 +51,7 @@ class ColaTareasAuto {
     pausar() {
         if (!this.pausado) {
             this.pausado = true;
-            $("#estado_cola").text(`⏸️  COLA PAUSADA. Tareas en espera: ${this.tareas.length}`);
+            //$("#estado_cola").text(`⏸️  COLA PAUSADA. Tareas en espera: ${this.tareas.length}`);
             if (this.procesando) {
                 $("#estado_cola").text(`ℹ️  La tarea actual terminará, pero no se procesarán nuevas`);
             }
@@ -65,7 +65,7 @@ class ColaTareasAuto {
     reanudar() {
         if (this.pausado) {
             this.pausado = false;
-            $("#estado_cola").text(`▶️  COLA REANUDADA. Tareas pendientes: ${this.tareas.length}`);
+            //$("#estado_cola").text(`▶️  COLA REANUDADA. Tareas pendientes: ${this.tareas.length}`);
             
             // Reiniciar el procesamiento si hay tareas y no se está procesando
             if (this.tareas.length > 0 && !this.procesando) {
@@ -75,6 +75,12 @@ class ColaTareasAuto {
             console.log(`ℹ️  La cola ya está activa`);
         }
         return !this.pausado;
+    }
+
+    // LIMPIAR LA COLA - Eliminar todas las tareas pendientes
+    limpiar() {        
+        // Limpiar todas las tareas         
+        this.tareas = [];           
     }
 
      // Obtener el estado actual de la cola
@@ -89,6 +95,7 @@ class ColaTareasAuto {
         };
     }
 
+    //retorna la cantidad de elementos de la cola
     tamano() {
         return this.tareas.length;
     }

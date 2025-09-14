@@ -388,11 +388,21 @@ function update_machine_specs(specs) {
 }
 
 
+function hora(date) {
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
 async function ejecutar_comando(parametros, funcionExito) {
     /*parametros va en la forma
             "getPosition"                  cuando es solo el comando sin otros parametros
             "C06,15664,15664,END"          cuando es gcode
             "move&motorA=55&motorB=-66"    cuando es un comando y lleva varios parametros  */   
+
+    const ini = new Date();
 
     if (location.href.includes('file://')){
         console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
@@ -404,17 +414,15 @@ async function ejecutar_comando(parametros, funcionExito) {
         }else if (parametros.includes(',END')){  // es un gcode
             data= {"result_ok":true,"motorA":15664,"motorB":15664};       
         }
-        $("#log").val(
-                        parametros+ " (LOCAL)" +
-                            "... " +
-                            JSON.stringify(data) +
-                            " \n\n " +
-                            $("#log").val()
-                    );
+
+        // logueo llamado y respuesta
+        const fin = new Date();        
+        $("#log").val(hora(ini)+ " (LOCAL) "+ parametros+ "\n    " + hora(fin) + " "+ JSON.stringify(data).replaceAll(",", ", ") +"\n" + $("#log").val());
+
         //actualizo la lista de tareas        
         $("#tareas").val(tareas.mostrar());
-         $("#estado_cola").text( tareas.obtenerEstado().estado); 
-        if (funcionExito && typeof funcionExito === "function") {            
+        $("#estado_cola").text( tareas.obtenerEstado().estado); 
+        if (funcionExito && typeof funcionExito === "function") {                 
             funcionExito(data);
         }
         return;
@@ -426,14 +434,10 @@ async function ejecutar_comando(parametros, funcionExito) {
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
+
             // logueo llamado y respuesta
-            $("#log").val(
-                    parametros +
-                        "... " +
-                        JSON.stringify(data) +
-                        " \n\n " +
-                        $("#log").val()
-            );
+            const fin = new Date();
+            $("#log").val( hora(ini)+ " "+parametros + "\n    " + hora(ini)+ + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
 
             //actualizo la lista de tareas
             $("#tareas").val(tareas.mostrar());            
@@ -449,6 +453,11 @@ async function ejecutar_comando(parametros, funcionExito) {
         console.error("Error:", error);
         throw error;
     }
+}
+
+function limpiar_cola(){
+    tareas.limpiar();
+    $("#tareas").val(tareas.mostrar());
 }
 
 function encolar_tarea(tarea,funcionExito){
