@@ -1,4 +1,4 @@
-$("#version").append(".3"); // agrego la version del js
+$("#version").append(".5"); // agrego la version del js
 
 machine_specs = {};
 pen = {};
@@ -8,6 +8,11 @@ config = {};
 
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
+//const cola_tareas = new cola();
+
+// Ejemplo de uso con tareas reales
+const tareas = new ColaTareasAuto();
+
 
 
 /*
@@ -32,10 +37,6 @@ function calc_motorB(x,y){
     return Math.round((1/machine_specs.stepMultiplier) * Math.sqrt(Math.pow((machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev)),2) + Math.pow( (Math.sqrt( Math.pow(x,2) + Math.pow(y,2)) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier))),2) - (2 * machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev) * x) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier)) ));
 };
 
-function move_to_xy(){
-    ejecutar_comando('C01,'+pen.motorA+','+pen.motorB+',END',update_pen_position)
-};
-
 
 // Add a click event listener to the canvas
 canvas.addEventListener('click', function(event) {
@@ -58,7 +59,8 @@ canvas.addEventListener('click', function(event) {
     $("#pen_motorB").html(pen.motorB);
 
     if (config.mover_gondola){
-        ejecutar_comando('C14,'+ pen.upPosition +',END',move_to_xy);    
+        //encolar_tarea('C14,'+ pen.upPosition +',END');    
+        encolar_tarea('C01,'+pen.motorA+','+pen.motorB+',END')
     }
 
     //console.log("valores pen:");    console.log(pen);
@@ -409,7 +411,10 @@ async function ejecutar_comando(parametros, funcionExito) {
                             " \n\n " +
                             $("#log").val()
                     );
-        if (funcionExito && typeof funcionExito === "function") {
+        //actualizo la lista de tareas        
+        $("#tareas").val(tareas.mostrar());
+         $("#estado_cola").text( tareas.obtenerEstado().estado); 
+        if (funcionExito && typeof funcionExito === "function") {            
             funcionExito(data);
         }
         return;
@@ -429,6 +434,9 @@ async function ejecutar_comando(parametros, funcionExito) {
                         " \n\n " +
                         $("#log").val()
             );
+
+            //actualizo la lista de tareas
+            $("#tareas").val(tareas.mostrar());            
             // Llama a la función de éxito si existe
             if (funcionExito && typeof funcionExito === "function") {                
                 funcionExito(data);
@@ -443,24 +451,38 @@ async function ejecutar_comando(parametros, funcionExito) {
     }
 }
 
+function encolar_tarea(tarea,funcionExito){
+    //cola_tareas.encolar(tarea);
+    //$("#log").val(cola_tareas.mostrar());
+
+    tareas.agregarTarea(() => ejecutar_comando(tarea,funcionExito),tarea);
+    $("#tareas").val(tareas.mostrar());
+
+};
+
+function cambiar_estado_cola(){
+    if (!tareas.obtenerEstado().pausado){
+        tareas.pausar();
+    }else{
+        tareas.reanudar();
+    }    
+    $("#estado_cola").text( tareas.obtenerEstado().estado); 
+}
 
 function pen_up(){
-     ejecutar_comando('C14,'+ pen.upPosition +',END');   
+     encolar_tarea('C14,'+ pen.upPosition +',END');   
 }
 
 function pen_down(){
-     ejecutar_comando('C13,'+ pen.downPosition +',END');   
+     encolar_tarea('C13,'+ pen.downPosition +',END');   
 }
 
-function return_to_home_(){
+function return_to_home(){
     motorA = calc_motorA(home.x,home.y);
     motorB = calc_motorB(home.x,home.y);
-    ejecutar_comando('C01,'+motorA+','+motorB+',END',update_pen_position)
+    encolar_tarea('C01,'+motorA+','+motorB+',END',update_pen_position)
 }
 
-function return_to_home(){  // hasta que arme una cola lo hago en dos partes
-    ejecutar_comando('C14,'+ pen.upPosition +',END',return_to_home_);          
-}
 
 function centrar_pagina_x(){  
     page.page_pos_x = (machine_specs.machineSizeMm_x / 2) - (page.page_width / 2);    
@@ -480,12 +502,17 @@ function init() {
     }
 
     // mostrarCamara();
+  
+    $('#estado_cola').on('click', function() {
+        cambiar_estado_cola();
+    });
+
+
+    $("#estado_cola").text( tareas.obtenerEstado().estado); 
 
     // busco los parametros de la maquina y llamo a la funcion de mostrar maquina
-
     recuperar_parametros();
     draw_machine() ;
-    //ejecutar_comando("getMachineSpecs", update_machine_specs);
-    //ejecutar_comando("getPosition", update_pen_position);
+   
 }
 

@@ -1,4 +1,5 @@
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
+<script src="cola.js"></script>
 
 <style>
     textarea {
@@ -22,7 +23,7 @@
 <table border="0" width="100%" height="100%">
     <tr>
         <td align="center" width="12%" valign="top">
-            <div style="text-align: left; font-size: 10px" id="version">version: 0.1</div> <br/>
+            <div style="text-align: left; font-size: 10px" id="version">version: 0.2</div> <br/>
             
             <fieldset>
                 <legend>Maquina</legend>
@@ -33,9 +34,9 @@
                     <tr><td align="right">MM por rev.:</td><td><input id="mmPerRev" size="4" value="126" onchange="guardar_parametros()"/></td></tr>
                     <tr><td align="right">Pasos x Rev.:</td><td><input id="stepsPerRev" size="4" value="4076" onchange="guardar_parametros()"/></td></tr>
                 </table>
-                <button type="button" onclick="ejecutar_comando('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
-                <button type="button" onclick="ejecutar_comando('releaseMotors')">Desenergizar motores</button> <br/>
-                <button type="button" onclick="ejecutar_comando('restart')">Restart ESP32</button> <br/>
+                <button type="button" onclick="encolar_tarea('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
+                <button type="button" onclick="encolar_tarea('releaseMotors')">Desenergizar motores</button> <br/>
+                <button type="button" onclick="encolar_tarea('restart')">Restart ESP32</button> <br/>
             </fieldset>
             <fieldset>
                 <legend>Pagina</legend>
@@ -50,7 +51,7 @@
                 <legend>Home</legend>
                 X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/><br/>
                 Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/><br/>
-                <button type="button" onclick="ejecutar_comando('setHome')">Set Home</button> <br/>
+                <button type="button" onclick="encolar_tarea('setHome')">Set Home</button> <br/>
             </fieldset>
             <fieldset>
                 <legend>Pen</legend>
@@ -61,28 +62,30 @@
                     <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td><td><button type="button" onclick="pen_down()">Abajo</button><br/></td></tr>               
                  </table>
                 <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
-                <button type="button" onclick="ejecutar_comando('getPosition',update_pen_position)">Posicion actual</button> <br/>
+                <button type="button" onclick="encolar_tarea('getPosition')">Posicion actual</button> <br/>
                 Mover gondola:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
                <hr>
-                <button type="button" onclick="ejecutar_comando('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
-                <button type="button" onclick="ejecutar_comando('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
+                <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
+                <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
                
-            </fieldset>      
+            </fieldset>  
+            <fieldset>
+                <legend>Enviar GCODE</legend>                
+                <input id="comando" />
+                <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Enviar</button>                              
+            </fieldset>
             <fieldset>
                 <legend>Interface</legend>     
                 Mostrar mapa tension:<input type="checkbox" id="mapa_tension"  onchange="guardar_parametros()">          
                 <button type="button" onclick="config_default()">Recargar Config default</button><br/>               
             </fieldset>                 
         </td>
-        <td align="center" valign="center">
+        <td align="center"  width="25%" valign="center">
             <canvas id="machine" width="0" height="0"></canvas>
         </td>
-        <td align="center"  width="25%" valign="top">
-            <fieldset>
-                <legend>Comandos GCODE</legend>
-                <input id="comando" />
-                <button type="button" onclick="ejecutar_comando($('#comando').val())" title="ingrese un comando GCODE">Enviar</button>
-            </fieldset>
+        <td align="center"  valign="top">           
+            <div id ="estado_cola"></div>
+            <textarea id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
             <textarea id="log" name="log" rows="20" cols="50"> </textarea><br/>
         </td>
     </tr>
