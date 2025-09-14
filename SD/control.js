@@ -45,27 +45,32 @@ canvas.addEventListener('click', function(event) {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // guardo la nueva posicion
-    pen.x = Math.round(x);
-    pen.y = Math.round(y);
-
-    $("#pen_x").val(pen.x);
-    $("#pen_y").val(pen.y);
-
-    pen.motorA = calc_motorA(pen.x,pen.y);
-    pen.motorB = calc_motorB(pen.x,pen.y);
-
-    $("#pen_motorA").html(pen.motorA);
-    $("#pen_motorB").html(pen.motorB);
-
     if (config.mover_gondola){
-        //encolar_tarea('C14,'+ pen.upPosition +',END');    
-        encolar_tarea('C01,'+pen.motorA+','+pen.motorB+',END')
+        // calculo los datos de la nueva posicion
+        pen_x = Math.round(x);
+        pen_y = Math.round(y);
+
+        motorA = calc_motorA(pen_x,pen_y);
+        motorB = calc_motorB(pen_x,pen_y);
+
+        // envio la terea, cuando termine actualiza los datos de posicion
+        encolar_tarea('C01,'+motorA+','+motorB+',END',update_pen_position);
+    }else{
+         // guardo la nueva posicion
+        pen.x = Math.round(x);
+        pen.y = Math.round(y);
+
+        $("#pen_x").val(pen.x);
+        $("#pen_y").val(pen.y);
+
+        pen.motorA = calc_motorA(pen.x,pen.y);
+        pen.motorB = calc_motorB(pen.x,pen.y);
+
+        $("#pen_motorA").html(pen.motorA);
+        $("#pen_motorB").html(pen.motorB);
+
+        guardar_parametros(); 
     }
-
-    //console.log("valores pen:");    console.log(pen);
-
-    guardar_parametros();    
    
 });
 
@@ -417,7 +422,7 @@ async function ejecutar_comando(parametros, funcionExito) {
 
         // logueo llamado y respuesta
         const fin = new Date();        
-        $("#log").val(hora(ini)+ " (LOCAL) "+ parametros+ "\n    " + hora(fin) + " "+ JSON.stringify(data).replaceAll(",", ", ") +"\n" + $("#log").val());
+        $("#log").val(hora(ini)+ " (LOCAL) "+ parametros+ "\n" + hora(fin) + " "+ JSON.stringify(data).replaceAll(",", ", ") +"\n" + $("#log").val());
 
         //actualizo la lista de tareas        
         $("#tareas").val(tareas.mostrar());
@@ -437,7 +442,7 @@ async function ejecutar_comando(parametros, funcionExito) {
 
             // logueo llamado y respuesta
             const fin = new Date();
-            $("#log").val( hora(ini)+ " "+parametros + "\n    " + hora(ini)+ + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
+            $("#log").val( hora(ini)+ " "+parametros + "\n" + hora(ini)+ + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
 
             //actualizo la lista de tareas
             $("#tareas").val(tareas.mostrar());            
