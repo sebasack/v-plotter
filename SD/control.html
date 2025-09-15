@@ -1,5 +1,5 @@
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
-<script src="cola.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/util.js"></script>
 
 <style>
     textarea {
@@ -63,7 +63,7 @@
                  </table>
                 <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
                 <button type="button" onclick="encolar_tarea('getPosition')">Posicion actual</button> <br/>
-                Mover gondola:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
+                Encolar movimientos:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
                <hr>
                 <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
                 <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              

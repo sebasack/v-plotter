@@ -1,3 +1,8 @@
+$("#version").append(".u0"); // agrego la version de util.js
+
+//////////////////////////////////////////////// COLA ////////////////////////////////////////////////
+
+
 class ColaTareasAuto {
     constructor() {
         this.tareas = [];
@@ -100,7 +105,6 @@ class ColaTareasAuto {
         return this.tareas.length;
     }
 
-
     // Obtener lista de tareas pendientes
     listarTareas() {
         return this.tareas.map((t, index) => ({
@@ -111,7 +115,6 @@ class ColaTareasAuto {
         }));
     }
 
-
     mostrar() {
         let resultado = "";
         for (let i =0; i <  this.tareas.length; i++) {
@@ -119,4 +122,90 @@ class ColaTareasAuto {
         }
         return resultado;
     }
+};
+
+
+//////////////////////////////////////////////// CALC ////////////////////////////////////////////////
+
+function calc_motorA(x,y){
+   return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(x,2) + Math.pow(y,2))) / machine_specs.mmPerRev);
+};
+
+function calc_motorB(x,y){
+    return Math.round((1/machine_specs.stepMultiplier) * Math.sqrt(Math.pow((machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev)),2) + Math.pow( (Math.sqrt( Math.pow(x,2) + Math.pow(y,2)) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier))),2) - (2 * machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev) * x) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier)) ));
+};
+
+function multiplier(valor){
+  return valor * machine_specs.stepMultiplier;
+}  
+
+function getCartesianX(motorA,motorB){
+    stepsPerMm = multiplier(machine_specs.stepsPerRev) / machine_specs.mmPerRev;
+    machineSizeStepsX= machine_specs.machineSizeMm_x * stepsPerMm;
+    calcX = (Math.pow(machineSizeStepsX, 2) - Math.pow(multiplier(motorB), 2) + Math.pow(multiplier(motorA), 2)) / (machineSizeStepsX*2);
+    return calcX;
+}
+
+function getCartesianY( cX,  motorA){
+    calcY = Math.sqrt(Math.pow(multiplier(motorA),2)-Math.pow(cX,2));
+    return calcY;
+}
+
+function formatTime(date) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
+
+//////////////////////////////////////////////// DRAW ////////////////////////////////////////////////
+
+
+function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
+    ctx.lineWidth = 0.5;
+    ctx.strokeStyle =line_color; 
+    ctx.fillStyle = line_color;
+    ctx.setLineDash([ancho_punto,acho_separacion]);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+    ctx.setLineDash([]); // reestablezco linea solida
+}
+
+function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+}
+
+function circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
+    if (color){
+        ctx.fillStyle = color;
+    }
+    ctx.beginPath();
+    ctx.arc(x, y, radio, 0, 2 * Math.PI);
+    ctx.stroke();
+}
+
+function rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
+    ctx.fillStyle = line_color;
+    if (color){
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, ancho, alto);
+    }
+    ctx.strokeRect(x, y, ancho, alto);
+}
+
+function text(text, x, y,line_color='#000000') {
+    ctx.fillStyle = line_color;
+    ctx.fillText(text, x, y);
 }

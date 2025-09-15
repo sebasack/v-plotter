@@ -8,7 +8,6 @@
         <div id="control-placeholder">
 <!------------------------------------------------------------------------------------------->           
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
-<script src="cola.js"></script>
 
 <style>
     textarea {
@@ -32,8 +31,7 @@
 <table border="0" width="100%" height="100%">
     <tr>
         <td align="center" width="12%" valign="top">
-            <div style="text-align: left; font-size: 10px" id="version">version: 0.1</div> <br/>
-            
+            <div style="text-align: left; font-size: 10px" id="version">version: h0</div> <br/>            
             <fieldset>
                 <legend>Maquina</legend>
                 <table>
@@ -58,9 +56,12 @@
             </fieldset>
             <fieldset>
                 <legend>Home</legend>
-                X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/><br/>
-                Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/><br/>
-                <button type="button" onclick="encolar_tarea('setHome')">Set Home</button> <br/>
+                <table>
+                    <tr><td>X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/></td>
+                        <td rowspan="2"><button type="button" onclick="set_home()">Set Home</button></td></tr>
+                    <tr><td>Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td></tr>
+                </table>
+                
             </fieldset>
             <fieldset>
                 <legend>Pen</legend>
@@ -72,16 +73,15 @@
                  </table>
                 <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
                 <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button> <br/>
-                Mover gondola:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
+                Encolar movimientos:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
                <hr>
                 <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
                 <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
-               
             </fieldset>  
             <fieldset>
                 <legend>Enviar GCODE</legend>                
-                <input id="comando" />
-                <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Enviar</button>                              
+                <input id="comando" size="25"/>
+                <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
             </fieldset>
             <fieldset>
                 <legend>Interface</legend>     
@@ -95,15 +95,18 @@
         <td align="center"  valign="top">       
             <table width="100%">
                 <tr><td  align="left"><div id ="estado_cola"></div></td>
-                    <td> <button type="button" onclick="limpiar_cola()">Limpiar Cola</button></td>
+                    <td> <button type="button" onclick="limpiar_cola()">Limpiar Cola</button>
+                         <input type="file" id="fileInput" style="display: none;">
+                         <button class="btn" onclick="document.getElementById('fileInput').click()">Importar Cola</button>
+                    </td>
                 </tr>
-            </table>            
-                          
+            </table>                          
             <textarea readonly id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
             <textarea readonly id="log" name="log" rows="20" cols="50"> </textarea><br/>
         </td>
     </tr>
 </table>
+<script src="util.js"></script>
 <!------------------------------------------------------------------------------------------->
 
         </div>
