@@ -1,4 +1,4 @@
-$("#version").append(".u0"); // agrego la version de util.js
+$("#version").append(".u1"); // agrego la version de util.js
 
 //////////////////////////////////////////////// COLA ////////////////////////////////////////////////
 
@@ -163,6 +163,34 @@ function formatTime(date) {
 //////////////////////////////////////////////// DRAW ////////////////////////////////////////////////
 
 
+
+function aplicar_offset_scale(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(config.offsetX, config.offsetY);
+    ctx.scale(config.scale,config.scale);
+
+    
+}
+
+function draw_image(src){
+
+    const img = new Image();
+    img.onload = function () {
+        // Establecer transparencia global
+        ctx.globalAlpha = 0.1;
+        // Calcular dimensiones manteniendo la proporcion
+        const aspectRatio = img.height / (img.width + 30);
+        const newWidth = canvas.width + 30;
+        const newHeight = (canvas.width + 30) * aspectRatio;
+        // Dibujar la imagen manteniendo proporcion
+        ctx.drawImage(img, -15, -15, newWidth, newHeight);
+        // Restaurar opacidad para las lineas
+        ctx.globalAlpha = 1.0;
+    };
+    img.src = src;
+}
+
 function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
     ctx.lineWidth = 0.5;
     ctx.strokeStyle =line_color; 
@@ -170,10 +198,12 @@ function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#0000
     ctx.setLineDash([ancho_punto,acho_separacion]);
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x1, y1);
+    ctx.lineTo(x1,y1);
     ctx.stroke();
     ctx.setLineDash([]); // reestablezco linea solida
 }
+
+
 
 function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
     ctx.lineWidth = lineWidth;

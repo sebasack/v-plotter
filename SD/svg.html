@@ -1,0 +1,48 @@
+<canvas id="myCanvas" width="400" height="400"></canvas>
+<button onclick="highlightPath()">Resaltar Path</button>
+
+<script>
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+
+const svgContent = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <path id="mainPath" d="M10 10 C 30 5, 50 40, 90 10 S 150 100, 190 80" 
+              stroke="black" fill="none"/>
+        <circle id="circle1" cx="50" cy="50" r="20" fill="green"/>
+    </svg>
+`;
+
+// Cargar SVG completo
+const img = new Image();
+img.onload = function() {
+    ctx.drawImage(img, 0, 0, 400, 400);
+};
+img.src = 'data:image/svg+xml;base64,' + btoa(svgContent);
+
+// Función para resaltar path específico
+function highlightPath() {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+    const path = svgDoc.getElementById('mainPath');
+    const pathData = path.getAttribute('d');
+    
+    // Limpiar canvas y redibujar
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, 400, 400);
+    
+    // Resaltar path específico
+    ctx.beginPath();
+    // Aquí implementarías drawSVGPath con estilo diferente
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 3;
+    drawSVGPath(ctx, pathData, 0, 0);
+    ctx.stroke();
+}
+
+function drawSVGPath(ctx, pathData, x, y) {
+    // Implementación simplificada - usar librería como paper.js para mejor soporte
+    const path2d = new Path2D(pathData);
+    ctx.path = path2d;
+}
+</script>
