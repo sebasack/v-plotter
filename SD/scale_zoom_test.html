@@ -1,0 +1,199 @@
+<canvas id="myCanvas" width="800" height="600"></canvas>
+<div>
+    <!--
+   
+    <button onclick="zoomIn()">Zoom +</button>
+    <button onclick="zoomOut()">Zoom -</button> -->
+    <button onclick="resetZoom()">Reset</button>
+</div>
+
+<script>
+
+
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+
+
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+
+
+    function draw() {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Aplicar transformaciones
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+        
+        // Dibujar figuras (usando coordenadas originales)
+        drawFigures(ctx);
+        
+        ctx.restore();
+    }
+
+    function drawFigures(ctx) {
+        console.log('draw');
+        // Línea
+        ctx.beginPath();
+        ctx.moveTo(50, 50);
+        ctx.lineTo(150, 150);
+        ctx.stroke();
+        
+        // Cuadrado
+        ctx.strokeRect(100, 100, 80, 80);
+        
+        // Círculo
+        ctx.beginPath();
+        ctx.arc(200, 200, 40, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Eventos para el zoom
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        const zoomIntensity = 0.1;
+        const wheel = e.deltaY < 0 ? 1 : -1;
+        const zoom = Math.exp(wheel * zoomIntensity);
+        
+        // Calcular nuevo scale y offset
+        offsetX -= (mouseX - offsetX) * (zoom - 1);
+        offsetY -= (mouseY - offsetY) * (zoom - 1);
+        scale *= zoom;
+        
+        draw();
+    });
+
+    /*
+    // Zoom con doble click
+    canvas.addEventListener('dblclick', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        scale *= 1.5; // Zoom in
+        offsetX = mouseX - (mouseX - offsetX) / 1.5;
+        offsetY = mouseY - (mouseY - offsetY) / 1.5;
+        
+        draw();
+    });*/
+
+      canvas.addEventListener('dblclick', (e) => {
+
+         const rect = canvas.getBoundingClientRect();
+    x = event.clientX - rect.left;
+    y = event.clientY - rect.top;
+
+         ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.stroke();
+
+
+        console.log(x+','+y);
+
+       w= screenToWorld(x, y);
+
+
+        console.log(w.x+','+w.y);
+
+
+      });
+
+    // Pan (arrastrar)
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            offsetX += (e.clientX - lastX) / scale;
+            offsetY += (e.clientY - lastY) / scale;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        isDragging = false;
+    });
+
+
+
+
+
+
+    function screenToWorld(x, y) {
+        return {
+            x: (x - offsetX) / scale,
+            y: (y - offsetY) / scale
+        };
+    }
+
+    function worldToScreen(x, y) {
+        return {
+            x: x * scale + offsetX,
+            y: y * scale + offsetY
+        };
+    }
+
+    /*
+    // Ejemplo de uso al dibujar
+    function drawFigures(ctx) {
+        const worldCoords = screenToWorld(lastX, lastY);
+        // Usar worldCoords.x y worldCoords.y para lógica de dibujo
+    }
+*/
+
+/*
+
+    function zoomIn() {
+        scale *= 1.2;
+        draw();
+    }
+
+    function zoomOut() {
+        scale /= 1.2;
+        draw();
+    }
+*/
+    function resetZoom() {
+        scale = 1;
+        offsetX = 0;
+        offsetY = 0;
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+        
+        // Dibujar tus figuras aquí
+        drawFigures(ctx);
+        
+        ctx.restore();
+    }
+
+    // Inicializar
+    draw();
+</script>

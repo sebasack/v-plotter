@@ -33,25 +33,18 @@
 
 <video id="video" playsinline autoplay style="display: none"></video>
 
+<input id="pen_status" value="0" hidden/>
+<input id="offsetX" value="0.0" hidden>
+<input id="offsetY" value="0.0" hidden>
+<input id="scale" value="1.0" hidden>
+
+
 <table border="0" width="100%" height="100%">
     <tr>
         <td align="center" width="12%" valign="top">
             <div style="text-align: left; font-size: 10px" id="version">version: h0</div> <br/>        
             <fieldset>
-                <legend>Interface</legend>     
-             
-                <table>
-                    <tr><td><button class="arrow-button" onclick="offset_scale(1)">&#x1F854;</button></td><td><button class="arrow-button" onclick="offset_scale(2)">&#x1F851;</button></td><td><button class="arrow-button" onclick="offset_scale(3)">&#x1F855;</button></td>
-                        <td rowspan="3"><button class="arrow-button" onclick="offset_scale(10)">&#x1F50D;+</button><br> 
-                                        <button class="arrow-button" onclick="offset_scale(11)">&#x1F50E;-</button>
-                                        <input id="offsetX" value="0" hidden>
-                                        <input id="offsetY" value="0" hidden>
-                                        <input id="scale" value="1" hidden>
-                        </td>
-                    </tr>
-                    <tr><td><button class="arrow-button" onclick="offset_scale(4)">&#x1F850;</button></td><td><button class="arrow-button" onclick="offset_scale(5)">&#x1F794;</button></td><td><button class="arrow-button" onclick="offset_scale(6)">&#x1F852;</button></td></tr>
-                    <tr><td><button class="arrow-button" onclick="offset_scale(7)">&#x1F857;</button></td><td><button class="arrow-button" onclick="offset_scale(8)">&#x1F853;</button></td><td><button class="arrow-button" onclick="offset_scale(9)">&#x1F856;</button></td></tr>
-                </table>  
+                <legend>Interface</legend>
                 Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()">     
                 <button type="button" onclick="config_default()">Recargar Config default</button><br/>               
             </fieldset>                     
@@ -89,7 +82,7 @@
             <fieldset>
                 <legend>Pen</legend>
                 <table>
-                    <input id="pen_status" value="0" hidden/>
+                    
                     <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
                     <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
                     <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td rowspan="2"> <button id="cambiar_status_pen" type="button" onclick="cambiar_status_pen()" value="0">Subir</button></td></tr>

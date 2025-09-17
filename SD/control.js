@@ -11,15 +11,41 @@ tareas_completadas = [];
 var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
 
+
+
+let isDragging = false;
+let lastX = 0;
+let lastY = 0;
+
+
 // creo la cola de tareas
 const tareas = new ColaTareasAuto();
 
+
+
+
+function screenToWorld(x, y) {
+    return {
+        x: (x - $("#offsetX").val()) /$("#scale").val(),
+        y: (y - $("#offsetY").val()) / $("#scale").val()
+    };
+}
+
+function worldToScreen(x, y) {
+    return {
+        x: x * $("#scale").val() + $("#offsetX").val(),
+        y: y * $("#scale").val() +$("#offsetY").val()
+    };
+}
+
+
 // Add a click event listener to the canvas
-canvas.addEventListener("click", function (event) {
+canvas.addEventListener("dblclick", function (event) {
     // Calculate the mouse coordinates relative to the canvas
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    x = event.clientX - rect.left;
+    y = event.clientY - rect.top;
+
 
     if (config.mover_gondola) {
         // calculo los datos de la nueva posicion
@@ -87,9 +113,9 @@ function guardar_parametros() {
     const config_tmp = {
         mostrar_mapa_tension: $("#mostrar_mapa_tension").prop("checked"),
         mover_gondola: $("#mover_gondola").prop("checked"),
-        offsetX:$("#offsetX").val(),
-        offsetY:$("#offsetY").val(),
-        scale:$("#scale").val(),
+        offsetX:parseFloat($("#offsetX").val()),
+        offsetY:parseFloat($("#offsetY").val()),
+        scale:parseFloat($("#scale").val()),
     };
 
     machine_specs = machine_specs_tmp;
@@ -173,9 +199,9 @@ function recuperar_parametros() {
     $("#mostrar_mapa_tension").prop("checked", config.mostrar_mapa_tension);
     $("#mover_gondola").prop("checked", config.mover_gondola);
 
-    $("#offsetY").val(config.offsetY) ;
-    $("#offsetX").val(config.offsetX);
-    $("#scale").val(config.scale);
+    $("#offsetY").val(parseFloat(config.offsetY));
+    $("#offsetX").val(parseFloat(config.offsetX));
+    $("#scale").val(parseFloat(config.scale));
 
 
     actualizar_estado_pen();
@@ -229,7 +255,7 @@ function draw_machine() {
         line(machine_specs.machineSizeMm_x, 0, pen.x, pen.y);
       
     
-        //ctx.restore();
+        ctx.restore();
     }
 }
 
@@ -689,49 +715,62 @@ function readFileAsText(file) {
     });
 }
 
-function offset_scale(id_boton){
-    offset=100;
-    scale_=0.1;
 
-    offsetX= parseInt($("#offsetX").val());
-    offsetY= parseInt($("#offsetY").val());
-    scale= parseFloat($("#scale").val());
 
-    // funcion que gestiona el scale y desplazamiento 
-    if (id_boton==1){      // arr izq
-        $("#offsetX").val(offsetX- offset);
-        $("#offsetY").val(offsetY- offset);
-    }else if (id_boton==2){// arr 
-        $("#offsetY").val(offsetY- offset);
-    }else if (id_boton==3){// arr der
-        $("#offsetX").val(offsetX+offset);
-        $("#offsetY").val(offsetY-offset);
-    }else if (id_boton==4){// izq
-        $("#offsetX").val(offsetX- offset);
-    }else if (id_boton==5){// centar
-        $("#offsetX").val(0);
-        $("#offsetY").val(0);
-        $("#scale").val(1);
-    }else if (id_boton==6){// der
-        $("#offsetX").val(offsetX+ offset);
-    }else if (id_boton==7){// aba izq
-        $("#offsetX").val(offsetX-offset);
-        $("#offsetY").val(offsetY+offset);
-    }else if (id_boton==8){// aba
-        $("#offsetY").val(offsetY+offset);
-    }else if (id_boton==9){// aba der 
-        $("#offsetX").val(offsetX+offset);
-        $("#offsetY").val(offsetY+offset);
-    }else if (id_boton==10){// scale +
-         $("#scale").val(scale+scale_);
-    }else if (id_boton==11){// scale -
-         $("#scale").val(scale-scale_);
+
+// Eventos para el zoom
+canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    const zoomIntensity = 0.1;
+    const wheel = e.deltaY < 0 ? 1 : -1;
+    const zoom = Math.exp(wheel * zoomIntensity);
+    
+    // Calcular nuevo scale y offset
+    config.offsetX -= (mouseX - config.offsetX) * (zoom - 1);
+    config.offsetY -= (mouseY - config.offsetY) * (zoom - 1);
+    config.scale *= zoom;
+    
+      $("#offsetY").val(config.offsetY);
+      $("#offsetX").val(config.offsetX);
+      $("#scale").val(config.scale);
+
+    draw_machine();
+});
+
+
+
+// Pan (arrastrar)
+canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        config.offsetX += (e.clientX - lastX) / config.scale;
+        config.offsetY += (e.clientY - lastY) / config.scale;
+        lastX = e.clientX;
+        lastY = e.clientY;  
+                
+
+      $("#offsetY").val(config.offsetY);
+      $("#offsetX").val(config.offsetX);
+      $("#scale").val(config.scale);
+
+        draw_machine();
     }
+});
 
-     config.offsetY= parseInt( $("#offsetY").val());
-     config.offsetX=  parseInt($("#offsetX").val());
-     config.scale=  parseFloat($("#scale").val());
+canvas.addEventListener('mouseup', () => {
+    isDragging = false;   
+});
 
-     guardar_parametros();
-     draw_machine();
-}
+canvas.addEventListener('mouseleave', () => {
+    isDragging = false;
+});

@@ -168,9 +168,7 @@ function aplicar_offset_scale(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(config.offsetX, config.offsetY);
-    ctx.scale(config.scale,config.scale);
-
-    
+    ctx.scale(config.scale,config.scale);    
 }
 
 function draw_image(src){
