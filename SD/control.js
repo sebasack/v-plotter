@@ -16,9 +16,9 @@ var ctx = canvas.getContext("2d");
 let isDragging = false;
 let lastX = 0;
 let lastY = 0;
-let offsetX = 0.0;
-let offsetY = 0.0;
-let scale =1.0;
+let offsetX = 0;
+let offsetY = 0;
+let scale =1;
 
 
 // creo la cola de tareas
@@ -49,8 +49,8 @@ canvas.addEventListener("dblclick", function (event) {
     x = event.clientX - rect.left;
     y = event.clientY - rect.top;
 
-    console.log(x+','+y);
 
+    // corrijo las coordenadas teniendo en cuenta el zoom y el offset
     w= screenToWorld(x, y);
 
 
@@ -219,8 +219,8 @@ function draw_machine() {
 
     aplicar_offset_scale();
 
-    // muestra el mapa de tension si esta habilitado
-    if (config.mostrar_mapa_tension) {        
+    // muestra el mapa de tension si esta habilitado y no hay zoom ni offset
+    if (config.mostrar_mapa_tension && scale == 1 && offsetX == 0 && offsetY== 0) {        
         draw_image("vPlotterMap.png");      
     }
 

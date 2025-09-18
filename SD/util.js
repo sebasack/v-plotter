@@ -172,7 +172,6 @@ function aplicar_offset_scale(){
 }
 
 function draw_image(src){
-
     const img = new Image();
     img.onload = function () {
         // Establecer transparencia global
