@@ -1,4 +1,4 @@
-$("#version").append(".c7"); // agrego la version del control.js
+$("#version").append(".c8"); // agrego la version del control.js
 
 machine_specs = {};
 pen = {};
@@ -12,34 +12,20 @@ var canvas = document.getElementById("machine");
 var ctx = canvas.getContext("2d");
 
 
-
 let isDragging = false;
 let lastX = 0;
 let lastY = 0;
 let offsetX = 0;
 let offsetY = 0;
 let scale =1;
+let pen_down = true; // down
 
 
 // creo la cola de tareas
-const tareas = new ColaTareasAuto();
+const tareas = new ColaTareas();
 
 
 
-
-function screenToWorld(x, y) {
-    return {
-        x: (x - offsetX) /scale,
-        y: (y - offsetY) / scale
-    };
-}
-
-function worldToScreen(x, y) {
-    return {
-        x: x * scale + offsetX,
-        y: y * scale +offsetY
-    };
-}
 
 
 // Add a click event listener to the canvas
@@ -84,13 +70,13 @@ canvas.addEventListener("dblclick", function (event) {
 
 function guardar_parametros() {
     const machine_specs_tmp = {
-        machineSizeMm_x : $("#machineSizeMm_x").val(),
-        machineSizeMm_y : $("#machineSizeMm_y").val(),
-        mmPerRev        : $("#mmPerRev").val(),
-        stepMultiplier  : $("#stepMultiplier").val(),
-        stepsPerRev     : $("#stepsPerRev").val(),
-      //currentMaxSpeed:  $("#currentMaxSpeed").val(),
-      //currentAcceleration:    $("#currentAcceleration").val()
+        machineSizeMm_x     : $("#machineSizeMm_x").val(),
+        machineSizeMm_y     : $("#machineSizeMm_y").val(),
+        mmPerRev            : $("#mmPerRev").val(),
+        stepMultiplier      : $("#stepMultiplier").val(),
+        stepsPerRev         : $("#stepsPerRev").val(),
+        currentMaxSpeed     : $("#currentMaxSpeed").val(),
+        currentAcceleration : $("#currentAcceleration").val()
     };
 
     const page_tmp = {
@@ -109,7 +95,7 @@ function guardar_parametros() {
         status : $("#pen_status").val(),
         downPosition : $("#downPosition").val(),
         upPosition: $("#upPosition").val(),
-        //penWidth : $("#penWidth").val()
+        penWidth : $("#penWidth").val()
     };
 
     const home_tmp = {
@@ -193,9 +179,10 @@ function recuperar_parametros() {
     $("#pen_y").val(pen.y);
     $("#pen_motorA").html(pen.motorA);
     $("#pen_motorB").html(pen.motorB);
-    $("#pen_status").val(pen.status)
+
     $("#downPosition").val(pen.downPosition);
     $("#upPosition").val(pen.upPosition);
+    $("#penWidth").val(pen.penWidth);    
 
     $("#home_pos_x").val(home.x);
     $("#home_pos_y").val(home.y);
@@ -211,16 +198,10 @@ function recuperar_parametros() {
 
 function draw_machine() {
 
-
-
-    // Cambiar dimensiones del canvas
-    canvas.width = machine_specs.machineSizeMm_x; // Ancho en pixeles    
-    canvas.height = machine_specs.machineSizeMm_y; // Alto en pixeles
-
     aplicar_offset_scale();
 
     // muestra el mapa de tension si esta habilitado y no hay zoom ni offset
-    if (config.mostrar_mapa_tension && scale == 1 && offsetX == 0 && offsetY== 0) {        
+    if (config.mostrar_mapa_tension /*&& scale == 1 && offsetX == (canvas.width - machine_specs.machineSizeMm_x)/2  && offsetY == 0*/) {        
         draw_image("vPlotterMap.png");      
     }
 
@@ -259,75 +240,6 @@ function draw_machine() {
     }
 }
 
-function draw_queue() {
-    //dibujo lo que esta guardado en la cola
-
-    lista = tareas.listarTareas();
-    //  console.log(lista);
-
-    pen_is_down = true;
-
-    //dibujo las tareas pendientes
-    ctx.strokeStyle ="#aaa";
-    ctx.beginPath();
-    for (const tarea of lista) {
-        gcode = tarea.nombre.split(',');
-        if (gcode[0]=='C14'){ // pen up
-            pen_is_down = false;
-        }else  if (gcode[0]=='C13'){ // pen down
-            pen_is_down = true;
-        }
-
-        // calculo las coordenadas cartesianas del punto
-        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
-        cartesianX = getCartesianX(gcode[1],gcode[2]);
-        x = Math.round(cartesianX*mmPerStep);
-        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
-        //  circle(x,y,2);
-
-        if (pen_is_down) {
-            ctx.lineTo(x,y);
-        } else {
-            ctx.moveTo(x,y);
-        }
-
-        //  console.log(tarea.nombre);
-    }
-    ctx.closePath();
-    ctx.stroke();
-
-
-    // dibujo las tareas terminadas
-    ctx.strokeStyle ="#000";
-    ctx.beginPath();
-    for (const tarea of tareas_completadas  ) {
-        gcode = tarea.split(',');
-        if (gcode[0]=='C14'){ // pen up
-            pen_is_down = false;
-        }else  if (gcode[0]=='C13'){ // pen down
-            pen_is_down = true;
-        }
-
-        // calculo las coordenadas cartesianas del punto
-        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
-        cartesianX = getCartesianX(gcode[1],gcode[2]);
-        x = Math.round(cartesianX*mmPerStep);
-        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
-        //  circle(x,y,2);
-
-        if (pen_is_down) {
-            ctx.lineTo(x, y);
-        } else {
-            ctx.moveTo(x, y);
-        }        
-    }
-
-  //  ctx.closePath();
-    ctx.stroke();
-
-
-};
-
 
 function update_pen_position(pen_position) {
     if (pen_position.result_ok) {
@@ -356,22 +268,20 @@ function update_pen_position(pen_position) {
 
 
 
-function actualizar_estado_pen(){    
-    $("#pen_status").val(pen.status);
-    if ( pen.status==1){
-        $("#cambiar_status_pen").html("Bajar");
+function actualizar_estado_pen(){
+    if (pen_down){
+        $("#cambiar_status_pen").html("Down");
     }else{
-        $("#cambiar_status_pen").html("Subir");
-    }   
-    guardar_parametros();
+        $("#cambiar_status_pen").html("Up");
+    }      
 }
 
 function cambiar_status_pen() {
-    if ( pen.status == 0){ // esta bajado, lo subo
+    if (pen_down){                                          // esta bajado, lo subo
         encolar_tarea("C14," + pen.upPosition + ",END");
-    }else{ // esta subido, lo bajo
+    }else{                                                  // esta subido, lo bajo
         encolar_tarea("C13," + pen.downPosition + ",END");
-    }    
+    }
 }
 
 
@@ -392,7 +302,26 @@ function update_machine_specs(specs) {
     $("#stepsPerRev").val(machine_specs.stepsPerRev);
     $("#downPosition").val(machine_specs.downPosition);
     $("#upPosition").val(machine_specs.upPosition);
+    $("#penWidth").val(pen.penWidth);
     draw_machine();
+}
+
+function resultado_tarea_ok(resultado){
+    if (!resultado.result_ok){
+        console.log("error enviando comando!");
+    }
+}
+
+function send_machine_specs(){
+    encolar_tarea("C25,NOMBRE_PG,END", resultado_tarea_ok);// cambio el nombre de la maquina, no esta implementado
+    encolar_tarea("C24," + machine_specs.machineSizeMm_x + "," + machine_specs.machineSizeMm_y + ",END", resultado_tarea_ok);// cambio el tamaño de la maquina
+    encolar_tarea("C29," + machine_specs.mmPerRev + ",END", resultado_tarea_ok);// cambio los mm por revolucion
+    encolar_tarea("C30," + machine_specs.stepsPerRev + ",END", resultado_tarea_ok);// cambio los pasos por revolucion
+    encolar_tarea("C37," + machine_specs.stepMultiplier + ",END", resultado_tarea_ok);// cambio el multiplicador de pasos
+    encolar_tarea("C45," + machine_specs.downPosition +"," + machine_specs.upPosition +",END", resultado_tarea_ok);// cambio las posisciones up y down del pen
+    encolar_tarea("C31," + machine_specs.currentMaxSpeed +",END", resultado_tarea_ok);// cambio la velocidad maxima actual
+    encolar_tarea("C32," + machine_specs.currentAcceleration +",END", resultado_tarea_ok);// cambio la aceleracion actual
+    encolar_tarea("C02," + pen.penWidth +",END", resultado_tarea_ok);// cambio el tamaño del pen   
 }
 
 async function ejecutar_comando(parametros, funcionExito) {
@@ -403,6 +332,7 @@ async function ejecutar_comando(parametros, funcionExito) {
 
     const ini = new Date();
 
+    // SE EJECUTA SI ESTA EN DESARROLLO
     if (location.href.includes('file://')){
         //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
         data= {'result_ok':false};
@@ -416,10 +346,10 @@ async function ejecutar_comando(parametros, funcionExito) {
             if (params[0]=='C13' ){ // down
                 data= {"result_ok":true};  
                 funcionExito=actualizar_estado_pen;    
-                pen.status = 0;
+                pen_down = true;
             }else if ( params[0]=='C14'){ // up
                 data= {"result_ok":true};    
-                pen.status = 1;
+                pen_down = false;
                 funcionExito=actualizar_estado_pen;        
             }else{
                 motorA = params[1];
@@ -444,6 +374,7 @@ async function ejecutar_comando(parametros, funcionExito) {
         return;
     }
 
+    // EJECUTO EN PRODUCCION
     try {
         const url = `/control?command=` + parametros;
         const response = await fetch(url);
@@ -470,7 +401,7 @@ async function ejecutar_comando(parametros, funcionExito) {
     }
 }
 
-// Event listener para el input de archivo
+// Event listener para el input de archivo GCODE
 document.getElementById('fileInput').addEventListener('change', function(event) {
     selectedFile = event.target.files[0];
     
@@ -506,13 +437,10 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
 
                         setTimeout(function () {
                             for (const tarea of cola) {
-                                if (tarea.includes(",END")) {
+                                if (tarea.startsWith("C") && tarea.includes(",END")) {
                                     encolar_tarea(tarea, update_pen_position);
                                 } else {
-                                    console.log(
-                                        " LA TAREA " +
-                                            tarea +
-                                            " NO PARECE SER GCODE!!"
+                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!"
                                     );
                                 }
                             }
@@ -537,9 +465,13 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
 
 function limpiar_cola() {
     tareas.limpiar();
-    tareas_completadas = [];
     draw_machine();
     $("#tareas").val(tareas.mostrar());
+}
+
+function limpiar_ejecutadas(){
+    tareas_completadas = [];
+    $("#log").val('');    
 }
 
 function encolar_tarea(tarea, funcionExito) {
@@ -569,6 +501,43 @@ function centrar_pagina_x() {
     guardar_parametros();
 }
 
+
+function init_tabs(){
+    const tabs = document.querySelectorAll('.tab');    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');            
+            // Desactivar todas las pestañas
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));            
+            // Activar la pestaña clickeada
+            tab.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+};
+
+function zoom_default(){
+
+    // Cambiar dimensiones del canvas
+    canvas.width = window.innerWidth * 0.70;
+    canvas.height = window.innerHeight;    
+
+    // centro la maquina en el canvas    
+    scale = 1;    
+    offsetX = (canvas.width - machine_specs.machineSizeMm_x)/2;
+    offsetY = 0;
+   // offsetY = (canvas.height - machine_specs.machineSizeMm_y)/2;
+
+}
+
+
+function resetZoom() {
+    zoom_default();
+    draw_machine();
+}
+
+
 function init() {
     if ($("#sdcard_present") != null) {
         //console.log("cargo edit");
@@ -583,20 +552,29 @@ function init() {
         cambiar_estado_cola();
     });
 
+
+    // inicio con la cola pausada
+    cambiar_estado_cola();
+
     $("#estado_cola").text(tareas.obtenerEstado().estado);
 
     // busco los parametros de la maquina y llamo a la funcion de mostrar maquina
     recuperar_parametros();
+
+
+    // precargo las tareas de inicio
+    encolar_tarea("C14," + pen.upPosition + ",END");   // subo el pen
+    encolar_tarea("C02," + pen.penWidth +",END", resultado_tarea_ok);// cambio el tamaño del pen   
+    encolar_tarea("C31," + machine_specs.currentMaxSpeed +",END", resultado_tarea_ok);// cambio la velocidad maxima actual
+    encolar_tarea("C32," + machine_specs.currentAcceleration +",END", resultado_tarea_ok);// cambio la aceleracion actual
+
+
+    zoom_default();
+
+    init_tabs();
+
+
     draw_machine();
-
-
-// Event listener para el input de archivo
-document.getElementById('svgInput').addEventListener('change', function() {
-    if (this.files.length > 0) {
-        processSVG();
-    }
-});
-
       
 }
 
@@ -769,9 +747,12 @@ canvas.addEventListener('mouseleave', () => {
 });
 
 
-function resetZoom() {
-    scale = 1;
-    offsetX = 0;
-    offsetY = 0;
-    draw_machine();
-}
+
+
+// Event listener para el input de archivo
+document.getElementById('svgInput').addEventListener('change', function() {
+    if (this.files.length > 0) {
+        processSVG();
+    }
+});
+

@@ -1,0 +1,7 @@
+ver que el mapa de tension aparezca bien
+
+importar svg
+elegir partes de svg
+generar gcode a partir de svg
+
+convertir imagenes a svg

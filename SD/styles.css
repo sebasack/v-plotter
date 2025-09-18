@@ -1,0 +1,31 @@
+  textarea {
+        width: 100%;
+        height: 90%;
+    }   
+    body {
+        font-family: Courier, monospaced;
+        font-size: 13px;
+    }
+    input{
+        padding:0px;
+        font-size:12px;
+        line-height:2px;
+        text-align:right;
+    }
+
+    /*estilos de tabs*/
+    .container {width: 230px;}
+    .tabs { display: flex; margin-bottom: -1px; }
+    .tab { 
+        padding: 5px 10px; 
+        cursor: pointer; 
+        border: 1px solid #ccc; 
+        border-bottom: none; 
+        background: #f0f0f0; 
+        margin-right: 5px; 
+        border-radius: 5px 5px 0 0; 
+    }
+    .tab.active { background: white; font-weight: bold; }
+    .content { border: 1px solid #ccc; padding: 5px;  }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }  

@@ -1,101 +1,112 @@
-<style>
-    textarea {
-        width: 100%;
-        height: 90%;
-    }
-    body {
-        font-family: Courier, monospaced;
-        font-size: 13px;
-    }  
-    input{
-        padding:0px;
-        font-size:12px;
-        line-height:2px;
-        text-align:right;
-    }
-</style>
-
 <video id="video" playsinline autoplay style="display: none"></video>
+
+<input id="pen_status" value="0" hidden/>
+<input id="offsetX" value="0.0" hidden>
+<input id="offsetY" value="0.0" hidden>
+<input id="scale" value="1.0" hidden>
 
 <table border="0" width="100%" height="100%">
     <tr>
         <td align="center" width="12%" valign="top">
-            <div style="text-align: left; font-size: 10px" id="version">version: h0</div> <br/>            
-            <fieldset>
-                <legend>Maquina</legend>
-                <table>
-                    <tr><td align="right">Ancho:</td><td><input id="machineSizeMm_x" size="4" value="882" onchange="guardar_parametros()"/></td></tr>
-                    <tr><td align="right">Alto:</td><td><input id="machineSizeMm_y" size="4" value="1100" onchange="guardar_parametros()"/></td></tr>
-                    <tr><td align="right">Mult. Pasos:</td><td><input id="stepMultiplier" size="4" value="8" onchange="guardar_parametros()"/></td></tr>
-                    <tr><td align="right">MM por rev.:</td><td><input id="mmPerRev" size="4" value="126" onchange="guardar_parametros()"/></td></tr>
-                    <tr><td align="right">Pasos x Rev.:</td><td><input id="stepsPerRev" size="4" value="4076" onchange="guardar_parametros()"/></td></tr>
-                </table>
-                <button type="button" onclick="encolar_tarea('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
-                <button type="button" onclick="encolar_tarea('releaseMotors')">Desenergizar motores</button> <br/>
-                <button type="button" onclick="encolar_tarea('restart')">Restart ESP32</button> <br/>
-            </fieldset>
-            <fieldset>
-                <legend>Pagina</legend>
-                <table>
-                    <tr><td align="right">Ancho:</td><td><input id="page_width" size="4" value="210" onchange="guardar_parametros()"/></td><td></td></tr>
-                    <tr><td align="right">Alto:</td><td><input id="page_height" size="4" value="297" onchange="guardar_parametros()"/></td><td></td></tr>
-                    <tr><td align="right">posX:</td><td><input id="page_pos_x" size="4" value="336" onchange="guardar_parametros()"/></td><td><button type="button" onclick="centrar_pagina_x()">Centrar</button> </td></tr>
-                    <tr><td align="right">posY:</td><td><input id="page_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td><td></td></tr>
-                </table>
-            </fieldset>
-            <fieldset>
-                <legend>Home</legend>
-                <table>
-                    <tr><td>X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/></td>
-                        <td rowspan="2"><button type="button" onclick="set_home()">Set Home</button></td></tr>
-                    <tr><td>Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td></tr>
-                </table>
-                
-            </fieldset>
-            <fieldset>
-                <legend>Pen</legend>
-                <table>
-                    <input id="pen_status" value="0" hidden/>
-                    <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
-                    <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
-                    <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td rowspan="2"> <button id="cambiar_status_pen" type="button" onclick="cambiar_status_pen()" value="0">Subir</button></td></tr>
-                    <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td></tr>               
-         
-                 </table>
-                <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
-                <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button> <br/>
-                Encolar movimientos:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
-               <hr>
-                <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
-                <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
-            </fieldset>  
-            <fieldset>
-                <legend>Enviar GCODE</legend>                
-                <input id="comando" size="25"/>
-                <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
-            </fieldset>
-            <fieldset>
-                <legend>Interface</legend>     
-                Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()">          
-                <button type="button" onclick="config_default()">Recargar Config default</button><br/>               
-            </fieldset>                 
+            <div style="text-align: left; font-size: 10px" id="version">version: h1</div> <br/>       
+            
+            <div class="container">
+                <div class="tabs">
+                    <div class="tab active" data-tab="input">Entrada</div>
+                    <div class="tab" data-tab="config">Config</div>
+                </div>        
+                <div class="content">
+                    <div class="tab-content active" id="input">    
+                        <fieldset>
+                            <legend>Interface</legend>
+                            Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()">    
+                            <button type="button" onclick="config_default()">Recargar Config default</button><br/>        
+                            <button type="button" onclick="resetZoom()">Reset zoom</button><br/>   
+                        </fieldset>                                                                
+                        <fieldset>
+                            <legend>Pen</legend>
+                            <table>                    
+                                <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
+                                <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
+                                <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td rowspan="2"> <button id="cambiar_status_pen" type="button" onclick="cambiar_status_pen()" value="0">Subir</button></td></tr>
+                                <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td></tr>       
+                                <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" onchange="guardar_parametros()"/></td></tr>                                                       
+                            </table>
+                            <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
+                            <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button> <br/>
+                            Encolar movimientos:<input type="checkbox" id="mover_gondola"  onchange="guardar_parametros()">          
+                        <hr>
+                            <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
+                            <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
+                        </fieldset>  
+                        <fieldset>
+                            <legend>Enviar GCODE</legend>                
+                            <input id="comando" size="25"/>
+                            <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
+                        </fieldset>         
+                    </div>            
+
+                    <div class="tab-content" id="config">                                    
+                        <fieldset>
+                            <legend>Maquina</legend>
+                            <table>
+                                <tr><td align="right">Ancho:</td><td><input id="machineSizeMm_x" size="4" value="882" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">Alto:</td><td><input id="machineSizeMm_y" size="4" value="1100" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">Mult. Pasos:</td><td><input id="stepMultiplier" size="4" value="8" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">MM por rev.:</td><td><input id="mmPerRev" size="4" value="126" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">Pasos x Rev.:</td><td><input id="stepsPerRev" size="4" value="4076" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">Vel. maxima:</td><td><input id="currentMaxSpeed" size="4" value="1000" onchange="guardar_parametros()"/></td></tr>
+                                <tr><td align="right">Aceleracion:</td><td><input id="currentAcceleration" size="4" value="400" onchange="guardar_parametros()"/></td></tr>
+                            </table>
+                            <button type="button" onclick="encolar_tarea('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
+                            <button type="button" onclick="send_machine_specs()">Enviar esp de la maquina</button><br/>
+                            <button type="button" onclick="encolar_tarea('releaseMotors')">Desenergizar motores</button> <br/>     
+                            <button type="button" onclick="encolar_tarea('restart')">Restart ESP32</button> <br/>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Pagina</legend>
+                            <table>
+                                <tr><td align="right">Ancho:</td><td><input id="page_width" size="4" value="210" onchange="guardar_parametros()"/></td><td></td></tr>
+                                <tr><td align="right">Alto:</td><td><input id="page_height" size="4" value="297" onchange="guardar_parametros()"/></td><td></td></tr>
+                                <tr><td align="right">posX:</td><td><input id="page_pos_x" size="4" value="336" onchange="guardar_parametros()"/></td><td><button type="button" onclick="centrar_pagina_x()">Centrar</button> </td></tr>
+                                <tr><td align="right">posY:</td><td><input id="page_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td><td></td></tr>
+                            </table>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Home</legend>
+                            <table>
+                                <tr><td>X:<input id="home_pos_x" size="4" value="441" onchange="guardar_parametros()"/></td>
+                                    <td rowspan="2"><button type="button" onclick="set_home()">Set Home</button></td></tr>
+                                <tr><td>Y:<input id="home_pos_y" size="4" value="200" onchange="guardar_parametros()"/></td></tr>
+                            </table>                
+                        </fieldset>
+                    </div>
+                </div>
+            </div>           
+           
         </td>
-        <td align="center"  width="25%" valign="center">
-            <canvas id="machine" width="0" height="0"></canvas>
+        <td align="center"  width="70%" valign="top">
+            <canvas id="machine" width="100%" height="100%"></canvas>
         </td>
         <td align="center"  valign="top">       
             <table width="100%">
-                <tr><td  align="left"><div id ="estado_cola"></div></td>
-                    <td> <button type="button" onclick="limpiar_cola()">Limpiar Cola</button>
+                <tr><td align="left"><div id ="estado_cola"></div></td>
+                    <td align="right">
                          <input type="file" id="fileInput" style="display: none;">
-                         <button class="btn" onclick="document.getElementById('fileInput').click()">Importar Cola</button>
+                         <button class="btn" onclick="document.getElementById('fileInput').click()">Importar</button>
+                         <button type="button" onclick="limpiar_cola()">Limpiar</button>
                     </td>
                 </tr>
             </table>                          
             <textarea readonly id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
+             <table width="100%">
+                <tr><td align="left">Tareas ejecutadas:</td><td align="right"><button type="button" onclick="limpiar_ejecutadas()">Limpiar</button></td></tr>
+            </table>                                   
             <textarea readonly id="log" name="log" rows="20" cols="50"> </textarea><br/>
         </td>
     </tr>
 </table>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/styles.css">
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/util.js"></script>

@@ -1,9 +1,9 @@
-$("#version").append(".u1"); // agrego la version de util.js
+$("#version").append(".u3"); // agrego la version de util.js
 
 //////////////////////////////////////////////// COLA ////////////////////////////////////////////////
 
 
-class ColaTareasAuto {
+class ColaTareas {
     constructor() {
         this.tareas = [];
         this.procesando = false;
@@ -16,6 +16,15 @@ class ColaTareasAuto {
             nombre,
             id: Date.now()
         };
+
+        // veo si la tarea ya esta cargada y es la proxima, si esta no la recargo
+        if (this.tareas.length >0){           
+            if (this.tareas[this.tareas.length-1].nombre == nombre){
+                console.log("La tarea "+nombre+ " ya esta cargada!");
+                return false;
+            }
+        }
+        
 
         this.tareas.push(tareaObj);
         //console.log(`➕ Tarea agregada: ${nombre}`);
@@ -160,6 +169,20 @@ function formatTime(date) {
 }
 
 
+function screenToWorld(x, y) {
+    return {
+        x: (x - offsetX) /scale,
+        y: (y - offsetY) / scale
+    };
+}
+
+function worldToScreen(x, y) {
+    return {
+        x: x * scale + offsetX,
+        y: y * scale +offsetY
+    };
+}
+
 //////////////////////////////////////////////// DRAW ////////////////////////////////////////////////
 
 
@@ -236,3 +259,75 @@ function text(text, x, y,line_color='#000000') {
     ctx.fillStyle = line_color;
     ctx.fillText(text, x, y);
 }
+
+
+function draw_queue() {
+    //dibujo lo que esta guardado en la cola
+
+    lista = tareas.listarTareas();
+    //  console.log(lista);
+
+    pen_is_down = true;
+
+    ctx.lineWidth = pen.penWidth;
+
+    //dibujo las tareas pendientes
+    ctx.strokeStyle ="#aaa";
+    ctx.beginPath();
+    for (const tarea of lista) {
+        gcode = tarea.nombre.split(',');
+        if (gcode[0]=='C14'){ // pen up
+            pen_is_down = false;
+        }else  if (gcode[0]=='C13'){ // pen down
+            pen_is_down = true;
+        }
+
+        // calculo las coordenadas cartesianas del punto
+        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
+        cartesianX = getCartesianX(gcode[1],gcode[2]);
+        x = Math.round(cartesianX*mmPerStep);
+        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
+        //  circle(x,y,2);
+
+        if (pen_is_down) {
+            ctx.lineTo(x,y);
+        } else {
+            ctx.moveTo(x,y);
+        }
+
+        //  console.log(tarea.nombre);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+
+    // dibujo las tareas terminadas
+    ctx.strokeStyle ="#000";
+    ctx.beginPath();
+    for (const tarea of tareas_completadas  ) {
+        gcode = tarea.split(',');
+        if (gcode[0]=='C14'){ // pen up
+            pen_is_down = false;
+        }else  if (gcode[0]=='C13'){ // pen down
+            pen_is_down = true;
+        }
+
+        // calculo las coordenadas cartesianas del punto
+        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
+        cartesianX = getCartesianX(gcode[1],gcode[2]);
+        x = Math.round(cartesianX*mmPerStep);
+        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
+        //  circle(x,y,2);
+
+        if (pen_is_down) {
+            ctx.lineTo(x, y);
+        } else {
+            ctx.moveTo(x, y);
+        }        
+    }
+
+  //  ctx.closePath();
+    ctx.stroke();
+
+
+};
