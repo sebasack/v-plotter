@@ -16,6 +16,9 @@ var ctx = canvas.getContext("2d");
 let isDragging = false;
 let lastX = 0;
 let lastY = 0;
+let offsetX = 0.0;
+let offsetY = 0.0;
+let scale =1.0;
 
 
 // creo la cola de tareas
@@ -26,15 +29,15 @@ const tareas = new ColaTareasAuto();
 
 function screenToWorld(x, y) {
     return {
-        x: (x - $("#offsetX").val()) /$("#scale").val(),
-        y: (y - $("#offsetY").val()) / $("#scale").val()
+        x: (x - offsetX) /scale,
+        y: (y - offsetY) / scale
     };
 }
 
 function worldToScreen(x, y) {
     return {
-        x: x * $("#scale").val() + $("#offsetX").val(),
-        y: y * $("#scale").val() +$("#offsetY").val()
+        x: x * scale + offsetX,
+        y: y * scale +offsetY
     };
 }
 
@@ -46,11 +49,15 @@ canvas.addEventListener("dblclick", function (event) {
     x = event.clientX - rect.left;
     y = event.clientY - rect.top;
 
+    console.log(x+','+y);
+
+    w= screenToWorld(x, y);
+
 
     if (config.mover_gondola) {
         // calculo los datos de la nueva posicion
-        pen_x = Math.round(x);
-        pen_y = Math.round(y);
+        pen_x = Math.round(w.x);
+        pen_y = Math.round(w.y);
 
         motorA = calc_motorA(pen_x, pen_y);
         motorB = calc_motorB(pen_x, pen_y);
@@ -59,8 +66,8 @@ canvas.addEventListener("dblclick", function (event) {
         encolar_tarea('C01,'+motorA+','+motorB+',END',update_pen_position);
     }else{
          // guardo la nueva posicion
-        pen.x = Math.round(x);
-        pen.y = Math.round(y);
+        pen.x = Math.round(w.x);
+        pen.y = Math.round(w.y);
 
         $("#pen_x").val(pen.x);
         $("#pen_y").val(pen.y);
@@ -113,9 +120,6 @@ function guardar_parametros() {
     const config_tmp = {
         mostrar_mapa_tension: $("#mostrar_mapa_tension").prop("checked"),
         mover_gondola: $("#mover_gondola").prop("checked"),
-        offsetX:parseFloat($("#offsetX").val()),
-        offsetY:parseFloat($("#offsetY").val()),
-        scale:parseFloat($("#scale").val()),
     };
 
     machine_specs = machine_specs_tmp;
@@ -198,10 +202,6 @@ function recuperar_parametros() {
 
     $("#mostrar_mapa_tension").prop("checked", config.mostrar_mapa_tension);
     $("#mover_gondola").prop("checked", config.mover_gondola);
-
-    $("#offsetY").val(parseFloat(config.offsetY));
-    $("#offsetX").val(parseFloat(config.offsetX));
-    $("#scale").val(parseFloat(config.scale));
 
 
     actualizar_estado_pen();
@@ -519,7 +519,7 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
                             $("#estado_cola").text(
                                 tareas.obtenerEstado().estado
                             );
-                            draw_queue();
+                            draw_machine();
                         }, 100);
 
                         //  console.log( cola);
@@ -731,13 +731,10 @@ canvas.addEventListener('wheel', (e) => {
     const zoom = Math.exp(wheel * zoomIntensity);
     
     // Calcular nuevo scale y offset
-    config.offsetX -= (mouseX - config.offsetX) * (zoom - 1);
-    config.offsetY -= (mouseY - config.offsetY) * (zoom - 1);
-    config.scale *= zoom;
+    offsetX -= (mouseX - offsetX) * (zoom - 1);
+    offsetY -= (mouseY - offsetY) * (zoom - 1);
+    scale *= zoom;
     
-      $("#offsetY").val(config.offsetY);
-      $("#offsetX").val(config.offsetX);
-      $("#scale").val(config.scale);
 
     draw_machine();
 });
@@ -753,15 +750,11 @@ canvas.addEventListener('mousedown', (e) => {
 
 canvas.addEventListener('mousemove', (e) => {
     if (isDragging) {
-        config.offsetX += (e.clientX - lastX) / config.scale;
-        config.offsetY += (e.clientY - lastY) / config.scale;
+        offsetX += (e.clientX - lastX) / scale;
+        offsetY += (e.clientY - lastY) / scale;
         lastX = e.clientX;
         lastY = e.clientY;  
                 
-
-      $("#offsetY").val(config.offsetY);
-      $("#offsetX").val(config.offsetX);
-      $("#scale").val(config.scale);
 
         draw_machine();
     }
@@ -774,3 +767,11 @@ canvas.addEventListener('mouseup', () => {
 canvas.addEventListener('mouseleave', () => {
     isDragging = false;
 });
+
+
+function resetZoom() {
+    scale = 1;
+    offsetX = 0;
+    offsetY = 0;
+    draw_machine();
+}
