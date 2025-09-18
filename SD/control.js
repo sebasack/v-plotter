@@ -95,7 +95,7 @@ function guardar_parametros() {
         status : parseInt($("#pen_status").val()),
         downPosition : parseInt($("#downPosition").val()),
         upPosition: parseInt($("#upPosition").val()),
-        penWidth : parseInt($("#penWidth").val())
+        penWidth : parseFloat($("#penWidth").val())
     };
 
     const home_tmp = {
