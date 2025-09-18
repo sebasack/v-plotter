@@ -1,9 +1,5 @@
-<video id="video" playsinline autoplay style="display: none"></video>
 
-<input id="pen_status" value="0" hidden/>
-<input id="offsetX" value="0.0" hidden>
-<input id="offsetY" value="0.0" hidden>
-<input id="scale" value="1.0" hidden>
+<video id="video" playsinline autoplay style="display: none"></video>
 
 <table border="0" width="100%" height="100%">
     <tr>
@@ -13,7 +9,7 @@
             <div class="container">
                 <div class="tabs">
                     <div class="tab active" data-tab="input">Entrada</div>
-                    <div class="tab" data-tab="config">Config</div>
+                    <div class="tab" data-tab="config">Configuracion</div>
                 </div>        
                 <div class="content">
                     <div class="tab-content active" id="input">    
@@ -28,7 +24,8 @@
                             <table>                    
                                 <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
                                 <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
-                                <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td rowspan="2"> <button id="cambiar_status_pen" type="button" onclick="cambiar_status_pen()" value="0">Subir</button></td></tr>
+                                <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" onchange="guardar_parametros()"/></td><td rowspan="2">
+                                     <button id="cambiar_status_pen" type="button" onclick="cambiar_status_pen()" title="Click para cambiar el estado" >Down</button></td></tr>
                                 <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td></tr>       
                                 <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" onchange="guardar_parametros()"/></td></tr>                                                       
                             </table>
@@ -86,11 +83,11 @@
            
         </td>
         <td align="center"  width="70%" valign="top">
-            <canvas id="machine" width="100%" height="100%"></canvas>
+            <canvas id="machine" width="100%" height="100%" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
         </td>
         <td align="center"  valign="top">       
             <table width="100%">
-                <tr><td align="left"><div id ="estado_cola"></div></td>
+                <tr><td align="left"><div id ="estado_cola" title="Haga click para pausar o despausar la cola"></div></td>
                     <td align="right">
                          <input type="file" id="fileInput" style="display: none;">
                          <button class="btn" onclick="document.getElementById('fileInput').click()">Importar</button>
@@ -106,7 +103,6 @@
         </td>
     </tr>
 </table>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/styles.css">
+<link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/webcam.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/util.js"></script>
+<script src="util.js"></script>

@@ -1,4 +1,4 @@
-ver que el mapa de tension aparezca bien
+
 
 importar svg
 elegir partes de svg
