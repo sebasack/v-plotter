@@ -194,17 +194,24 @@ function aplicar_offset_scale(){
     ctx.scale(scale,scale);    
 }
 
+
+
 function draw_image(src){
+
     const img = new Image();
     img.onload = function () {
+
         // Establecer transparencia global
         ctx.globalAlpha = 0.1;
         // Calcular dimensiones manteniendo la proporcion
         const aspectRatio = img.height / (img.width + 30);
-        const newWidth = canvas.width + 30;
-        const newHeight = (canvas.width + 30) * aspectRatio;
+        const newWidth = machine_specs.machineSizeMm_x + 30;
+        const newHeight = ( machine_specs.machineSizeMm_y+ 30) * aspectRatio;
+   
         // Dibujar la imagen manteniendo proporcion
-        ctx.drawImage(img, -15, -15, newWidth, newHeight);
+        s = worldToScreen(-15, -20);
+        ctx.drawImage(img,s.x, s.y, newWidth*scale, newHeight*scale);
+
         // Restaurar opacidad para las lineas
         ctx.globalAlpha = 1.0;
     };

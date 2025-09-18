@@ -70,37 +70,37 @@ canvas.addEventListener("dblclick", function (event) {
 
 function guardar_parametros() {
     const machine_specs_tmp = {
-        machineSizeMm_x     : $("#machineSizeMm_x").val(),
-        machineSizeMm_y     : $("#machineSizeMm_y").val(),
-        mmPerRev            : $("#mmPerRev").val(),
-        stepMultiplier      : $("#stepMultiplier").val(),
-        stepsPerRev         : $("#stepsPerRev").val(),
-        currentMaxSpeed     : $("#currentMaxSpeed").val(),
-        currentAcceleration : $("#currentAcceleration").val()
+        machineSizeMm_x     : parseInt($("#machineSizeMm_x").val()),
+        machineSizeMm_y     : parseInt($("#machineSizeMm_y").val()),
+        mmPerRev            : parseInt($("#mmPerRev").val()),
+        stepMultiplier      : parseInt($("#stepMultiplier").val()),
+        stepsPerRev         : parseInt($("#stepsPerRev").val()),
+        currentMaxSpeed     : parseInt($("#currentMaxSpeed").val()),
+        currentAcceleration : parseInt($("#currentAcceleration").val())
     };
 
     const page_tmp = {
-        page_width  : $("#page_width").val(),
-        page_height : $("#page_height").val(),
-        page_pos_x  : $("#page_pos_x").val(),
-        page_pos_y  : $("#page_pos_y").val(),
+        page_width  : parseInt($("#page_width").val()),
+        page_height : parseInt($("#page_height").val()),
+        page_pos_x  : parseInt($("#page_pos_x").val()),
+        page_pos_y  : parseInt($("#page_pos_y").val()),
     }
 
 
     const pen_tmp = {
-        x : $("#pen_x").val(),
-        y : $("#pen_y").val(),
-        motorA : $("#pen_motorA").html(),
-        motorB : $("#pen_motorB").html(),
-        status : $("#pen_status").val(),
-        downPosition : $("#downPosition").val(),
-        upPosition: $("#upPosition").val(),
-        penWidth : $("#penWidth").val()
+        x : parseInt($("#pen_x").val()),
+        y : parseInt($("#pen_y").val()),
+        motorA : parseInt($("#pen_motorA").html()),
+        motorB : parseInt($("#pen_motorB").html()),
+        status : parseInt($("#pen_status").val()),
+        downPosition : parseInt($("#downPosition").val()),
+        upPosition: parseInt($("#upPosition").val()),
+        penWidth : parseInt($("#penWidth").val())
     };
 
     const home_tmp = {
-        x: $("#home_pos_x").val(),
-        y: $("#home_pos_y").val(),
+        x: parseInt($("#home_pos_x").val()),
+        y: parseInt($("#home_pos_y").val()),
     };
 
     const config_tmp = {
@@ -198,16 +198,15 @@ function recuperar_parametros() {
 
 function draw_machine() {
 
-    aplicar_offset_scale();
-
-    // muestra el mapa de tension si esta habilitado y no hay zoom ni offset
-    if (config.mostrar_mapa_tension /*&& scale == 1 && offsetX == (canvas.width - machine_specs.machineSizeMm_x)/2  && offsetY == 0*/) {        
-        draw_image("vPlotterMap.png");      
-    }
-
-
-
     if (canvas.getContext) {
+
+        aplicar_offset_scale();
+
+            // muestra el mapa de tension si esta habilitado
+        if (config.mostrar_mapa_tension) {        
+            draw_image("vPlotterMap.png");      
+        }
+
         // dibujo el contorno de la maquina maquina
         rectangle(1,1,machine_specs.machineSizeMm_x-1,machine_specs.machineSizeMm_y-1,'#000000',"#FFE6C9");
         //text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
@@ -233,9 +232,7 @@ function draw_machine() {
 
         // dibujo los hilos de los motores a la gondola
         line(0, 0, pen.x, pen.y);
-        line(machine_specs.machineSizeMm_x, 0, pen.x, pen.y);
-      
-    
+        line(machine_specs.machineSizeMm_x, 0, pen.x, pen.y);                                 
         ctx.restore();
     }
 }
