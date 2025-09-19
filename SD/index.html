@@ -2,38 +2,51 @@
 <html>
     <head>
         <title>Control v-plotter SDs</title>
-        <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
-
+        <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
         <script>
-            $(function () {
-                //cdn = "https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/";
-                cdn = "";
-
-                // Cargar HTML
-                $.get(cdn + "control.html")
-                    .done(function (html) {
-                        $("#control-placeholder").html(html);
-                        // Cargar y ejecutar JS
-                        $.getScript(cdn + "control.js")
-                            .done(function () {
-                                init();
-                            })
-                            .fail(function (jqxhr, settings, exception) {
-                                console.error(
-                                    "Error al cargar JavaScript:",
-                                    exception
-                                );
+            function cargarRecursos(recursos, alTerminar) {
+                function cargarSiguiente(i) {
+                    if (i >= recursos.length) {
+                        if (alTerminar) alTerminar();
+                        return;
+                    }
+                    const recurso = recursos[i];                    
+                    if (recurso.tipo === 'css') {
+                        $('<link>', { rel: 'stylesheet', href: recurso.archivo }).appendTo('head').on('load', function() {
+                            cargarSiguiente(i + 1);
+                        });
+                    } else if (recurso.tipo === 'js') {
+                        $.getScript(recurso.archivo)
+                            .done(function() {cargarSiguiente(i + 1);})
+                            .fail(function() {
+                                console.warn('Error cargando JS, continuando...');
+                                cargarSiguiente(i + 1);
                             });
-                    })
-                    .fail(function (jqxhr, textStatus, errorThrown) {
-                        console.error("Error al cargar HTML:", errorThrown);
-                    });
+                    } else if (recurso.tipo === 'html' && recurso.contenedor) {
+                        $(recurso.contenedor).load(recurso.archivo, function() { cargarSiguiente(i + 1); });
+                    } else {
+                        cargarSiguiente(i + 1);
+                    }
+                }                
+                cargarSiguiente(0);
+            }
+            $(function() {
+                /*cdn = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';*/
+                cdn = "";
+                cargarRecursos([
+                    { tipo: 'html', archivo: cdn + 'control.html', contenedor: '#control-placeholder' },
+                    { tipo: 'css', archivo: cdn + 'styles.css' },
+                    { tipo: 'js', archivo: cdn + 'util.js' },
+                    { tipo: 'js', archivo: cdn + 'control.js' }
+                ], function() {
+                    init();
+                });
             });
         </script>
     </head>
     <body>
-        <div id="control-placeholder">loading html...</div>
-        <a href="/" target="_self">Cargar controlador desde CDN</a><br /><br />
-        <div id="sdcard_present"></div>
+        <div id='control-placeholder'>loading html...</div>
+        <a href='/' target='_self'>Cargar controlador desde CDN</a><br /><br />
+        <div id='sdcard_present'></div>
     </body>
 </html>

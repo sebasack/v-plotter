@@ -196,24 +196,38 @@ function aplicar_offset_scale(){
 
 
 
-function draw_image(src){
+function draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1){
 
     const img = new Image();
     img.onload = function () {
 
-        // Establecer transparencia global
-        ctx.globalAlpha = 0.1;
+           // Establecer transparencia global
+        ctx.globalAlpha =globalAlpha;
+      
         // Calcular dimensiones manteniendo la proporcion
-        const aspectRatio = img.height / (img.width + 30);
-        const newWidth = machine_specs.machineSizeMm_x + 30;
-        const newHeight = ( machine_specs.machineSizeMm_y+ 30) * aspectRatio;
+        aspectRatio = 1;
+        if(!width){
+            width= img.width;
+        }
+
+        if(!height){
+            height= img.height;
+        }
+
+        if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
+            height=width;
+            aspectRatio = img.height / img.width;
+        }        
    
         // Dibujar la imagen manteniendo proporcion
-        s = worldToScreen(-15, -20);
-        ctx.drawImage(img,s.x, s.y, newWidth*scale, newHeight*scale);
+        s = worldToScreen(x, y);
+        ctx.drawImage(img,s.x, s.y, width*scale, (height * aspectRatio)*scale);
+
 
         // Restaurar opacidad para las lineas
         ctx.globalAlpha = 1.0;
+
+       
     };
     img.src = src;
 }
@@ -242,13 +256,15 @@ function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {
 
 function circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle =line_color;
+    ctx.strokeStyle =line_color;    
+    ctx.beginPath(); 
+    ctx.arc(x, y, radio, 0, 2 * Math.PI);     
     if (color){
-        ctx.fillStyle = color;
-    }
-    ctx.beginPath();
-    ctx.arc(x, y, radio, 0, 2 * Math.PI);
+        ctx.fillStyle =color;
+        ctx.fill(); 
+    }     
     ctx.stroke();
+   
 }
 
 function rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
@@ -307,6 +323,8 @@ function draw_queue() {
     ctx.closePath();
     ctx.stroke();
 
+
+    pen_is_down = true;
 
     // dibujo las tareas terminadas
     ctx.strokeStyle ="#000";

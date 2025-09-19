@@ -57,44 +57,70 @@ void handleRoot(){
   server.send(200);
 
   //--------------------------------------------
-// trae la pagina web y los js desde la CDN de github, los archivos usados estan en web-control
-
-  sprintf(temp,
-          "\
- <!DOCTYPE html>\
+// trae la pagina web y los js desde la CDN de github, los archivos usados estan en SD
+// divido en dos el html por que la variable temp no puede tener mas de 1000 caracteres
+  sprintf(temp,"\
+<!DOCTYPE html>\
 <html>\
   <head>\
+    <meta charset='utf-8'/>\
     <title>Control v-plotter CDN</title>\
     <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
-    <script>\
-        $(function () {\
-            $.get('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.html').done(function(html) {\
-                $('#control-placeholder').html(html);\
-                $.getScript('https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/control.js').done(function() {\
-                    init();\
-                }).fail(function(jqxhr, settings, exception) {\
-                    console.error('Error al cargar JavaScript:', exception);\
-                });\
-              }).fail(function(jqxhr, textStatus, errorThrown) {\
-                  console.error('Error al cargar HTML:', errorThrown);\
-              });\
-        });\
+    <script> \
+      function cargarRecursos(recursos, alTerminar){\
+        function cargarSiguiente(i) {\
+          if (i >= recursos.length) {\
+            if (alTerminar) alTerminar();\
+            return;\
+          }\
+          const recurso = recursos[i];\
+          if (recurso.tipo === 'css') {\
+            $('<link>', { rel: 'stylesheet', href: recurso.archivo }).appendTo('head').on('load',function() {\
+              cargarSiguiente(i + 1);\
+            });\
+          } else if (recurso.tipo === 'js') {\
+              $.getScript(recurso.archivo)\
+                  .done(function() {cargarSiguiente(i + 1);})\
+                  .fail(function() {\
+                      console.warn('Error cargando JS, continuando...');\
+                      cargarSiguiente(i + 1);\
+                  });");          
+  server.sendContent(temp);   
+
+  sprintf(temp,"\
+          } else if (recurso.tipo === 'html' && recurso.contenedor) {\
+              $(recurso.contenedor).load(recurso.archivo, function() { cargarSiguiente(i + 1);});\
+          } else {\
+              cargarSiguiente(i + 1);\
+          }\
+        }\
+        cargarSiguiente(0);\
+      }\
+      $(function() {\
+          cdn='https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';\
+          cargarRecursos([\
+              {tipo:'html',archivo:cdn+'control.html',contenedor:'#control-placeholder'},\
+              {tipo:'css',archivo:cdn+'styles.css'},\
+              {tipo:'js',archivo:cdn+'util.js'},\
+              {tipo:'js',archivo:cdn+'control.js' }\
+          ],function(){\
+              init();\
+          });\
+      });\
     </script>\
   </head>\
   <body>\
-    <div id='control-placeholder'>loading html...</div>\
-");
-
+      <div id='control-placeholder'>loading html...</div>");
   server.sendContent(temp);
 
   if (cardPresent){   
       // quitar estas lineas una vez que resuelva el link dinamico
-      sprintf(temp,"<a href='index.html' target='_self'>Cargar controlador desde SD</a><br><br>");    
+      sprintf(temp,"      <a href='index.html' target='_self'>Cargar controlador desde SD</a><br><br>");    
       server.sendContent(temp);     
 
-      sprintf(temp,"<div id='sdcard_present'>tarjeta sd encontrada</div>");    
+      sprintf(temp,"      <div id='sdcard_present'>tarjeta sd encontrada</div>");    
   }else{
-      sprintf(temp,"<div>Tarjeta SD no encontrada!</div>");        
+      sprintf(temp,"      <div>Tarjeta SD no encontrada!</div>");        
   }
     
   server.sendContent(temp);     

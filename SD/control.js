@@ -28,46 +28,6 @@ const tareas = new ColaTareas();
 
 
 
-// Add a click event listener to the canvas
-canvas.addEventListener("dblclick", function (event) {
-    // Calculate the mouse coordinates relative to the canvas
-    const rect = canvas.getBoundingClientRect();
-    x = event.clientX - rect.left;
-    y = event.clientY - rect.top;
-
-
-    // corrijo las coordenadas teniendo en cuenta el zoom y el offset
-    w= screenToWorld(x, y);
-
-
-    if (config.mover_gondola) {
-        // calculo los datos de la nueva posicion
-        pen_x = Math.round(w.x);
-        pen_y = Math.round(w.y);
-
-        motorA = calc_motorA(pen_x, pen_y);
-        motorB = calc_motorB(pen_x, pen_y);
-
-        // envio la terea, cuando termine actualiza los datos de posicion
-        encolar_tarea('C01,'+motorA+','+motorB+',END',update_pen_position);
-    }else{
-         // guardo la nueva posicion
-        pen.x = Math.round(w.x);
-        pen.y = Math.round(w.y);
-
-        $("#pen_x").val(pen.x);
-        $("#pen_y").val(pen.y);
-
-        pen.motorA = calc_motorA(pen.x, pen.y);
-        pen.motorB = calc_motorB(pen.x, pen.y);
-
-        $("#pen_motorA").html(pen.motorA);
-        $("#pen_motorB").html(pen.motorB);
-
-        guardar_parametros();
-    }
-});
-
 function guardar_parametros() {
     const machine_specs_tmp = {
         machineSizeMm_x     : parseInt($("#machineSizeMm_x").val()),
@@ -196,15 +156,17 @@ function recuperar_parametros() {
 }
 
 
+
+
 function draw_machine() {
 
     if (canvas.getContext) {
 
         aplicar_offset_scale();
-
-            // muestra el mapa de tension si esta habilitado
+       
+        // muestra el mapa de tension si esta habilitado
         if (config.mostrar_mapa_tension) {        
-            draw_image("vPlotterMap.png");      
+            draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,machine_specs.machineSizeMm_x + 30,false,true,0.1);  
         }
 
         // dibujo el contorno de la maquina maquina
@@ -223,7 +185,11 @@ function draw_machine() {
 
         // dibujo la gondola y el marcador
         rectangle(pen.x - 10, pen.y - 10, 20, 30, "#000000", "#ccc");
-        circle(pen.x, pen.y, 3, "#000000", "#ffffff");
+        circle(pen.x, pen.y, 3, "#000000", "#000000");
+        if (!pen_down){ // el pen esta up, lo dibujo levantado           
+            circle(pen.x, pen.y-10, 3, "#000000", "#000000");
+            rectangle(pen.x-3, pen.y-10,6,10,'#000000',"#000000");
+        }
 
         //dibujo los motores
         rectangle(-20,-20,20,20,'#000000',"#000000");
@@ -258,7 +224,6 @@ function update_pen_position(pen_position) {
         $("#pen_x").val(pen.x);
         $("#pen_y").val(pen.y);
 
-        draw_machine();
         guardar_parametros();
     }
 }
@@ -270,14 +235,15 @@ function actualizar_estado_pen(){
         $("#cambiar_status_pen").html("Down");
     }else{
         $("#cambiar_status_pen").html("Up");
-    }      
+    }  
+    draw_machine();    
 }
 
 function cambiar_status_pen() {
     if (pen_down){                                          // esta bajado, lo subo
-        encolar_tarea("C14," + pen.upPosition + ",END");
+        encolar_tarea("C14,END");
     }else{                                                  // esta subido, lo bajo
-        encolar_tarea("C13," + pen.downPosition + ",END");
+        encolar_tarea("C13,END");
     }
 }
 
@@ -342,8 +308,8 @@ async function ejecutar_comando(parametros, funcionExito) {
             let params = parametros.split(","); // Splits by space
             if (params[0]=='C13' ){ // down
                 data= {"result_ok":true};  
-                funcionExito=actualizar_estado_pen;    
                 pen_down = true;
+                funcionExito=actualizar_estado_pen;    
             }else if ( params[0]=='C14'){ // up
                 data= {"result_ok":true};    
                 pen_down = false;
@@ -354,9 +320,7 @@ async function ejecutar_comando(parametros, funcionExito) {
                 data = { result_ok: true, motorA: motorA, motorB: motorB };
             }
             tareas_completadas.push(parametros);
-        }
-
-    
+        }   
 
         // logueo llamado y respuesta
         const fin = new Date();        
@@ -374,16 +338,21 @@ async function ejecutar_comando(parametros, funcionExito) {
     // EJECUTO EN PRODUCCION
     try {
         const url = `/control?command=` + parametros;
+
+        $("#log").val( formatTime(ini)+ " "+parametros +"\n" +$("#log").val());
+
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
 
             // logueo llamado y respuesta
             const fin = new Date();
-            $("#log").val( formatTime(ini)+ " "+parametros + "\n" + formatTime(ini)+ + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
+            $("#log").val(formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
 
             //actualizo la lista de tareas
             $("#tareas").val(tareas.mostrar());
+
+            tareas_completadas.push(parametros);
             // Llama a la función de éxito si existe
             if (funcionExito && typeof funcionExito === "function") {
                 funcionExito(data);
@@ -398,67 +367,6 @@ async function ejecutar_comando(parametros, funcionExito) {
     }
 }
 
-// Event listener para el input de archivo GCODE
-document.getElementById('fileInput').addEventListener('change', function(event) {
-    selectedFile = event.target.files[0];
-    
-    if (selectedFile) {
-        
-        const reader = new FileReader();
-    
-        reader.onload = function(e) {
-            // Crear objeto con información del archivo
-            const fileData = {
-                name: selectedFile.name,
-                type: selectedFile.type,
-                size: selectedFile.size,
-                lastModified: selectedFile.lastModified,
-                content: e.target.result, // Contenido en base64 o texto
-                arrayBuffer: null
-            };
-
-                if (selectedFile.type.startsWith("text/")) {
-                    const arrayBufferReader = new FileReader();
-                    arrayBufferReader.onload = function (arrayBufferEvent) {
-                        fileData.arrayBuffer = arrayBufferEvent.target.result;
-
-                        cola = fileData.content.split("\n");
-
-                        tareas.limpiar();
-                        tareas_completadas = [];
-
-                        tareas.pausar();
-                        $("#estado_cola").text(
-                            tareas.obtenerEstado().estado + " (IMPORTANDO)"
-                        );
-
-                        setTimeout(function () {
-                            for (const tarea of cola) {
-                                if (tarea.startsWith("C") && tarea.includes(",END")) {
-                                    encolar_tarea(tarea, update_pen_position);
-                                } else {
-                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!"
-                                    );
-                                }
-                            }
-                            $("#estado_cola").text(
-                                tareas.obtenerEstado().estado
-                            );
-                            draw_machine();
-                        }, 100);
-
-                        //  console.log( cola);
-                    };
-                    arrayBufferReader.readAsArrayBuffer(selectedFile);
-                }
-            };
-
-            // Leer el archivo según su tipo
-            if (selectedFile.type.startsWith("text/")) {
-                reader.readAsText(selectedFile);
-            }
-        }
-    });
 
 function limpiar_cola() {
     tareas.limpiar();
@@ -487,6 +395,7 @@ function cambiar_estado_cola() {
 
 
 function return_to_home() {
+    encolar_tarea("C14,END"); // levanto el pen antes de moverlo
     motorA = calc_motorA(home.x, home.y);
     motorB = calc_motorB(home.x, home.y);
     encolar_tarea("C01," + motorA + "," + motorB + ",END", update_pen_position);
@@ -560,7 +469,7 @@ function init() {
 
 
     // precargo las tareas de inicio
-    encolar_tarea("C14," + pen.upPosition + ",END");   // subo el pen
+    encolar_tarea("C14,END");   // subo el pen
     encolar_tarea("C02," + pen.penWidth +",END", resultado_tarea_ok);// cambio el tamaño del pen   
     encolar_tarea("C31," + machine_specs.currentMaxSpeed +",END", resultado_tarea_ok);// cambio la velocidad maxima actual
     encolar_tarea("C32," + machine_specs.currentAcceleration +",END", resultado_tarea_ok);// cambio la aceleracion actual
@@ -576,122 +485,111 @@ function init() {
 }
 
 
-// Función para procesar el SVG
-async function processSVG() {
-    const fileInput = document.getElementById('svgInput');
-    const file = fileInput.files[0];
+
+
+/**************************************************** LISTENERS *************************************************************/
+
+// Event listener para el input de archivo GCODE
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    selectedFile = event.target.files[0];
     
-    if (!file) {
-        alert('Por favor, selecciona un archivo SVG');
-        return;
-    }
-
-    try {
-        const svgContent = await readFileAsText(file);
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
-        
-        // Verificar si el parsing fue exitoso
-        if (svgDoc.querySelector('parsererror')) {
-            throw new Error('Error al parsear el SVG');
-        }
-
-        const svgElement = svgDoc.querySelector('svg');
-        
-        // Reiniciar la estructura de datos
-        svgData = {
-            filename: file.name,
-            paths: [],
-            viewBox: svgElement.getAttribute('viewBox') || '',
-            dimensions: {
-                width: svgElement.getAttribute('width') || '',
-                height: svgElement.getAttribute('height') || ''
-            },
-            metadata: {
-                created: new Date().toISOString(),
-                fileSize: file.size,
-                fileType: file.type
-            }
-        };
-
-        // Extraer todos los paths
-        const paths = svgElement.querySelectorAll('path');
-        
-        if (paths.length === 0) {
-            throw new Error('No se encontraron elementos path en el SVG');
-        }
-
-        paths.forEach((path, index) => {
-            const pathData = {
-                id: path.getAttribute('id') || `path-${index}`,
-                d: path.getAttribute('d') || '',
-                fill: path.getAttribute('fill') || 'none',
-                stroke: path.getAttribute('stroke') || 'none',
-                strokeWidth: path.getAttribute('stroke-width') || '1',
-                opacity: path.getAttribute('opacity') || '1',
-                transform: path.getAttribute('transform') || ''
+    if (selectedFile) {        
+        const reader = new FileReader();    
+        reader.onload = function(e) {
+            // Crear objeto con información del archivo
+            const fileData = {
+                name: selectedFile.name,
+                type: selectedFile.type,
+                size: selectedFile.size,
+                lastModified: selectedFile.lastModified,
+                content: e.target.result, // Contenido en base64 o texto
+                arrayBuffer: null
             };
-            
-            svgData.paths.push(pathData);
-        });
 
-        // Mostrar vista previa
-        showPreview(svgContent);
-        
-        // Mostrar datos en pantalla
-        displayPathData();
-        
-        console.log('Datos del SVG:', svgData);
-        
-    } catch (error) {
-        console.error('Error procesando el SVG:', error);
-        alert('Error al procesar el SVG: ' + error.message);
+                if (selectedFile.type.startsWith("text/")) {
+                    const arrayBufferReader = new FileReader();
+                    arrayBufferReader.onload = function (arrayBufferEvent) {
+                        fileData.arrayBuffer = arrayBufferEvent.target.result;
+
+                        cola = fileData.content.split("\n");
+
+                        tareas.limpiar();
+                        tareas_completadas = [];
+
+                        tareas.pausar();
+                        $("#estado_cola").text(
+                            tareas.obtenerEstado().estado + " (IMPORTANDO)"
+                        );
+
+                        setTimeout(function () {
+                            for (const tarea of cola) {
+                                if (tarea.startsWith("C") && tarea.includes(",END")) {
+                                    encolar_tarea(tarea, update_pen_position);
+                                } else {
+                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!"
+                                    );
+                                }
+                            }
+                            $("#estado_cola").text(
+                                tareas.obtenerEstado().estado
+                            );
+                            draw_machine();
+                        }, 100);
+
+                        //  console.log( cola);
+                    };
+                    arrayBufferReader.readAsArrayBuffer(selectedFile);
+                }
+            };
+
+            // Leer el archivo según su tipo
+            if (selectedFile.type.startsWith("text/")) {
+                reader.readAsText(selectedFile);
+            }
+        }
     }
-}
+);
 
 
-// Función para mostrar vista previa
-function showPreview(svgContent) {
-    const previewDiv = document.getElementById('svgPreview');
-    previewDiv.innerHTML = svgContent;
-    
-    // Ajustar el tamaño para la vista previa
-    const svg = previewDiv.querySelector('svg');
-    if (svg) {
-        svg.style.maxWidth = '100%';
-        svg.style.maxHeight = '200px';
+// Add a click event listener to the canvas
+canvas.addEventListener("dblclick", function (event) {
+    // Calculate the mouse coordinates relative to the canvas
+    const rect = canvas.getBoundingClientRect();
+    x = event.clientX - rect.left;
+    y = event.clientY - rect.top;
+
+
+    // corrijo las coordenadas teniendo en cuenta el zoom y el offset
+    w= screenToWorld(x, y);
+
+
+    if (config.mover_gondola) {
+        // calculo los datos de la nueva posicion
+        pen_x = Math.round(w.x);
+        pen_y = Math.round(w.y);
+
+        motorA = calc_motorA(pen_x, pen_y);
+        motorB = calc_motorB(pen_x, pen_y);
+
+        // envio la terea, cuando termine actualiza los datos de posicion
+        encolar_tarea('C01,'+motorA+','+motorB+',END',update_pen_position);
+    }else{
+         // guardo la nueva posicion
+        pen.x = Math.round(w.x);
+        pen.y = Math.round(w.y);
+
+        $("#pen_x").val(pen.x);
+        $("#pen_y").val(pen.y);
+
+        pen.motorA = calc_motorA(pen.x, pen.y);
+        pen.motorB = calc_motorB(pen.x, pen.y);
+
+        $("#pen_motorA").html(pen.motorA);
+        $("#pen_motorB").html(pen.motorB);
+
+        guardar_parametros();
     }
-}
-
-
-
-
-// Función para mostrar los datos del path
-function displayPathData() {
-    const pathDataDiv = document.getElementById('pathData');
-    
-    if (svgData.paths.length > 0) {
-        const mainPath = svgData.paths[0]; // Tomamos el primer path
-        pathDataDiv.textContent = JSON.stringify(mainPath, null, 2);
-    } else {
-        pathDataDiv.textContent = 'No se encontraron paths';
-    }
-}
-
-
-
-// Función para leer el archivo como texto
-function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (e) => reject(e);
-        reader.readAsText(file);
-    });
-}
-
-
-
+});
 
 // Eventos para el zoom
 canvas.addEventListener('wheel', (e) => {
@@ -714,8 +612,6 @@ canvas.addEventListener('wheel', (e) => {
     draw_machine();
 });
 
-
-
 // Pan (arrastrar)
 canvas.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -728,9 +624,7 @@ canvas.addEventListener('mousemove', (e) => {
         offsetX += (e.clientX - lastX) / scale;
         offsetY += (e.clientY - lastY) / scale;
         lastX = e.clientX;
-        lastY = e.clientY;  
-                
-
+        lastY = e.clientY;                  
         draw_machine();
     }
 });
@@ -741,15 +635,5 @@ canvas.addEventListener('mouseup', () => {
 
 canvas.addEventListener('mouseleave', () => {
     isDragging = false;
-});
-
-
-
-
-// Event listener para el input de archivo
-document.getElementById('svgInput').addEventListener('change', function() {
-    if (this.files.length > 0) {
-        processSVG();
-    }
 });
 

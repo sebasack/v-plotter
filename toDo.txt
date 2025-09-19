@@ -1,7 +1,11 @@
+buscar forma de activar o desactivar distintos listeners segun este importando un svg o dibujando
 
 
 importar svg
-elegir partes de svg
-generar gcode a partir de svg
+    abrir archivo
+    modificar posicion y escala
+    elegir partes de svg
+    generar gcode a partir de lo elegido
+    
 
 convertir imagenes a svg
