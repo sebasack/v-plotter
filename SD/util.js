@@ -1,7 +1,7 @@
-$("#version").append(".u3"); // agrego la version de util.js
+$("#version").append(".u04"); // agrego la version de util.js
+
 
 //////////////////////////////////////////////// COLA ////////////////////////////////////////////////
-
 
 class ColaTareas {
     constructor() {
@@ -39,7 +39,7 @@ class ColaTareas {
         
     async procesarSiguiente() {
         //muestro el estado de la cola
-        $("#estado_cola").text(tareas.obtenerEstado().estado); 
+        $("#estado_cola").text(this.obtenerEstado().estado); 
         if (this.pausado || this.procesando || this.tareas.length === 0) return;
 
         this.procesando = true;
@@ -47,10 +47,10 @@ class ColaTareas {
 
         try {
             $("#estado_cola").text(`🚀 Ejecutando: ${nombre}`);
-            const resultado = await tarea();
-            $("#estado_cola").text(`✅ Completado: ${nombre}`, resultado);
+            const resultado = await tarea();         
+            $("#estado_cola").text(`✅ Completado: ${nombre}`);
         } catch (error) {
-            $("#estado_cola").text(`❌ Error en: ${nombre}`, error);
+            $("#estado_cola").text(`❌ Error en: ${nombre}`);
         } finally {
             this.procesando = false;
 
@@ -329,7 +329,7 @@ function draw_queue() {
     // dibujo las tareas terminadas
     ctx.strokeStyle ="#000";
     ctx.beginPath();
-    for (const tarea of tareas_completadas  ) {
+    for (const tarea of tareas_completadas) {
         gcode = tarea.split(',');
         if (gcode[0]=='C14'){ // pen up
             pen_is_down = false;

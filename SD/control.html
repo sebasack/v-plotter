@@ -1,8 +1,7 @@
-
 <table border="0" width="100%" height="100%">
     <tr>
         <td align="center" width="12%" valign="top">
-            <div style="text-align: left; font-size: 10px" id="version">version: h1</div> <br/>       
+            <div style="text-align: left; font-size: 10px" id="version">version: h01</div> <br/>       
             
             <div class="container">
                 <div class="tabs">
@@ -13,7 +12,7 @@
                     <div class="tab-content active" id="input">    
                         <fieldset>
                             <legend>Interface</legend>
-                            Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()">    
+                            Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()"/>    
                             <button type="button" onclick="config_default()">Recargar Config default</button><br/>        
                             <button type="button" onclick="resetZoom()">Reset zoom</button><br/>   
                         </fieldset>                                                                
@@ -27,16 +26,20 @@
                                 <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90" onchange="guardar_parametros()"/></td></tr>       
                                 <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" onchange="guardar_parametros()"/></td></tr>                                                       
                             </table>
-                            <button type="button" onclick="return_to_home()">Return to Home</button> <br/>                              
-                            <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button> <br/>
-                            Encolar movimientos:<input type="checkbox" id="mover_gondola" onchange="guardar_parametros()" title="Encola movimiento cuando se hace doble click en una posicion">          
-                        <hr>
-                            <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br>
-                            <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar </button>              
+                            <button type="button" onclick="return_to_home()">Return to Home</button><br/>                              
+                            <button type="button" onclick="encolar_tarea('getPosition',update_pen_position)">Posicion actual</button><br/>
+                            Encolar movimientos:<input type="checkbox" id="mover_gondola" onchange="guardar_parametros()" title="Encola movimiento cuando se hace doble click en una posicion"/>
+                            <hr/>
+                            <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br/>
+                            <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar</button>
                         </fieldset>  
                         <fieldset>
+                            <legend>SVG</legend>
+                            <button type="button" onclick="" title="Elija un archivo svg">Cargar</button>                              
+                        </fieldset>         
+                        <fieldset>
                             <legend>Enviar GCODE</legend>                
-                            <input id="comando" size="25"/>
+                            <input id="comando" size="23"/>
                             <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
                         </fieldset>         
                     </div>            
@@ -53,8 +56,8 @@
                                 <tr><td align="right">Vel. maxima:</td><td><input id="currentMaxSpeed" size="4" value="1000" onchange="guardar_parametros()"/></td></tr>
                                 <tr><td align="right">Aceleracion:</td><td><input id="currentAcceleration" size="4" value="400" onchange="guardar_parametros()"/></td></tr>
                             </table>
-                            <button type="button" onclick="encolar_tarea('getMachineSpecs',update_machine_specs)">Obtener esp de la maquina</button><br/>
-                            <button type="button" onclick="send_machine_specs()">Enviar esp de la maquina</button><br/>
+                            <button type="button" onclick="encolar_tarea('getMachineSpecs',update_machine_specs)">Cargar conf de la maquina</button><br/>
+                            <button type="button" onclick="send_machine_specs()">Enviar conf a la maquina</button><br/>
                             <button type="button" onclick="encolar_tarea('releaseMotors')">Desenergizar motores</button> <br/>     
                             <button type="button" onclick="encolar_tarea('restart')">Restart ESP32</button> <br/>
                         </fieldset>
@@ -77,27 +80,26 @@
                         </fieldset>
                     </div>
                 </div>
-            </div>           
-           
+            </div>
         </td>
         <td align="center"  width="70%" valign="top">
             <canvas id="machine" width="100%" height="100%" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
         </td>
         <td align="center"  valign="top">       
             <table width="100%">
-                <tr><td align="left"><div id ="estado_cola" title="Haga click para pausar o despausar la cola"></div></td></tr>
+                <tr><td align="left"><div id ="estado_cola" title="Haga click para pausar o activar la cola"></div></td></tr>
                 <tr><td align="right">
-                         <input type="file" id="fileInput" style="display: none;">
+                         <input type="file" id="fileInput" style="display: none;"/>
                          <button class="btn" onclick="document.getElementById('fileInput').click()">Importar</button>
                          <button type="button" onclick="limpiar_cola()">Limpiar</button>
                     </td>
                 </tr>
-            </table>                          
-            <textarea readonly id="tareas" name="log" rows="20" cols="50"> </textarea><br/>
+            </table>
+            <textarea readonly id="tareas" name="log" rows="20" cols="50"></textarea>
              <table width="100%">
                 <tr><td align="left">Tareas ejecutadas:</td><td align="right"><button type="button" onclick="limpiar_ejecutadas()">Limpiar</button></td></tr>
-            </table>                                   
-            <textarea readonly id="log" name="log" rows="20" cols="50"> </textarea><br/>
+            </table>
+            <textarea readonly id="log" name="log" rows="20" cols="50"></textarea>
         </td>
     </tr>
 </table>

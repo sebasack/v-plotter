@@ -11,7 +11,7 @@ var distanciaAceptableColor = 80; //190
 function mostrarCamara() {
   console.log("mostrar camara");
   video = document.getElementById("video");
-  canvas = document.getElementById("canvas");
+  canvas = document.getElementById("canvas_v");
 
   var opciones = {
     audio: false,

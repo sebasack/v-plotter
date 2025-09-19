@@ -1,10 +1,11 @@
-$("#version").append(".c8"); // agrego la version del control.js
+$("#version").append(".c09");// agrego la version del control.js
 
 machine_specs = {};
 pen = {};
 page = {};
 home = {};
 config = {};
+
 
 tareas_completadas = [];
 
@@ -339,7 +340,6 @@ async function ejecutar_comando(parametros, funcionExito) {
     try {
         const url = `/control?command=` + parametros;
 
-        $("#log").val( formatTime(ini)+ " "+parametros +"\n" +$("#log").val());
 
         const response = await fetch(url);
         if (response.ok) {
@@ -347,7 +347,7 @@ async function ejecutar_comando(parametros, funcionExito) {
 
             // logueo llamado y respuesta
             const fin = new Date();
-            $("#log").val(formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
+            $("#log").val( formatTime(ini)+ " "+parametros +"\n" +formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
 
             //actualizo la lista de tareas
             $("#tareas").val(tareas.mostrar());
@@ -376,6 +376,7 @@ function limpiar_cola() {
 
 function limpiar_ejecutadas(){
     tareas_completadas = [];
+    draw_machine();
     $("#log").val('');    
 }
 
