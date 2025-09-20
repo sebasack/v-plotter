@@ -168,7 +168,6 @@ function formatTime(date) {
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-
 function screenToWorld(x, y) {
     return {
         x: (x - offsetX) /scale,
@@ -183,6 +182,32 @@ function worldToScreen(x, y) {
     };
 }
 
+function gcode_valido(gcode){   
+    partes = gcode.split(',');
+    cant = partes.length;
+
+    if (partes[cant-1]!='END'){
+        return false;
+    }
+    
+    cod = partes[0];
+    num = cod.substring(1);
+    console.log (num);
+
+    if (!cod.startsWith('C')){
+        return false;
+    }
+
+    if(num === '01' || num === '02' || num === '03' || num === '05' || num === '06' || num === '08' || num === '09' || 
+       num === '10' || num === '11' || num === '13' || num === '14' || num === '17' ||
+       num === '24' || num === '25' || num === '26' || num === '27' || num === '29' || 
+       num === '30' || num === '31' || num === '32' || num === '37' || num === '45' || 
+       num === '46' || num === '47'){
+        return true;
+    }
+
+    return false;
+};
 //////////////////////////////////////////////// DRAW ////////////////////////////////////////////////
 
 

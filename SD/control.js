@@ -470,7 +470,7 @@ function init() {
 
 
     // precargo las tareas de inicio
-    encolar_tarea("C14,END");   // subo el pen
+    encolar_tarea("C14,END", update_pen_position);   // subo el pen
     encolar_tarea("C02," + pen.penWidth +",END", resultado_tarea_ok);// cambio el tamaño del pen   
     encolar_tarea("C31," + machine_specs.currentMaxSpeed +",END", resultado_tarea_ok);// cambio la velocidad maxima actual
     encolar_tarea("C32," + machine_specs.currentAcceleration +",END", resultado_tarea_ok);// cambio la aceleracion actual
@@ -638,3 +638,19 @@ canvas.addEventListener('mouseleave', () => {
     isDragging = false;
 });
 
+
+document.getElementById('comando_gcode').addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+      // Prevent the default form submission behavior if the input is within a form
+      event.preventDefault(); 
+
+      let comando = $("#comando_gcode").val().toUpperCase();
+      //valido el gcode
+        if (gcode_valido(comando)){
+            $("#comando_gcode").val('');
+            encolar_tarea(comando, update_pen_position);
+        }else{
+            alert("gcode " + comando + " no valido!");
+        }
+    }
+});

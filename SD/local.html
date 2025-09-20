@@ -6,7 +6,7 @@
         <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>             
     </head>
     <body>              
-        <div id="control-placeholder">
+
 <!--
 <video id="video" playsinline autoplay style="display: none"></video>
 <canvas id="canvas_v" width="200" height="200" ></canvas>            
@@ -52,11 +52,7 @@
                             <legend>SVG</legend>
                             <button type="button" onclick="" title="Elija un archivo svg">Cargar</button>                              
                         </fieldset>         
-                        <fieldset>
-                            <legend>Enviar GCODE</legend>                
-                            <input id="comando" size="23"/>
-                            <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
-                        </fieldset>         
+                      
                     </div>            
 
                     <div class="tab-content" id="config">                                    
@@ -105,16 +101,17 @@
                 <tr><td align="left"><div id ="estado_cola" title="Haga click para pausar o activar la cola"></div></td></tr>
                 <tr><td align="right">
                          <input type="file" id="fileInput" style="display: none;"/>
+                         <input id="comando_gcode" size="19" style="text-align:left;" title="Escriba el comando GCODE y presione enter para encolarlo"/>
                          <button class="btn" onclick="document.getElementById('fileInput').click()">Importar</button>
                          <button type="button" onclick="limpiar_cola()">Limpiar</button>
                     </td>
                 </tr>
             </table>
-            <textarea readonly id="tareas" name="log" rows="20" cols="50"></textarea>
+            <textarea readonly id="tareas" name="log" rows="24" cols="50"></textarea>
              <table width="100%">
                 <tr><td align="left">Tareas ejecutadas:</td><td align="right"><button type="button" onclick="limpiar_ejecutadas()">Limpiar</button></td></tr>
             </table>
-            <textarea readonly id="log" name="log" rows="20" cols="50"></textarea>
+            <textarea readonly id="log" name="log" rows="24" cols="50"></textarea>
         </td>
     </tr>
 </table>
