@@ -178,7 +178,7 @@ function screenToWorld(x, y) {
 function worldToScreen(x, y) {
     return {
         x: x * scale + offsetX,
-        y: y * scale +offsetY
+        y: y * scale + offsetY
     };
 }
 
@@ -221,13 +221,13 @@ function aplicar_offset_scale(){
 
 
 
-function draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1){
+function draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1,ctx1= ctx){
 
     const img = new Image();
     img.onload = function () {
 
            // Establecer transparencia global
-        ctx.globalAlpha =globalAlpha;
+        ctx1.globalAlpha = globalAlpha;
       
         // Calcular dimensiones manteniendo la proporcion
         aspectRatio = 1;
@@ -246,11 +246,11 @@ function draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1){
    
         // Dibujar la imagen manteniendo proporcion
         s = worldToScreen(x, y);
-        ctx.drawImage(img,s.x, s.y, width*scale, (height * aspectRatio)*scale);
+        ctx1.drawImage(img,s.x, s.y, width*scale, (height * aspectRatio)*scale);
 
 
         // Restaurar opacidad para las lineas
-        ctx.globalAlpha = 1.0;
+        ctx1.globalAlpha = 1.0;
 
        
     };

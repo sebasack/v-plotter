@@ -1,11 +1,23 @@
 buscar forma de activar o desactivar distintos listeners segun este importando un svg o dibujando
 
+convertir las lineas de tipo [[x,y,x1,y1],[x1,y1,x2,y2],[x2,y2,x3,y3],[x10,y10,x11,y11],[x11,y11,x12,y12]] a 
+
+[x,y]->[x1,y1]->[x2,y2]->[x3,y3]
+
 
 importar svg
     abrir archivo
-    modificar posicion y escala
-    elegir partes de svg
+    modificar 
+        posicion 
+        escala
+        rotacion
+        voltear horizontal y vertical
+        recortar, hacer un cuadro con el mouse o uno que se pueda redimensionar
+        elegir partes de svg
     generar gcode a partir de lo elegido
-    
+
+importar imagenes
+    abrir archivo
+    capturar lineas    
 
 convertir imagenes a svg

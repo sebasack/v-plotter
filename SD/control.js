@@ -654,3 +654,132 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
         }
     }
 });
+
+/******************************** IMPORTACION IMAGENES *************************/
+
+        // Variables globales
+        let originalCanvas = document.getElementById('originalCanvas');
+        let originalCtx = originalCanvas.getContext('2d');
+
+        let lineCanvas = document.getElementById('lineCanvas');
+        let lineCtx = lineCanvas.getContext('2d');
+        
+
+        let lineOutput = document.getElementById('log');
+        let toggleImageBtn = document.getElementById('toggleImageBtn');
+        let downloadBtn = document.getElementById('downloadBtn');
+
+        let thresholdValue = document.getElementById('thresholdValue');
+
+        let escala_value = document.getElementById('escala_value');
+        
+        let showOriginalImage = true;
+        let currentLines = [];
+        
+
+        toggleImageBtn.addEventListener('click', toggleOriginalImage);        
+
+
+// slider umbral de deteccion
+let thresholdSlider = document.getElementById('thresholdSlider');
+thresholdSlider.addEventListener('input', updateThreshold);
+
+function updateThreshold() {
+    thresholdValue.textContent = thresholdSlider.value;
+    if (originalCanvas.width > 0 && originalCanvas.height > 0) {
+        processImage();
+    }
+}
+
+
+// slider escala 
+let escalaSlider = document.getElementById('escala');
+escalaSlider.addEventListener('input', updateEscala);
+
+// slider lapiz 
+let escalaLapiz = document.getElementById('lapiz_slider');
+escalaLapiz.addEventListener('input', processImage);
+
+
+
+
+function updateEscala() {
+    escala_value.textContent = escalaSlider.value;
+    lapiz_value.textContent = lapiz_slider.value;
+ //   if (originalCanvas.width > 0 && originalCanvas.height > 0) {
+   //     processImage();
+   // }
+    escala = escalaSlider.value;
+
+
+    if (originalCanvas.getContext) {
+        originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+     
+      //  draw_image(imagen.src,page.page_pos_x,page.page_pos_y,imagen.width*escala,imagen.height*escala,true,originalCtx);
+        originalCtx.drawImage(imagen,page.page_pos_x,page.page_pos_y, imagen.width*escala,imagen.height*escala);
+
+
+       processImage();
+    }
+}
+
+
+        function toggleOriginalImage() {
+            showOriginalImage = !showOriginalImage;
+            
+            if (showOriginalImage) {
+                originalCanvas.style.display = 'block';
+                toggleImageBtn.textContent = 'Ocultar Imagen Original';
+            } else {
+                originalCanvas.style.display = 'none';
+                toggleImageBtn.textContent = 'Mostrar Imagen Original';
+            }
+        }
+
+
+//CARGAR imagen
+let imageLoader = document.getElementById('imageLoader');
+imageLoader.addEventListener('change', handleImage, false);
+imagen =false;
+
+function handleImage(e) {
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        let img = new Image();
+        img.onload = function() {
+           
+            // Ajustar tamaño de los canvases al de la imagen
+            originalCanvas.width = lineCanvas.width = img.width;
+            originalCanvas.height = lineCanvas.height = img.height;
+            
+            // Dibujar imagen en el canvas original
+            originalCtx.drawImage(img, 0, 0);
+        
+          /*
+            // Ajustar tamaño de los canvases al del canvar ppal
+            originalCanvas.width = lineCanvas.width =  canvas.width;
+            originalCanvas.height =  lineCanvas.height = canvas.height;
+*/
+
+            originalCtx.translate(offsetX, offsetY);
+            originalCtx.scale(scale,scale);    
+
+          
+         
+         //   originalCtx.drawImage(img,page.page_pos_x,page.page_pos_y,img.width,img.height);
+
+
+            draw_image(img.src,page.page_pos_x,page.page_pos_y,img.width,img.height,true,originalCtx);
+
+            imagen=img;
+
+        //    draw_image(img.src,page.page_pos_x,page.page_pos_y,page.page_width,page.page_height);
+            // Procesar imagen y detectar contornos
+            processImage();
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+
