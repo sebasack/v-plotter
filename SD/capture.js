@@ -29,8 +29,20 @@
                 for (let x = borde; x < width-borde; x++) {
                
                     color = Math.round( matriz[y][x]);
-                    if (binary && color ==1){
-                        color=255;
+
+                    if (binary){
+                        if (color ===1){
+                            color=255;
+                        }else if (color ===2){
+                            color=120;
+                        //     console.log(color);
+                        }else if ( color ===3){
+                          //   console.log(color);
+                            color=200;
+                        }else{
+                            color=0;                        
+                        }
+                       
                     }
 
                    color= (color).toString(16);
@@ -115,9 +127,58 @@
             }
             
           mostrar_matriz('debug',binaryEdges,true);
-          
+
+           borde = 1;
+
+          function marcar_nodo(binaryEdges,y,x){                     
+                for (let y1 = y-borde; y1 < y+borde; y1++) {
+                    for (let x1 = x-borde; x1 < x+borde; x1++) {
+                        if (x1>0 && y1>0 && x1< originalCanvas.width && y1<originalCanvas.height){
+                            binaryEdges[y1][x1] = 2;
+                        }                        
+                    }
+                }                    
+                binaryEdges[y][x] = 3;
+          }
+
+          function seguir_linea(binaryEdges,y,x, pn=4){ // pn=pixel negro  
+                                                        //              01 02 03 04 05
+                                                        //              06 07 08 09 10  el default es 4 por que barre de arriba para abajo y de derecha a izquierda
+                                                        //              11 12 x  13 14
+                                                        //              15 16 17 18 19
+                                                        //              20 21 22 23 24 
+                // busco el siguiente pixel blanco mas cercano al actual 
+                if (pn === 4){ 
+                    if (binaryEdges[y+1][x] === 0){// si la pos 7 es blanco la linea esta volviendo hacia la izquierda
+                        // marco el punto actual y la zona adyacente
+                        marcar_nodo(binaryEdges,y,x);    
+                        seguir_linea(binaryEdges,y,x, pn=4)
+                    }else if (binaryEdges[y+1][x] === 1 &&  binaryEdges[y+1][x+1] === 1){// veo si la pos 7 es negro y la 8 blanco
+
+                    }
+
+                }
+
+            
+          }
 
 
+          // busco ls primera linea blanca que encuentre y sigo el rastro
+           for (let y = 0; y < originalCanvas.height; y++) {            
+                for (let x =0; x < originalCanvas.width; x++) {
+                   // console.log(y + ','+ x);
+                    if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco!!    
+                        // busco en un radio de lapiz *2 pixeles uno blanco  
+                       
+                        seguir_linea(binaryEdges,y,x);              
+                    }
+                }             
+            }
+
+              
+            mostrar_matriz('debug',binaryEdges,true);
+
+/******************************ORIGINAL******************************************
             // Convertir bordes a líneas (algoritmo simplificado)
             currentLines = [];
             
@@ -142,7 +203,7 @@
             //reduzco los lineas
             console.log(currentLines.length);
             currentLines=  reduceLines(currentLines) ;
-         
+***************************************************************************/
             
             // Dibujar líneas en el canvas
             drawLines(currentLines);
@@ -194,6 +255,8 @@
                 }
             }
             
+            //console.log(points);
+                        
             return points;
         }
         
