@@ -1,5 +1,5 @@
 
-        function mostrar_matriz(canvas,matriz,binary=false){
+        function mostrar_matriz(canvas,matriz){
 
 
 
@@ -26,27 +26,18 @@
                 // Dibujar puntos
              
             for (let y = borde; y < height-borde; y++) {
-                for (let x = borde; x < width-borde; x++) {
-               
-                    color = Math.round( matriz[y][x]);
-
-                    if (binary){
-                        if (color ===1){
-                            color=255;
-                        }else if (color ===2){
-                            color=120;
-                        //     console.log(color);
-                        }else if ( color ===3){
-                          //   console.log(color);
-                            color=200;
-                        }else{
-                            color=0;                        
-                        }
-                       
-                    }
-
-                   color= (color).toString(16);
-                   color='#'+color +color+color
+                for (let x = borde; x < width-borde; x++) {               
+                
+                    color =  matriz[y][x];
+                    if (color ===1){
+                        color="#ffffff";
+                    }else if (color ===2){
+                        color="#ff0000";         
+                    }else if ( color ===3){                     
+                        color="#0000ff";     
+                    }else{
+                        color="#000000";                   
+                    }             
 
                     debugCtx.lineWidth = 10;
                     debugCtx.strokeStyle =color;
@@ -125,10 +116,13 @@
                     }
                 }
             }
-            
-          mostrar_matriz('debug',binaryEdges,true);
 
-           borde = 1;
+            
+          mostrar_matriz('debug',binaryEdges);
+
+          borde = parseInt(lines_slider.value);
+ 
+   
 
           function marcar_nodo(binaryEdges,y,x){                     
                 for (let y1 = y-borde; y1 < y+borde; y1++) {
@@ -149,13 +143,13 @@
                                                         //              20 21 22 23 24 
                 // busco el siguiente pixel blanco mas cercano al actual 
                 if (pn === 4){ 
-                    if (binaryEdges[y+1][x] === 0){// si la pos 7 es blanco la linea esta volviendo hacia la izquierda
+                   // if (binaryEdges[y+1][x] === 0){// si la pos 7 es blanco la linea esta volviendo hacia la izquierda
                         // marco el punto actual y la zona adyacente
                         marcar_nodo(binaryEdges,y,x);    
-                        seguir_linea(binaryEdges,y,x, pn=4)
-                    }else if (binaryEdges[y+1][x] === 1 &&  binaryEdges[y+1][x+1] === 1){// veo si la pos 7 es negro y la 8 blanco
+                       // seguir_linea(binaryEdges,y,x, pn=4)
+                    //}else if (binaryEdges[y+1][x] === 1 &&  binaryEdges[y+1][x+1] === 1){// veo si la pos 7 es negro y la 8 blanco
 
-                    }
+                    //}
 
                 }
 

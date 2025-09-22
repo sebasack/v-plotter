@@ -672,6 +672,8 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
         let thresholdValue = document.getElementById('thresholdValue');
 
         let escala_value = document.getElementById('escala_value');
+
+        let lines_value = document.getElementById('lines_value');
         
         let showOriginalImage = true;
         let currentLines = [];
@@ -696,16 +698,19 @@ function updateThreshold() {
 let escalaSlider = document.getElementById('escala');
 escalaSlider.addEventListener('input', updateEscala);
 
-// slider lapiz 
-let escalaLapiz = document.getElementById('lapiz_slider');
-escalaLapiz.addEventListener('input', processImage);
+// slider pen 
+let grosorLineas = document.getElementById('lines_slider');
+grosorLineas.addEventListener('input', update_lines);
 
 
+function update_lines(){
+    lines_value.textContent = lines_slider.value;
+    processImage();
+}
 
 
 function updateEscala() {
     escala_value.textContent = escalaSlider.value;
-    lapiz_value.textContent = lapiz_slider.value;
  //   if (originalCanvas.width > 0 && originalCanvas.height > 0) {
    //     processImage();
    // }
