@@ -29,14 +29,16 @@
                 for (let x = borde; x < width-borde; x++) {               
                 
                     color =  matriz[y][x];
-                    if (color ===1){
+                    if (color === 0){
+                        color="#000000";
+                    }else if (color === 1){
                         color="#ffffff";
-                    }else if (color ===2){
+                    }else if (color === 2){
                         color="#ff0000";         
-                    }else if ( color ===3){                     
+                    }else if ( color === 3){                     
                         color="#0000ff";     
                     }else{
-                        color="#000000";                   
+                        color="#00ff00";                   
                     }             
 
                     debugCtx.lineWidth = 10;
@@ -120,13 +122,94 @@
             
           mostrar_matriz('debug',binaryEdges);
 
-          borde = parseInt(lines_slider.value);
+          radio_pen = parseInt(lines_slider.value);
  
    
 
-          function marcar_nodo(binaryEdges,y,x){                     
-                for (let y1 = y-borde; y1 < y+borde; y1++) {
-                    for (let x1 = x-borde; x1 < x+borde; x1++) {
+           // Función para calcular la distancia entre dos puntos
+            function distance(x1, y1, x2, y2) {
+                return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            }
+
+            // Algoritmo de Bresenham para círculos (más preciso)
+            function getCirclePoints(centerX, centerY, radius) {
+
+                const points = [];
+                let x = 0;
+                let y = radius;
+                let d = 3 - 2 * radius;
+                
+                // Función para agregar puntos en todos los octantes
+                const addPoints = (x, y) => {
+                    points.push([centerX + x, centerY + y]);
+                    points.push([centerX - x, centerY + y]);
+                    points.push([centerX + x, centerY - y]);
+                    points.push([centerX - x, centerY - y]);
+                    points.push([centerX + y, centerY + x]);
+                    points.push([centerX - y, centerY + x]);
+                    points.push([centerX + y, centerY - x]);
+                    points.push([centerX - y, centerY - x]);
+                };
+                                      
+                addPoints(x, y);    
+                
+                
+                while (y >= x) {
+                    x++;
+                    
+                    if (d > 0) {
+                        y--;
+                        d = d + 4 * (x - y) + 10;
+                    } else {
+                        d = d + 4 * x + 6;
+                    }
+                    
+                    addPoints(x, y);
+                }
+
+
+
+                // Eliminar duplicados y filtrar puntos fuera de la matriz
+                const uniquePoints = [];
+                const pointSet = new Set();
+                
+                for (const point of points) {
+                    const key = `${point[0]},${point[1]}`;
+                    if (!pointSet.has(key) && point[0] >= 0 && point[0] < originalCanvas.height && point[1] >= 0 && point[1] < originalCanvas.width) {
+                        pointSet.add(key);
+                        uniquePoints.push(point);
+                    }
+                }                                
+                return uniquePoints;
+            }
+        
+
+            // Función para ordenar los puntos del círculo comenzando desde el más cercano a [x1,y1]
+            function orderPointsFromReference(points, refX, refY) {
+                if (points.length === 0) return points;
+                
+                // Encontrar el punto más cercano a la referencia
+                let closestIndex = 0;
+                let minDistance = distance(points[0][0], points[0][1], refX, refY);
+                
+                for (let i = 1; i < points.length; i++) {
+                    const d = distance(points[i][0], points[i][1], refX, refY);
+                    if (d < minDistance) {
+                        minDistance = d;
+                        closestIndex = i;
+                    }
+                }
+                
+                // Reordenar el array comenzando desde el punto más cercano
+                return points.slice(closestIndex).concat(points.slice(0, closestIndex));
+            }
+
+
+
+
+          function marcar_nodo(binaryEdges,circlePoints,y,x,color){                     
+                for (let y1 = y-radio_pen; y1 < y+radio_pen; y1++) {
+                    for (let x1 = x-radio_pen; x1 < x+radio_pen; x1++) {
                         if (x1>0 && y1>0 && x1< originalCanvas.width && y1<originalCanvas.height){
                             binaryEdges[y1][x1] = 2;
                         }                        
@@ -135,36 +218,33 @@
                 binaryEdges[y][x] = 3;
           }
 
-          function seguir_linea(binaryEdges,y,x, pn=4){ // pn=pixel negro  
-                                                        //              01 02 03 04 05
-                                                        //              06 07 08 09 10  el default es 4 por que barre de arriba para abajo y de derecha a izquierda
-                                                        //              11 12 x  13 14
-                                                        //              15 16 17 18 19
-                                                        //              20 21 22 23 24 
+          function seguir_linea(binaryEdges,y,x,borde_y, borde_x,color=10){ 
+            
                 // busco el siguiente pixel blanco mas cercano al actual 
-                if (pn === 4){ 
-                   // if (binaryEdges[y+1][x] === 0){// si la pos 7 es blanco la linea esta volviendo hacia la izquierda
-                        // marco el punto actual y la zona adyacente
-                        marcar_nodo(binaryEdges,y,x);    
-                       // seguir_linea(binaryEdges,y,x, pn=4)
-                    //}else if (binaryEdges[y+1][x] === 1 &&  binaryEdges[y+1][x+1] === 1){// veo si la pos 7 es negro y la 8 blanco
 
-                    //}
+                // genero los puntos del circulo del pen
+                circlePoints = getCirclePoints(x, y, radio_pen) ;
 
-                }
+                  // Ordenar puntos comenzando desde el más cercano a [refX, refY]
+                const orderedPoints = orderPointsFromReference(circlePoints, borde_x, borde_y);
+                                   
+
+                // comenzando en el borde enviado hasta que encuentre un pixel blanco, alternando entre un lado y otro del borde
+                
+                marcar_nodo(binaryEdges,circlePoints,y,x,color);    
+                   
 
             
           }
 
 
           // busco ls primera linea blanca que encuentre y sigo el rastro
+            color_linea =10;
            for (let y = 0; y < originalCanvas.height; y++) {            
-                for (let x =0; x < originalCanvas.width; x++) {
-                   // console.log(y + ','+ x);
-                    if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco!!    
-                        // busco en un radio de lapiz *2 pixeles uno blanco  
-                       
-                        seguir_linea(binaryEdges,y,x);              
+                for (let x = 0; x < originalCanvas.width; x++) {
+                    if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco a la derecha del borde negro!!
+                        seguir_linea(binaryEdges,y,x+1,y,x,color_linea);      
+                        color_linea ++;        
                     }
                 }             
             }
