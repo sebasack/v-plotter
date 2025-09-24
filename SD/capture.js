@@ -131,56 +131,104 @@
                 return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
             }
 
-            // Algoritmo de Bresenham para círculos (más preciso)
-            function getCirclePoints(centerX, centerY, radius) {
+            
+            function getCirclePoints(centerX, centerY, radius,borderX=0,borderY=0) {
 
+                const tipos = [];
+                                       
+                tipos[1]= [-1,-1, 0,-1, 1,-1, //  X X X
+                           -1,0,       1, 0, //  X . X
+                           -1, 1, 0, 1, 1, 1  //  X X X
+                ];
+
+
+                tipos[2] =    [-1,-2,0,-2,1,-2,     //  X X X
+                           -2,-1,             2,-1,  // X     X
+                           -2, 0,             2, 0,  // X  .  X
+                           -2, 1,             2, 1,  // X     X 
+                               -1, 2,0, 2,1, 2      //  X X X
+                ];
+
+                tipos[3] =     [-1,-3,0,-3,1,-3,          //     X X X
+                           -2,-2,              2,-2,      //   X       X
+                       -3,-1,                      3,-1,  // X           X
+                       -3, 0,                      3, 0,  // X     .     X 
+                       -3, 1,                      3, 1,  // X           X
+                           -2, 2,              2, 2,      //   X       X
+                               -1, 3,0, 3,1, 3            //     X X X
+                ];
+
+                tipos[4] =     [-1,-4,0,-4,1,-4,             //       X X X
+                          -2,-3,               2,-3,         //     X       X
+                      -3,-2,                       3,-2,     //   X           X
+                  -4,-1,                               4,-1, // X               X 
+                  -4, 0,                               4, 0, // X       .       X
+                  -4, 1,                               4, 1, // X               X
+                      -3, 2,                       3, 2,     //   X           X
+                          -2, 3,               2,3,          //     X       X
+                               -1, 4, 0, 4, 1, 4             //       X X X
+                ];
+
+                tipos[5] =     [-1,-5,0,-5,1,-5,                //         X X X
+                          -2,-4,              2,-4,             //       X       X
+                      -3,-3,                      3,-3,         //     X           X
+                 -4,-2,                               4,-2,     //   X               X
+             -5,-1,                                       5,-1, // X                   X 
+             -5, 0,                                       5, 0, // X         .         X
+             -5, 1,                                       5, 1, // X                   X
+                -4, 2,                                4, 2,     //   X               X
+                    -3, 3,                       3, 3,         //     X           X
+                        -2, 4,              2, 4,             //       X       X
+                            -1, 5, 0, 5, 1, 5                   //         X X X
+                ];
+
+                tipos[6] =        [-1,-6,0,-6,1,-6,                      //           X X X
+                       -3,-5,-2,-5,               2,-5,3,-5,             //       X X       X X
+                  -4,-4,                                   4,-4,         //     X               X
+             -5,-3,                                            5,-3,     //   X                   X
+             -5,-2,                                            5,-2,     //   X                   X
+        -6,-1,                                                     6,-1, // X                       X 
+        -6, 0,                                                     6, 0, // X           .           X
+        -6, 1,                                                     6, 1, // X                       X
+             -5, 2,                                            5, 2,     //   X                   X
+             -5, 3,                                            5, 3,     //   X                   X
+                  -4, 4,                                   4, 4,         //     X               X
+                       -3, 5,-2,5                ,2, 5,3, 5,             //       X X       X X
+                                -1, 6, 0, 6, 1, 6                        //           X X X
+                ]; 
+
+
+                
                 const points = [];
-                let x = 0;
-                let y = radius;
-                let d = 3 - 2 * radius;
-                
-                // Función para agregar puntos en todos los octantes
-                const addPoints = (x, y) => {
-                    points.push([centerX + x, centerY + y]);
-                    points.push([centerX - x, centerY + y]);
-                    points.push([centerX + x, centerY - y]);
-                    points.push([centerX - x, centerY - y]);
-                    points.push([centerX + y, centerY + x]);
-                    points.push([centerX - y, centerY + x]);
-                    points.push([centerX + y, centerY - x]);
-                    points.push([centerX - y, centerY - x]);
-                };
-                                      
-                addPoints(x, y);    
-                
-                
-                while (y >= x) {
-                    x++;
+
+                for (let i = 0; i < tipos[radius].length; i+=2) {
+                    // me aseguro de que quede dentro del canvas   
                     
-                    if (d > 0) {
-                        y--;
-                        d = d + 4 * (x - y) + 10;
-                    } else {
-                        d = d + 4 * x + 6;
+                    
+                    // Encontrar el punto más cercano a la referencia
+                    let closestIndex = 0;
+                   
+                    let minDistance = distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
+                   
+                    if (centerX - radius > 0 && centerY - radius > 0 && centerX + radius < originalCanvas.width && centerY + radius < originalCanvas.height ){ 
+                      
+                        points.push([ tipos[radius][i] + centerX, tipos[radius][i+1] + centerY]);
+
+                        const d = distance( tipos[radius][i] + centerX, tipos[radius][i+1] + centerY, borderX, borderY);
+                        if (d < minDistance) {
+                            minDistance = d;
+                            closestIndex = i;
+                        }
                     }
-                    
-                    addPoints(x, y);
+                  
                 }
 
 
+                // Reordenar el array comenzando desde el punto más cercano
+                return points.slice(closestIndex).concat(points.slice(0, closestIndex));
 
-                // Eliminar duplicados y filtrar puntos fuera de la matriz
-                const uniquePoints = [];
-                const pointSet = new Set();
-                
-                for (const point of points) {
-                    const key = `${point[0]},${point[1]}`;
-                    if (!pointSet.has(key) && point[0] >= 0 && point[0] < originalCanvas.height && point[1] >= 0 && point[1] < originalCanvas.width) {
-                        pointSet.add(key);
-                        uniquePoints.push(point);
-                    }
-                }                                
-                return uniquePoints;
+                return points;
+
             }
         
 
