@@ -36,7 +36,27 @@
                     }else if (color === 2){
                         color="#ff0000";         
                     }else if ( color === 3){                     
-                        color="#0000ff";     
+                        color="#0000ff";
+                    }else if ( color === 10){
+                        color="#fda50f";
+                    }else if ( color === 11){
+                        color="#fc6600";
+                    }else if ( color === 12){
+                        color="#8d1815";
+                    }else if ( color === 13){
+                        color="#4a9976";
+                    }else if ( color === 14){
+                        color="#704ca5";
+                    }else if ( color === 15){
+                        color="#81818e";
+                    }else if ( color === 16){
+                        color="#c4ac9a";
+                    }else if ( color === 17){
+                        color="#abcdef";
+                    }else if ( color === 18){
+                        color="#bfa850";
+                    }else if ( color === 19){
+                        color="#e916d7ff";
                     }else{
                         color="#00ff00";                   
                     }             
@@ -130,9 +150,10 @@
             function distance(x1, y1, x2, y2) {
                 return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
             }
-
             
-            function getCirclePoints(centerX, centerY, radius,borderX=0,borderY=0) {
+            function getCirclePoints(centerX, centerY, radius, borderX=0, borderY=0, sentido_antihorario=true) {
+
+              //  console.log('getCirclePoints('+centerX +','+ centerY+','+ radius+','+ borderX+','+ borderY+','+ sentido_antihorario+')' );
 
                 const tipos = [];
                                        
@@ -224,45 +245,96 @@
                         6  7        11 12
                             8  9  10
                 */
-            
-                
+                            
                 const points = [];
+                const fill =[];                                 
+                let closestIndex = 0;
 
                 for (let i = 0; i < tipos[radius].length; i+=2) {
-                    // me aseguro de que quede dentro del canvas                       
-                    
-                    // Encontrar el punto más cercano a la referencia
-                    let closestIndex = 0;
+                    // me aseguro de que quede dentro del canvas                                            
                    
                     let minDistance = distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
                    
-                    if (centerX - radius > 0 && centerY - radius > 0 && centerX + radius < originalCanvas.width && centerY + radius < originalCanvas.height ){ 
+                    if (tipos[radius][i] + centerX >= 0 && 
+                        tipos[radius][i+1] + centerY >= 0 &&
+                        tipos[radius][i] + centerX < originalCanvas.width && 
+                        tipos[radius][i+1] + centerY < originalCanvas.height ){ 
                       
-                        points.push([ tipos[radius][i] + centerX, tipos[radius][i+1] + centerY]);
+                        points.push([tipos[radius][i] + centerX, tipos[radius][i+1] + centerY]);
 
+                        // ACA PODRIA EXCLUIR LOS PUNTOS QUE NO SON BLANCOS EN EL DIBUJO....
+
+                        // lleno el arreglo con el relleno
+                        if (radius === 2 && i < tipos[1].length &&
+                            tipos[1][i] + centerX >= 0 && 
+                            tipos[1][i+1] + centerY >= 0 &&
+                            tipos[1][i] + centerX < originalCanvas.width && 
+                            tipos[1][i+1] + centerY < originalCanvas.height ){                             
+                            fill.push([tipos[1][i] + centerX, tipos[1][i+1] + centerY]);                                                        
+                        }
+                        if (radius === 3 && i < tipos[2].length &&
+                            tipos[2][i] + centerX >= 0 && 
+                            tipos[2][i+1] + centerY >= 0 &&
+                            tipos[2][i] + centerX < originalCanvas.width && 
+                            tipos[2][i+1] + centerY < originalCanvas.height ){ 
+                            fill.push([tipos[2][i] + centerX, tipos[2][i+1] + centerY]);                                              
+                        }
+                        if (radius === 4 && i < tipos[3].length &&
+                            tipos[3][i] + centerX >= 0 && 
+                            tipos[3][i+1] + centerY >= 0 &&
+                            tipos[3][i] + centerX < originalCanvas.width && 
+                            tipos[3][i+1] + centerY < originalCanvas.height ){                                 
+                            fill.push([tipos[3][i] + centerX, tipos[3][i+1] + centerY]);                                                       
+                        }
+                        if (radius === 5 && i < tipos[4].length &&
+                            tipos[4][i] + centerX >= 0 && 
+                            tipos[4][i+1] + centerY >= 0 &&
+                            tipos[4][i] + centerX < originalCanvas.width && 
+                            tipos[4][i+1] + centerY < originalCanvas.height ){
+                            fill.push([tipos[4][i] + centerX, tipos[4][i+1] + centerY]);                                                  
+                        }
+                        if (radius === 6 && i < tipos[5].length &&
+                            tipos[5][i] + centerX >= 0 && 
+                            tipos[5][i+1] + centerY >= 0 &&
+                            tipos[5][i] + centerX < originalCanvas.width && 
+                            tipos[5][i+1] + centerY < originalCanvas.height ){ 
+                            fill.push([tipos[5][i] + centerX, tipos[5][i+1] + centerY]);                                                        
+                        }                      
+
+                        // Encontrar el punto más cercano a la referencia
                         const d = distance( tipos[radius][i] + centerX, tipos[radius][i+1] + centerY, borderX, borderY);
                         if (d < minDistance) {
                             minDistance = d;
                             closestIndex = i;
                         }
-                    }
-                  
+                    }                                           
                 }
 
 
-                // Reordenar el array comenzando desde el punto más cercano
-                return points.slice(closestIndex).concat(points.slice(0, closestIndex));
+                //agrego el centro a los puntos de relleno
+                fill.push([centerX, centerY]);
 
-                return points;
+
+                // Reordenar el array comenzando desde el punto más cercano
+                points.slice(closestIndex).concat(points.slice(0, closestIndex));
+
+                // si el sentido es horario invierto el arreglo de puntos
+                if (!sentido_antihorario){
+                    points.reverse();;
+                }
+
+                return {contorno :points,
+                        relleno : fill
+                };
 
             }
         
-
+/*
             // Función para ordenar los puntos del círculo comenzando desde el más cercano a [x1,y1]
             function orderPointsFromReference(points, refX, refY) {
                 if (points.length === 0) return points;
                 
-                // Encontrar el punto más cercano a la referencia
+                // Encontrar el punto 3más cercano a la referencia
                 let closestIndex = 0;
                 let minDistance = distance(points[0][0], points[0][1], refX, refY);
                 
@@ -277,55 +349,111 @@
                 // Reordenar el array comenzando desde el punto más cercano
                 return points.slice(closestIndex).concat(points.slice(0, closestIndex));
             }
+*/
 
 
 
-
-          function marcar_nodo(binaryEdges,circlePoints,y,x,color){                     
+          function marcar_nodo(binaryEdges,circlePoints,y,x,color){   
+                circlePoints.relleno.forEach(function(punto) {        
+                  //  console.log(punto);           
+                    binaryEdges[punto[1]][punto[0]] = color;
+                });
+          
+          /*                
                 for (let y1 = y-radio_pen; y1 < y+radio_pen; y1++) {
                     for (let x1 = x-radio_pen; x1 < x+radio_pen; x1++) {
                         if (x1>0 && y1>0 && x1< originalCanvas.width && y1<originalCanvas.height){
                             binaryEdges[y1][x1] = 2;
                         }                        
                     }
-                }                    
+                }                   
                 binaryEdges[y][x] = 3;
+                */
           }
 
-          function seguir_linea(binaryEdges,y,x,borde_y, borde_x,color=10){ 
+          function seguir_linea(binaryEdges,y,x,borde_y,borde_x,color=10,sentido_antihorario=true){        
             
-                // busco el siguiente pixel blanco mas cercano al actual 
+               // console.log('seguir_linea ' + x + ',' + y + ' / '+borde_x+','+ borde_y + ' / '+ color);
 
-                // genero los puntos del circulo del pen
-                circlePoints = getCirclePoints(x, y, radio_pen) ;
+                i_borde=1;
 
-                  // Ordenar puntos comenzando desde el más cercano a [refX, refY]
-                const orderedPoints = orderPointsFromReference(circlePoints, borde_x, borde_y);
-                                   
+                while (i_borde > -1){
+                    i_borde =-1;
+                    i_nuevo_centro = -1;
 
-                // comenzando en el borde enviado hasta que encuentre un pixel blanco, alternando entre un lado y otro del borde
+                    // genero los puntos del circulo del pen
+                    circlePoints = getCirclePoints(x, y, radio_pen,borde_x,borde_y,sentido_antihorario) ;
                 
-                marcar_nodo(binaryEdges,circlePoints,y,x,color);    
-                   
+                    p = circlePoints.contorno;
 
+                    console.log(p);
+
+                    // busco el siguiente pixel blanco mas cercano al actual 
+                    
+                    console.log('------------');
+                
+                    for (let i = 0; i < p.length-1; i++) {                           
+                        
+                        if (i_borde === -1 && binaryEdges[p[i][1]][p[i][0]] === 0 && binaryEdges[p[i+1][1]][p[i+1][0]] === 1){
+                            // encontre el borde!!!
+                            i_borde = i;
+                            console.log(' borde en x:'+ p[i][0]+ ' y:'+p[i][1]+ '  blanco en x:' +p[i+1][0]+' y:'+p[i+1][1]+ ' i_borde:'+i_borde + ' radio:'+radio_pen);
+                        }         
+                    
+                        // si encontre el borde trato de mover el centro del circulo a 'radio_pen' posiciones
+                         console.log('    i ' +i +  ' punto:'+binaryEdges[p[i][1]][p[i][0]] + ' x:' +p[i][0] + ' y='+p[i][1]);
+                       
+                        if (i_borde > -1 && binaryEdges[p[i][1]][p[i][0]] === 1 /*&& i < radio_pen*/){                             
+                            i_nuevo_centro = i;
+                            console.log('NUEVO CENTRO ' +i + ' x:' + p[i][0]+ ' y:' +p[i][1] );
+                            i=999;
+                        }
+                    };
+                
+                    //i_nuevo_centro=2;
+
+
+                    if (i_nuevo_centro>-1){
+                       // console.log(i_nuevo_centro + '  '+ i_borde);
+                       // console.log(p[i_nuevo_centro]);
+                       // console.log(p[i_borde]);
+
+                        marcar_nodo(binaryEdges,circlePoints,p[i_nuevo_centro][0],p[i_nuevo_centro][1],color);  
+                           
+                        x=p[i_nuevo_centro][0];
+                        y=p[i_nuevo_centro][1];
+                        borde_x=p[i_borde][0];
+                        borde_y=p[i_borde][1];
+                    //  console.log(i_borde)                  
+                    }
+                    i_borde =-1;
+                    i_nuevo_centro =-1;
+                }                                       
             
           }
 
 
           // busco ls primera linea blanca que encuentre y sigo el rastro
-            color_linea =10;
+           color_linea =10;
            for (let y = 0; y < originalCanvas.height; y++) {            
                 for (let x = 0; x < originalCanvas.width; x++) {
                     if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco a la derecha del borde negro!!
-                        seguir_linea(binaryEdges,y,x+1,y,x,color_linea);      
-                        color_linea ++;        
+                        seguir_linea(binaryEdges,y,x+1, y,x, color_linea);      
+                        color_linea ++;       
+                        x=99999;
+                        y=99999; 
+                      
                     }
-
+/*
                     if (binaryEdges[y][x] === 1 && binaryEdges[y][x+1] === 0) { // econtre un punt negro luego de uno blanco!! eso es por que habia una linea blanca muy ancha
                       //  seguir_linea(binaryEdges,y,x+1,y,x,color_linea);      
                       //color_linea ++;        
-                      console.warn("FALTA IMPLEMENTAR SEGUIR LINEA INVERSO!!!");
+                      console.warn("FALTA IMPLEMENTAR SEGUIR LINEA INVERSO!!! esta funcion recorre siguiendo la linea por la izquierda");
                     }
+                    if (color_linea ==20){
+                        color_linea =10;
+                    }
+  */                   
                 }             
             }
 
