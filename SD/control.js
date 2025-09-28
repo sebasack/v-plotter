@@ -22,6 +22,7 @@ let scale =1;
 let pen_down = true; // down
 
 
+
 // creo la cola de tareas
 const tareas = new ColaTareas();
 
@@ -675,6 +676,7 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
 
         let lines_value = document.getElementById('lines_value');
         
+        
         let showOriginalImage = true;
         let currentLines = [];
         
@@ -686,10 +688,55 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
 let thresholdSlider = document.getElementById('thresholdSlider');
 thresholdSlider.addEventListener('input', updateThreshold);
 
+
+
+function obtener_lineas(){
+    let dibujo = processImage();
+
+    $("#lineas").text("Lineas: "+dibujo.length);
+   // console.log(dibujo);    
+    
+    lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+    lineCtx.save();
+
+
+    lineas_negras =  $("#lineas_negras").prop("checked") ;
+    // dibujo la figura
+
+
+    lineCtx.lineWidth = 1;
+    dibujo.forEach(function(linea) {          
+        
+        lineCtx.beginPath();
+
+        if (lineas_negras){
+            lineCtx.strokeStyle ="#000000";
+        }else{
+            lineCtx.strokeStyle = linea.color;
+        }        
+       
+        // Dibujar líneas
+        lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);       
+        d=distancia(linea.vertices[0],linea.vertices[linea.vertices.length-1]);        
+        for (i=1;i< linea.vertices.length;i++){                                          
+            lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
+            lineCtx.stroke();                      
+        }
+
+        lineCtx.restore();
+    
+      
+    });
+
+   // lineCtx.closePath();
+
+}
+
+
 function updateThreshold() {
     thresholdValue.textContent = thresholdSlider.value;
     if (originalCanvas.width > 0 && originalCanvas.height > 0) {
-        processImage();
+        obtener_lineas();
     }
 }
 
@@ -703,16 +750,23 @@ let grosorLineas = document.getElementById('lines_slider');
 grosorLineas.addEventListener('input', update_lines);
 
 
+// slider vertices 
+let reduccionVertices = document.getElementById('vertices_slider');
+reduccionVertices.addEventListener('input', update_lines);
+
+
+
 function update_lines(){
     lines_value.textContent = lines_slider.value;
-    processImage();
+    vertices_value.textContent = vertices_slider.value;
+    obtener_lineas();
 }
 
 
 function updateEscala() {
     escala_value.textContent = escalaSlider.value;
  //   if (originalCanvas.width > 0 && originalCanvas.height > 0) {
-   //     processImage();
+   //     obtener_lineas();
    // }
     escala = escalaSlider.value;
 
@@ -724,7 +778,7 @@ function updateEscala() {
         originalCtx.drawImage(imagen,page.page_pos_x,page.page_pos_y, imagen.width*escala,imagen.height*escala);
 
 
-       processImage();
+       obtener_lineas();
     }
 }
 
@@ -780,7 +834,7 @@ function handleImage(e) {
 
         //    draw_image(img.src,page.page_pos_x,page.page_pos_y,page.page_width,page.page_height);
             // Procesar imagen y detectar contornos
-            processImage();
+            obtener_lineas();
         }
         img.src = event.target.result;
     }

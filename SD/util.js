@@ -1,4 +1,9 @@
+
 $("#version").append(".u04"); // agrego la version de util.js
+
+  const colores = ['#000000','#ffffff','#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', 
+                                     '#ff7700', '#7700ff', '#abcdef', '#ff0077', '#77ff00', '#0077ff','#17f8edff','#80c5ecff'];       
+                
 
 
 //////////////////////////////////////////////// COLA ////////////////////////////////////////////////
@@ -135,6 +140,26 @@ class ColaTareas {
 
 
 //////////////////////////////////////////////// CALC ////////////////////////////////////////////////
+function eco(obj){
+    console.log(obj);
+};
+
+
+// Calcular el ángulo de una línea en radianes
+function calculateAngle(v1,v2) {
+    const dx = v2.x - v1.x;
+    const dy = v2.y - v1.y;
+    return Math.atan2(dy, dx);
+}
+
+// Calcular la diferencia entre dos ángulos (en grados)
+function angleDifference(angle1, angle2) {
+    let diff = Math.abs(angle1 - angle2) % (2 * Math.PI);
+    diff = diff > Math.PI ? (2 * Math.PI - diff) : diff;
+    return Math.abs(diff * 180 / Math.PI); // Convertir a grados
+}
+        
+
 
 function calc_motorA(x,y){
    return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(x,2) + Math.pow(y,2))) / machine_specs.mmPerRev);
@@ -159,6 +184,10 @@ function getCartesianY( cX,  motorA){
     calcY = Math.sqrt(Math.pow(multiplier(motorA),2)-Math.pow(cX,2));
     return calcY;
 }
+
+function distancia(v1,v2) {
+                return Math.sqrt((v1.x - v2.x) ** 2 + (v1.y - v2.y) ** 2);
+            }
 
 function formatTime(date) {
     const hours = date.getHours().toString().padStart(2, '0');

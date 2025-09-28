@@ -1,5 +1,13 @@
 
-        function mostrar_matriz(canvas,matriz){
+
+        // Variables globales
+const dibujo = new Dibujo();
+
+
+            
+
+
+    function mostrar_matriz(canvas,matriz){
 
 
 
@@ -26,40 +34,10 @@
                 // Dibujar puntos
              
             for (let y = borde; y < height-borde; y++) {
-                for (let x = borde; x < width-borde; x++) {               
-                
-                    color =  matriz[y][x];
-                    if (color === 0){
-                        color="#000000";
-                    }else if (color === 1){
-                        color="#ffffff";
-                    }else if (color === 2){
-                        color="#ff0000";         
-                    }else if ( color === 3){                     
-                        color="#0000ff";
-                    }else if ( color === 10){
-                        color="#fda50f";
-                    }else if ( color === 11){
-                        color="#fc6600";
-                    }else if ( color === 12){
-                        color="#8d1815";
-                    }else if ( color === 13){
-                        color="#4a9976";
-                    }else if ( color === 14){
-                        color="#704ca5";
-                    }else if ( color === 15){
-                        color="#81818e";
-                    }else if ( color === 16){
-                        color="#c4ac9a";
-                    }else if ( color === 17){
-                        color="#abcdef";
-                    }else if ( color === 18){
-                        color="#bfa850";
-                    }else if ( color === 19){
-                        color="#e916d7ff";
-                    }else{
-                        color="#00ff00";                   
-                    }             
+                for (let x = borde; x < width-borde; x++) {  
+
+                  
+                    color = colores[matriz[y][x]];                
 
                     debugCtx.lineWidth = 10;
                     debugCtx.strokeStyle =color;
@@ -73,9 +51,9 @@
                 }
             }
 
-        };
+    };
         
-        function processImage() {
+    function processImage() {
        //     console.log('procesando...');
             // Limpiar canvas de líneas
             lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
@@ -247,58 +225,75 @@
                 */
                             
                 const points = [];
-                const fill =[];                                 
+                let fill =[];                                 
                 let closestIndex = 0;
 
-                for (let i = 0; i < tipos[radius].length; i+=2) {
-                    // me aseguro de que quede dentro del canvas                                            
+
+
+                //agrego el centro a los puntos de relleno (fue movido a marcar_nodo para ser usado como semilla en la buzqueda de adyacentes)
+                //fill.push([centerX, centerY]);
+
+                a1=[]; // anillo 1 del relleno
+                a2=[]; // anillo 2 del relleno
+                a3=[]; // anillo 3 del relleno
+                a4=[]; // anillo 4 del relleno
+                a5=[]; // anillo 5 del relleno
+
+
+                // busco el pixel con menos distancia al borde inicial
+                let minDistance = distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
+
+
+                for (let i = 0; i < tipos[radius].length; i+=2) {                                                             
                    
-                    let minDistance = distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
-                   
+                    // me aseguro de que quede dentro del canvas   
                     if (tipos[radius][i] + centerX >= 0 && 
                         tipos[radius][i+1] + centerY >= 0 &&
                         tipos[radius][i] + centerX < originalCanvas.width && 
                         tipos[radius][i+1] + centerY < originalCanvas.height ){ 
                       
                         points.push([tipos[radius][i] + centerX, tipos[radius][i+1] + centerY]);
-
-                        // ACA PODRIA EXCLUIR LOS PUNTOS QUE NO SON BLANCOS EN EL DIBUJO....
-
-                        // lleno el arreglo con el relleno
-                        if (radius === 2 && i < tipos[1].length &&
+                        
+                        // lleno los distintos anillos para luego armar el rellono
+                        if (radius >= 2 && i < tipos[1].length &&
                             tipos[1][i] + centerX >= 0 && 
                             tipos[1][i+1] + centerY >= 0 &&
                             tipos[1][i] + centerX < originalCanvas.width && 
-                            tipos[1][i+1] + centerY < originalCanvas.height ){                             
-                            fill.push([tipos[1][i] + centerX, tipos[1][i+1] + centerY]);                                                        
+                            tipos[1][i+1] + centerY < originalCanvas.height &&
+                            binaryEdges[tipos[1][i+1]+ centerY][tipos[1][i]+ centerX] === 1 ){ // solo elijo puntos blancos
+                                a1.push([tipos[1][i] + centerX, tipos[1][i+1] + centerY]);                                                                                 
                         }
-                        if (radius === 3 && i < tipos[2].length &&
+                        if (radius >= 3 && i < tipos[2].length &&
                             tipos[2][i] + centerX >= 0 && 
                             tipos[2][i+1] + centerY >= 0 &&
                             tipos[2][i] + centerX < originalCanvas.width && 
-                            tipos[2][i+1] + centerY < originalCanvas.height ){ 
-                            fill.push([tipos[2][i] + centerX, tipos[2][i+1] + centerY]);                                              
+                            tipos[2][i+1] + centerY < originalCanvas.height  &&
+                            binaryEdges[tipos[2][i+1]+ centerY][tipos[2][i]+ centerX] === 1 ){ // solo elijo puntos blancos
+                                a2.push([tipos[2][i] + centerX, tipos[2][i+1] + centerY]);                                                                          
                         }
-                        if (radius === 4 && i < tipos[3].length &&
+                        if (radius >= 4 && i < tipos[3].length &&
                             tipos[3][i] + centerX >= 0 && 
                             tipos[3][i+1] + centerY >= 0 &&
                             tipos[3][i] + centerX < originalCanvas.width && 
-                            tipos[3][i+1] + centerY < originalCanvas.height ){                                 
-                            fill.push([tipos[3][i] + centerX, tipos[3][i+1] + centerY]);                                                       
+                            tipos[3][i+1] + centerY < originalCanvas.height &&
+                            binaryEdges[tipos[3][i+1]+ centerY][tipos[3][i]+ centerX] === 1 ){      // solo elijo puntos blancos                           
+                                a3.push([tipos[3][i] + centerX, tipos[3][i+1] + centerY]);                                                                                
                         }
-                        if (radius === 5 && i < tipos[4].length &&
+                        if (radius >= 5 && i < tipos[4].length &&
                             tipos[4][i] + centerX >= 0 && 
                             tipos[4][i+1] + centerY >= 0 &&
                             tipos[4][i] + centerX < originalCanvas.width && 
-                            tipos[4][i+1] + centerY < originalCanvas.height ){
-                            fill.push([tipos[4][i] + centerX, tipos[4][i+1] + centerY]);                                                  
+                            tipos[4][i+1] + centerY < originalCanvas.height &&
+                            binaryEdges[tipos[4][i+1]+ centerY][tipos[4][i]+ centerX] === 1 ){// solo elijo puntos blancos
+                                a4.push([tipos[4][i] + centerX, tipos[4][i+1] + centerY]);                                                                          
                         }
-                        if (radius === 6 && i < tipos[5].length &&
+                        if (radius >= 6 && i < tipos[5].length &&
                             tipos[5][i] + centerX >= 0 && 
                             tipos[5][i+1] + centerY >= 0 &&
                             tipos[5][i] + centerX < originalCanvas.width && 
-                            tipos[5][i+1] + centerY < originalCanvas.height ){ 
-                            fill.push([tipos[5][i] + centerX, tipos[5][i+1] + centerY]);                                                        
+                            tipos[5][i+1] + centerY < originalCanvas.height &&
+                            binaryEdges[tipos[5][i+1]+ centerY][tipos[5][i]+ centerX] === 1){// solo elijo puntos blancos
+                                a5.push([tipos[5][i] + centerX, tipos[5][i+1] + centerY]);                                                                                 
                         }                      
 
                         // Encontrar el punto más cercano a la referencia
@@ -310,9 +305,8 @@
                     }                                           
                 }
 
-
-                //agrego el centro a los puntos de relleno
-                fill.push([centerX, centerY]);
+                // agrego los anillos necesarios al relleno
+                fill = [].concat(fill, a1, a2,a3,a4,a5);
 
 
                 // Reordenar el array comenzando desde el punto más cercano
@@ -320,7 +314,7 @@
 
                 // si el sentido es horario invierto el arreglo de puntos
                 if (!sentido_antihorario){
-                    points.reverse();;
+                    points.reverse();
                 }
 
                 return {contorno :points,
@@ -328,55 +322,48 @@
                 };
 
             }
-        
-/*
-            // Función para ordenar los puntos del círculo comenzando desde el más cercano a [x1,y1]
-            function orderPointsFromReference(points, refX, refY) {
-                if (points.length === 0) return points;
-                
-                // Encontrar el punto 3más cercano a la referencia
-                let closestIndex = 0;
-                let minDistance = distance(points[0][0], points[0][1], refX, refY);
-                
-                for (let i = 1; i < points.length; i++) {
-                    const d = distance(points[i][0], points[i][1], refX, refY);
-                    if (d < minDistance) {
-                        minDistance = d;
-                        closestIndex = i;
-                    }
-                }
-                
-                // Reordenar el array comenzando desde el punto más cercano
-                return points.slice(closestIndex).concat(points.slice(0, closestIndex));
-            }
-*/
-
-
+      
+    
 
           function marcar_nodo(binaryEdges,circlePoints,y,x,color){   
-                circlePoints.relleno.forEach(function(punto) {        
-                  //  console.log(punto);           
-                    binaryEdges[punto[1]][punto[0]] = color;
-                });
-          
-          /*                
-                for (let y1 = y-radio_pen; y1 < y+radio_pen; y1++) {
-                    for (let x1 = x-radio_pen; x1 < x+radio_pen; x1++) {
-                        if (x1>0 && y1>0 && x1< originalCanvas.width && y1<originalCanvas.height){
-                            binaryEdges[y1][x1] = 2;
-                        }                        
-                    }
-                }                   
-                binaryEdges[y][x] = 3;
-                */
-          }
+                //console.log(JSON.stringify(circlePoints.relleno));    
+                
+                binaryEdges[y][x] = color;   // marco el primer punto, es la semilla si no voy a marcar lineas adyacentes
 
-          function seguir_linea(binaryEdges,y,x,borde_y,borde_x,color=10,sentido_antihorario=true){        
+                circlePoints.relleno.forEach(function(punto) {                               
+                    marcar = true;
+                    if (! $("#unificar_lineas_adyacentes").prop("checked") ){ // no unificar!                            
+                        marcar = false;
+
+                        // veo que el punto en cuestion este al lado de otro punto del color elegido     
+                        if (binaryEdges[punto[1]  ][punto[0]-1] === color ||  
+                            binaryEdges[punto[1]+1][punto[0]-1] === color ||
+                            binaryEdges[punto[1]+1][punto[0]  ] === color ||
+                            binaryEdges[punto[1]+1][punto[0]+1] === color ||
+                            binaryEdges[punto[1]  ][punto[0]+1] === color ||
+                            binaryEdges[punto[1]-1][punto[0]+1] === color ||
+                            binaryEdges[punto[1]-1][punto[0]  ] === color ||
+                            binaryEdges[punto[1]-1][punto[0]-1] === color ){
+                                marcar = true;
+                        }                      
+                    }
+
+                    if (marcar){                        
+                        binaryEdges[punto[1]][punto[0]] = color;                       
+                    }
+
+
+                    // muestro donde esta el vertice
+                    //binaryEdges[y][x] = 2;
+
+                });                 
+            }
+
+          function seguir_linea(linea,binaryEdges,y,x,borde_y,borde_x,color=10,sentido_antihorario=true){        
             
-               // console.log('seguir_linea ' + x + ',' + y + ' / '+borde_x+','+ borde_y + ' / '+ color);
+             //   console.log(linea.id +'  seguir_linea ' + x + ',' + y + ' / '+borde_x+','+ borde_y + ' / '+ color);
 
                 i_borde=1;
-
                 while (i_borde > -1){
                     i_borde =-1;
                     i_nuevo_centro = -1;
@@ -386,205 +373,113 @@
                 
                     p = circlePoints.contorno;
 
-                    console.log(p);
-
-                    // busco el siguiente pixel blanco mas cercano al actual 
-                    
-                    console.log('------------');
-                
-                    for (let i = 0; i < p.length-1; i++) {                           
-                        
-                        if (i_borde === -1 && binaryEdges[p[i][1]][p[i][0]] === 0 && binaryEdges[p[i+1][1]][p[i+1][0]] === 1){
+                   // busco el siguiente pixel blanco mas cercano al actual                                     
+                    for (let i = 0; i < p.length-1; i++) {                                                  
+                        if ((binaryEdges[p[i][1]][p[i][0]] === 0 || binaryEdges[p[i][1]][p[i][0]] === color) &&   // el borde es negro o del color buscado
+                           // binaryEdges[p[i][1]][p[i][0]] != 0 && // el borde es de cualquier color
+                            binaryEdges[p[i+1][1]][p[i+1][0]] === 1){ // el siguiente punto es blanco
                             // encontre el borde!!!
                             i_borde = i;
-                            console.log(' borde en x:'+ p[i][0]+ ' y:'+p[i][1]+ '  blanco en x:' +p[i+1][0]+' y:'+p[i+1][1]+ ' i_borde:'+i_borde + ' radio:'+radio_pen);
-                        }         
-                    
-                        // si encontre el borde trato de mover el centro del circulo a 'radio_pen' posiciones
-                         console.log('    i ' +i +  ' punto:'+binaryEdges[p[i][1]][p[i][0]] + ' x:' +p[i][0] + ' y='+p[i][1]);
-                       
-                        if (i_borde > -1 && binaryEdges[p[i][1]][p[i][0]] === 1 /*&& i < radio_pen*/){                             
-                            i_nuevo_centro = i;
-                            console.log('NUEVO CENTRO ' +i + ' x:' + p[i][0]+ ' y:' +p[i][1] );
-                            i=999;
+                            i_nuevo_centro = i+1;
+                           // console.log('agrego punto '+p[i+1][0]+' '+p[i+1][1]);
+
+
+
+                            linea.agregarVertice(p[i+1][0], p[i+1][1],!sentido_antihorario);
+
+                            marcar_nodo(binaryEdges,circlePoints,p[i+1][1],p[i+1][0],color);  
+                            /*
+                            // MUESTRO EL CENTRO Y BORDE ORIGINALES...
+                            binaryEdges[y][x] =2;
+                            binaryEdges[borde_y][ borde_x] =3;
+                            //MUESTRO EL PUNTO INICIAL DE BUSQUEDA Y EL PUNGO ESPERADO DE AVANCE
+                            binaryEdges[p[0][1]][p[0][0]]=2;
+                            binaryEdges[p[radio_pen][1]][p[radio_pen][0]]=20;
+                            */
+                            x=p[i_nuevo_centro][0];
+                            y=p[i_nuevo_centro][1];
+                            borde_x=p[i_borde][0];
+                            borde_y=p[i_borde][1];
+
+                            // encontre el pixel blanco, salgo del for
+                            break;
                         }
                     };
-                
-                    //i_nuevo_centro=2;
-
-
-                    if (i_nuevo_centro>-1){
-                       // console.log(i_nuevo_centro + '  '+ i_borde);
-                       // console.log(p[i_nuevo_centro]);
-                       // console.log(p[i_borde]);
-
-                        marcar_nodo(binaryEdges,circlePoints,p[i_nuevo_centro][0],p[i_nuevo_centro][1],color);  
-                           
-                        x=p[i_nuevo_centro][0];
-                        y=p[i_nuevo_centro][1];
-                        borde_x=p[i_borde][0];
-                        borde_y=p[i_borde][1];
-                    //  console.log(i_borde)                  
-                    }
-                    i_borde =-1;
-                    i_nuevo_centro =-1;
-                }                                       
-            
+                }
           }
 
 
           // busco ls primera linea blanca que encuentre y sigo el rastro
-           color_linea =10;
+           color_linea =2;           
+
+           // elimino el dibujo anterior si existia
+           dibujo.limpiar();
+
+           linea = dibujo.crearLinea( colores[color_linea]);
+
            for (let y = 0; y < originalCanvas.height; y++) {            
-                for (let x = 0; x < originalCanvas.width; x++) {
-                    if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco a la derecha del borde negro!!
-                        seguir_linea(binaryEdges,y,x+1, y,x, color_linea);      
-                        color_linea ++;       
-                        x=99999;
-                        y=99999; 
+                for (let x = 0; x < originalCanvas.width; x++) {                    
+                    if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco
+                        
+                        seguir_linea(linea,binaryEdges,y,x+1, y,x, color_linea);     
+                        // si se encontro solo un punto descarto la linea
+                        if (linea.vertices.length === 1 ) {
+                            dibujo.eliminarLinea(linea.id);
+                            linea = dibujo.crearLinea( colores[color_linea]);
+                        }
+
+                        //sigo la linea hacia el otro lado
+                        seguir_linea(linea,binaryEdges,y,x+1, y,x, color_linea,false);   
+                        // si se encontro solo un punto descarto la linea
+                        if (linea.vertices.length === 1) {
+                            dibujo.eliminarLinea(linea.id);
+                            linea = dibujo.crearLinea( colores[color_linea]);
+                        }
+
+                        if (linea.vertices.length >1){
+                            linea = dibujo.crearLinea( colores[color_linea]);
+                            color_linea ++;                               
+                        }
                       
+                        
                     }
-/*
+
+                    /*
                     if (binaryEdges[y][x] === 1 && binaryEdges[y][x+1] === 0) { // econtre un punt negro luego de uno blanco!! eso es por que habia una linea blanca muy ancha
-                      //  seguir_linea(binaryEdges,y,x+1,y,x,color_linea);      
-                      //color_linea ++;        
+                      seguir_linea(binaryEdges,y,x+1,y,x,color_linea,false);      
+                      seguir_linea(binaryEdges,y,x+1,y,x,color_linea);    
+                      color_linea ++;        
                       console.warn("FALTA IMPLEMENTAR SEGUIR LINEA INVERSO!!! esta funcion recorre siguiendo la linea por la izquierda");
                     }
-                    if (color_linea ==20){
-                        color_linea =10;
+                    */
+
+                    if (color_linea ==16){
+                        color_linea =2;
                     }
-  */                   
+                  
                 }             
             }
 
-              
+
+            // la ultima linea creada nunca se va a llenar
+            dibujo.eliminarLinea(linea.id);
+
             mostrar_matriz('debug',binaryEdges,true);
+  
+            
+            // unifico lineas contiguas
+            dibujo.unificarLineas(6);
 
-/******************************ORIGINAL******************************************
-            // Convertir bordes a líneas (algoritmo simplificado)
-            currentLines = [];
-            
-            
-            // Recorrer la matriz de bordes y conectar puntos adyacentes
-            for (let y = 0; y < originalCanvas.height; y++) {
-                for (let x = 0; x < originalCanvas.width; x++) {
-                    if (binaryEdges[y][x] === 1) {
-                        // Buscar puntos adyacentes para formar líneas
-                        let line = traceLine(binaryEdges, x, y);
-                        if (line && line.length > 1) {
-                            // Simplificar la línea a segmentos rectos
-                            let simplifiedLines = simplifyLine(line);
-                            currentLines = currentLines.concat(simplifiedLines);
-                        }
-                    }
-                }
-            }
-                
-           
 
-            //reduzco los lineas
-            console.log(currentLines.length);
-            currentLines=  reduceLines(currentLines) ;
-***************************************************************************/
-            
-            // Dibujar líneas en el canvas
-            drawLines(currentLines);
-            
-            // Mostrar líneas en el área de texto
-            updateOutputText();
+            // reduzco cantidad de vertices
+            dibujo.reducirVertices( vertices_value.textContent );
+
+            //retorno las el dibujo procesado
+            return dibujo.obtenerInfoLineas();
+          
         }
-        
-        function traceLine(edges, startX, startY) {
-            // Algoritmo simple para seguir un contorno
-            let points = [];
-            let x = startX;
-            let y = startY;
-            
-            // Marcar este punto como visitado
-            edges[y][x] = 0;
-            points.push([x, y]);
-            
-            // Direcciones para buscar puntos adyacentes (8-vecinos)
-            let directions = [
-                [-1, -1], [0, -1], [1, -1],
-                [-1, 0],           [1, 0],
-                [-1, 1],  [0, 1],  [1, 1]
-            ];
-            
-            let foundNext = true;
-            
-            while (foundNext) {
-                foundNext = false;
-                
-                for (let i = 0; i < directions.length; i++) {
-                    let newX = x + directions[i][0];
-                    let newY = y + directions[i][1];
-                    
-                    // Verificar límites
-                    if (newX >= 0 && newX < edges[0].length && 
-                        newY >= 0 && newY < edges.length) {
-                        
-                        if (edges[newY][newX] === 1) {
-                            // Encontramos el siguiente punto
-                            x = newX;
-                            y = newY;
-                            edges[y][x] = 0; // Marcar como visitado
-                            points.push([x, y]);
-                            foundNext = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            //console.log(points);
-                        
-            return points;
-        }
-        
-        function simplifyLine(points) {
-            // Algoritmo muy simple para convertir puntos en segmentos de línea
-            let lines = [];
-            
-            if (points.length < 2) return lines;
-            
-            // Solo tomar puntos cada ciertos píxeles para simplificar
-            let step = 5;
-            for (let i = 0; i < points.length - step; i += step) {
-                let x1 = points[i][0];
-                let y1 = points[i][1];
-                let x2 = points[i + step][0];
-                let y2 = points[i + step][1];
-                
-                lines.push([x1, y1, x2, y2]);
-            }
-            
-            return lines;
-        }
-        
-        function drawLines(lines) {
-            lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
-            lineCtx.strokeStyle = '#ff0000';
-            lineCtx.lineWidth = 1;
-            
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
-                lineCtx.beginPath();
-                lineCtx.moveTo(line[0], line[1]);
-                lineCtx.lineTo(line[2], line[3]);
-                lineCtx.stroke();
-            }
-        }
-        
-        function updateOutputText() {
-            let outputText = "";
-            for (let i = 0; i < currentLines.length; i++) {
-                let line = currentLines[i];
-                outputText += `[${line[0]},${line[1]},${line[2]},${line[3]}],\n`;
-            }
-            
-            lineOutput.value = currentLines.length +"\n"+ outputText;
-        }
+
+       
         
         function toggleOriginalImage() {
             showOriginalImage = !showOriginalImage;
@@ -598,112 +493,5 @@
             }
         }
         
-        function downloadLines() {
-            const blob = new Blob([lineOutput.value], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'lineas.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        
-        // Calcular ángulo entre dos vectores en grados
-        function calculateAngle(v1, v2) {
-            const dot = v1.x * v2.x + v1.y * v2.y;
-            const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
-            const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
-            
-            // Evitar división por cero
-            if (mag1 * mag2 === 0) return 0;
-            
-            const cosAngle = dot / (mag1 * mag2);
-            // Asegurar que el valor esté en el rango válido para acos
-            const clamped = Math.max(-1, Math.min(1, cosAngle));
-            const angleRad = Math.acos(clamped);
-            return angleRad * (180 / Math.PI); // Convertir a grados
-        }
-        
-        // Reducir líneas según el ángulo
-        function reduceLines(lines) {
-            const maxAngle = parseFloat(15);
-            if (isNaN(maxAngle) || maxAngle < 0 || maxAngle > 180) {
-                alert("Por favor, introduce un ángulo válido entre 0 y 180 grados.");
-                return;
-            }
-            
-            if (lines.length < 2) return; // No hay suficientes líneas para procesar
-            
-            const newLines = [];
-            let i = 0;
-            
-            while (i < lines.length) {
-                if (i === lines.length - 1) {
-                    // Última línea, añadirla sin cambios
-                    newLines.push(lines[i]);
-                    break;
-                }
-                
-                // Calcular vectores de las líneas actual y siguiente
-              //  let currentLine = lines[i];
-              //  let nextLine = lines[i + 1];
-              let currentLine;
-              let nextLine;
-
-                currentLine=  {
-                    start:{x:lines[i][0],y:lines[i][1]},
-                    end: {x:lines[i][2],y:lines[i][3]}
-                };
-                nextLine=  {
-                    start:{x:lines[i+1][0],y:lines[i+1][1]},
-                    end: {x:lines[i+1][2],y:lines[i+1][3]}
-                };
-
-                angle=20;
-
-                if (currentLine.end.x==nextLine.start.x && currentLine.end.y==nextLine.start.y ){
-                    const v1 = {
-                        x: currentLine.end.x - currentLine.start.x,
-                        y: currentLine.end.y - currentLine.start.y
-                    };
-                    
-                    const v2 = {
-                        x: nextLine.end.x - nextLine.start.x,
-                        y: nextLine.end.y - nextLine.start.y
-                    };
-                    
-                    // Calcular ángulo entre las líneas
-                     angle = calculateAngle(v1, v2);
-                }               
-               
-                
-                if (angle <= maxAngle) {
-                    // Unir las líneas (eliminar el punto intermedio)
-                    newLines.push([currentLine.start.x,currentLine.start.y,nextLine.end.x,nextLine.end.y]);                
-                    i += 2; // Saltar la siguiente línea ya que la hemos unido
-                } else {
-                    // Mantener la línea actual                 
-                      newLines.push([currentLine.start.x,currentLine.start.y,currentLine.end.x,currentLine.end.y]);
-                    i += 1;
-                }
-            }
-            
-            lines = newLines;
-
-            return lines;
-        }    
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-

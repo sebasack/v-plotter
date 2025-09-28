@@ -59,14 +59,25 @@
                              <div class="slider-container">
                                 <label for="escala">Escala: <span id="escala_value">1</span></label><br>
                                 <input type="range" id="escala" min="0.1" max="5"  step="0.1" value="1">
-                            </div>              
+                            </div>   
+
+                             unificar lineas paralelas:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" onchange="update_lines()"/>  <br>  
+                             lineas negras:<input type="checkbox" id="lineas_negras" checked_ onchange="update_lines()"/>    
                             
                              <div class="slider-container">
                                 <label for="lines_slider">Grosor lineas: <span id="lines_value">2</span></label><br>
                                 <input type="range" id="lines_slider" min="1" max="6"  step="1" value="2">
                             </div>
-                            
+
+  
+                             <div class="slider-container">
+                                <label for="vertices_slider">% Vertices eliminados: <span id="vertices_value">10</span></label><br>
+                                <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
+                            </div>
+
+
                             <button id="toggleImageBtn">Ocultar Imagen Original</button>
+                            <div id="lineas">Lineas:</div> 
                         </fieldset>         
                       
                     </div>            
@@ -145,6 +156,7 @@
 <link rel="stylesheet" href="styles.css">
 <script src="util.js"></script>
 <script src="webcam.js"></script>
+<script src="clase_dibujo.js"></script>
 <script src="capture.js"></script>
 
 

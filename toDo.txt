@@ -18,6 +18,10 @@ importar svg
 
 importar imagenes
     abrir archivo
-    capturar lineas    
+    capturar lineas  
+    unir lineas cercanas  
+    reducir puntos
+    ordenar recorrido del dibujado
 
-convertir imagenes a svg
+
+generar gcode a partir de vectores
