@@ -410,3 +410,20 @@ function draw_queue() {
 
 
 };
+
+
+
+//////////////////////////////////////////////// FUNCIONES VARIAS ////////////////////////////////////////////////
+
+
+
+function actualizarNombreArchivo() {
+    const input = document.getElementById('imageLoader');
+    const nombreSpan = document.getElementById('nombreArchivo');
+    
+    if (input.files.length > 0) {
+        nombreSpan.textContent = input.files[0].name;
+    }else{
+        nombreSpan.textContent = '';
+    }
+}

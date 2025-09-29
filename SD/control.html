@@ -1,15 +1,17 @@
 <table border="0" width="100%" height="100%">
     <tr>
-        <td align="center" width="12%" valign="top">
-            <div style="text-align: left; font-size: 10px" id="version">version: h01</div> <br/>       
+        <td align="center" width="230px" valign="top">
+            <div style="text-align: left; font-size: 10px" id="version">version: h02</div> <br/>       
             
             <div class="container">
                 <div class="tabs">
-                    <div class="tab active" data-tab="input">Entrada</div>
-                    <div class="tab" data-tab="config">Configuracion</div>
+                    <div class="tab active" data-tab="input">Dibujar</div>
+                    <div class="tab" data-tab="captura">Captura</div>
+                    <div class="tab" data-tab="config">Config</div>
                 </div>        
                 <div class="content">
-                    <div class="tab-content active" id="input">    
+                    
+                    <div class="tab-content active" id="input">
                         <fieldset>
                             <legend>Interface</legend>
                             Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension"  onchange="guardar_parametros()"/>    
@@ -17,7 +19,7 @@
                             <button type="button" onclick="resetZoom()">Reset zoom</button><br/>   
                         </fieldset>                                                                
                         <fieldset>
-                            <legend>Pen</legend>
+                            <legend>Marcador</legend>
                             <table>                    
                                 <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441" onchange="guardar_parametros()"/></td><td id="pen_motorA"></td></tr>                
                                 <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" onchange="guardar_parametros()"/></td><td id="pen_motorB"></td></tr>                   
@@ -33,16 +35,40 @@
                             <button type="button" onclick="encolar_tarea('initialCalibrate')" title="Ponga la gondola en Home manualmente antes del calibrado inicial" >Calibrado inicial</button><br/>
                             <button type="button" onclick="encolar_tarea('calibrate')" title="Busca los marcadores de posicion y vuelve la gondola a su Home" >Recalibrar</button>
                         </fieldset>  
+                    </div>
+
+                    <div class="tab-content" id="captura">
                         <fieldset>
-                            <legend>SVG</legend>
-                            <button type="button" onclick="" title="Elija un archivo svg">Cargar</button>                              
-                        </fieldset>         
-                        <fieldset>
-                            <legend>Enviar GCODE</legend>                
-                            <input id="comando" size="23"/>
-                            <button type="button" onclick="encolar_tarea($('#comando').val())" title="ingrese un comando GCODE">Encolar</button>                              
-                        </fieldset>         
-                    </div>            
+                            <legend>Capturar imagen</legend>         
+
+                            <input type="file" id="imageLoader"  style="display: none;" accept="image/*"   onchange="actualizarNombreArchivo()"/>
+                            <button type="button" class="boton-archivo" onclick="document.getElementById('imageLoader').click()">Examinar</button>
+                            <span id="nombreArchivo" class="nombre-archivo"></span>
+
+                             <div class="slider-container">
+                                <label for="umbral_slider">Umbral de detección: <span id="umbral_value">50</span></label><br>
+                                <input type="range" id="umbral_slider" min="10" max="500" value="50">
+                            </div>
+                             Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" onchange="update_lines()" title="Unifica lineas adyacentes"/><br>                               
+                             <div class="slider-container">
+                                <label for="grosor_slider">Grosor lineas: <span id="grosor_value">2</span></label><br>
+                                <input type="range" id="grosor_slider" min="1" max="6"  step="1" value="2">
+                            </div>
+                             <div class="slider-container">
+                                <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
+                                <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
+                            </div>
+                            <hr>
+                            Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked onchange="obtener_lineas()"/><br>
+                            Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ onchange="update_lines()"/>                               
+                             <div class="slider-container">
+                                <label for="escala_captura">Escala: <span id="escala_value">1</span></label><br>
+                                <input type="range" id="escala_captura" min="0.1" max="2"  step="0.1" value="1">
+                            </div>                               
+                            <div id="lineas"></div> 
+                            <button type="button" class="boton-archivo" onclick="importar_dibujo()">Importar</button>
+                        </fieldset>
+                    </div>           
 
                     <div class="tab-content" id="config">                                    
                         <fieldset>
@@ -82,25 +108,36 @@
                 </div>
             </div>
         </td>
-        <td align="center"  width="70%" valign="top">
-            <canvas id="machine" width="100%" height="100%" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
+
+
+
+        <td align="right"  valign="top">
+            <div class="canvas-container">
+                <canvas id="machine" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
+               
+            <!--    <canvas id="originalCanvas"  width="0%" height="0%" ></canvas>-->
+                <canvas id="lineCanvas"  width="0%" height="0%" ></canvas>
+            </div>
         </td>
-        <td align="center"  valign="top">       
+
+
+
+        <td align="center"  width="300px" valign="top">       
             <table width="100%">
                 <tr><td align="left"><div id ="estado_cola" title="Haga click para pausar o activar la cola"></div></td></tr>
                 <tr><td align="right">
-                         <input type="file" id="fileInput" style="display: none;"/>
-                         <input id="comando" size="23"/>
+                         <input type="file" id="fileInput" style="display: none;" title="elija un archivo"/>
+                         <input id="comando_gcode" size="19" style="text-align:left;" title="Escriba el comando GCODE y presione enter para encolarlo"/>
                          <button class="btn" onclick="document.getElementById('fileInput').click()">Importar</button>
                          <button type="button" onclick="limpiar_cola()">Limpiar</button>
                     </td>
                 </tr>
             </table>
-            <textarea readonly id="tareas" name="log" rows="20" cols="50"></textarea>
+            <textarea readonly id="tareas" name="log" rows="24" cols="50"></textarea>
              <table width="100%">
                 <tr><td align="left">Tareas ejecutadas:</td><td align="right"><button type="button" onclick="limpiar_ejecutadas()">Limpiar</button></td></tr>
             </table>
-            <textarea readonly id="log" name="log" rows="20" cols="50"></textarea>
+            <textarea readonly id="log" name="log" rows="24" cols="50"></textarea>
         </td>
     </tr>
 </table>

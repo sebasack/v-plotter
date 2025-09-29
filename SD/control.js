@@ -27,9 +27,6 @@ let pen_down = true; // down
 const tareas = new ColaTareas();
 
 
-
-
-
 function guardar_parametros() {
     const machine_specs_tmp = {
         machineSizeMm_x     : parseInt($("#machineSizeMm_x").val()),
@@ -427,16 +424,17 @@ function init_tabs(){
 
 function zoom_default(){
 
-    // Cambiar dimensiones del canvas
-    canvas.width = window.innerWidth * 0.70;
-    canvas.height = window.innerHeight;    
+    // Obtener dimensiones del td que contiene el canvas
+    const td = canvas.closest('td');       
+
+   // Cambiar dimensiones del canvas
+    canvas.width = td.clientWidth;
+    canvas.height = td.clientHeight;    
 
     // centro la maquina en el canvas    
-    scale = 1;    
-    offsetX = (canvas.width - machine_specs.machineSizeMm_x)/2;
-    offsetY = 0;
-   // offsetY = (canvas.height - machine_specs.machineSizeMm_y)/2;
-
+    scale =1;    
+    offsetX =(canvas.width - machine_specs.machineSizeMm_x )/2;
+    offsetY =0;
 }
 
 
@@ -481,7 +479,6 @@ function init() {
 
     init_tabs();
 
-
     draw_machine();
       
 }
@@ -495,9 +492,13 @@ function init() {
 document.getElementById('fileInput').addEventListener('change', function(event) {
     selectedFile = event.target.files[0];
     
+ 
+
     if (selectedFile) {        
         const reader = new FileReader();    
         reader.onload = function(e) {
+
+         
             // Crear objeto con información del archivo
             const fileData = {
                 name: selectedFile.name,
@@ -658,187 +659,107 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
 
 /******************************** IMPORTACION IMAGENES *************************/
 
-        // Variables globales
-        let originalCanvas = document.getElementById('originalCanvas');
-        let originalCtx = originalCanvas.getContext('2d');
-
-        let lineCanvas = document.getElementById('lineCanvas');
-        let lineCtx = lineCanvas.getContext('2d');
-        
-
-        let lineOutput = document.getElementById('log');
-        let toggleImageBtn = document.getElementById('toggleImageBtn');
-        let downloadBtn = document.getElementById('downloadBtn');
-
-        let thresholdValue = document.getElementById('thresholdValue');
-
-        let escala_value = document.getElementById('escala_value');
-
-        let lines_value = document.getElementById('lines_value');
-        
-        
-        let showOriginalImage = true;
-        let currentLines = [];
-        
-
-        toggleImageBtn.addEventListener('click', toggleOriginalImage);        
-
-
-// slider umbral de deteccion
-let thresholdSlider = document.getElementById('thresholdSlider');
-thresholdSlider.addEventListener('input', updateThreshold);
 
 
 
-function obtener_lineas(){
-    let dibujo = processImage();
+// Variables globales
+/*
+let originalCanvas = document.getElementById('originalCanvas');
+let originalCtx = originalCanvas.getContext('2d');
+*/
 
-    $("#lineas").text("Lineas: "+dibujo.length);
-   // console.log(dibujo);    
-    
+let lineCanvas = document.getElementById('lineCanvas');
+let lineCtx = lineCanvas.getContext('2d');
+
+
+let lineOutput = document.getElementById('log');
+let downloadBtn = document.getElementById('downloadBtn');
+
+let umbral_value = document.getElementById('umbral_value');
+
+let escala_value = document.getElementById('escala_value');
+
+let grosor_value = document.getElementById('grosor_value');
+
+
+
+function dibujar_captura(dibujo,detalle_lineas = true){
+
+    //eco(dibujo.obtenerInfoLineas());
+
+   // mostrar_imagen_original();
+
     lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
     lineCtx.save();
 
-
-    lineas_negras =  $("#lineas_negras").prop("checked") ;
-    // dibujo la figura
-
-
+    if ($("#mostrar_imagen").prop("checked") ){
+        lineCtx.drawImage(imagen, 0, 0);
+    }   
+    
     lineCtx.lineWidth = 1;
-    dibujo.forEach(function(linea) {          
-        
+
+    if (!detalle_lineas){
+            lineCtx.strokeStyle ="#000000";
+     
+        }       
+
+    dibujo.lineas.forEach(function(linea) {                 
         lineCtx.beginPath();
 
-        if (lineas_negras){
-            lineCtx.strokeStyle ="#000000";
-        }else{
-            lineCtx.strokeStyle = linea.color;
-        }        
-       
+        if (detalle_lineas){  
+             lineCtx.strokeStyle = linea.color;
+        }   
+         
         // Dibujar líneas
         lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);       
         d=distancia(linea.vertices[0],linea.vertices[linea.vertices.length-1]);        
         for (i=1;i< linea.vertices.length;i++){                                          
             lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
             lineCtx.stroke();                      
-        }
-
-        lineCtx.restore();
-    
+        }    
       
     });
 
+
+
+    lineCtx.restore();
+
    // lineCtx.closePath();
+}  
+
+
+function obtener_lineas(){
+
+    let radio_pen = parseInt(grosor_slider.value);
+    let umbral = parseInt(umbral_slider.value);
+    let unificarAdyacentes = $("#unificar_lineas_adyacentes").prop("checked") ;
+    let detalle_lineas =  $("#detalle_lineas").prop("checked") ;
+    let vertices_eliminados =  parseInt(vertices_slider.value);
+
+
+    // capturo las lineas de la imagen con los parametros seleccionados
+    dibujo = processImage(umbral,vertices_eliminados,radio_pen,unificarAdyacentes );
+
+    // muestro las estadisticas de la imagen
+    $("#lineas").text("Lineas:"+dibujo.cantidadLineas() + ", vertices:"+dibujo.cantidadVertices());
+
+   // console.log(dibujo);    
+    
+
+    // dibujo la figura
+
+    dibujar_captura(dibujo,detalle_lineas );
+
 
 }
 
 
-function updateThreshold() {
-    thresholdValue.textContent = thresholdSlider.value;
-    if (originalCanvas.width > 0 && originalCanvas.height > 0) {
-        obtener_lineas();
+function importar_dibujo(){
+
+    if ($("#nombreArchivo").html() === ''){
+        alert('No cargo ninguna imagen!');
+        return;
     }
+alert('no implementado');
+
 }
-
-
-// slider escala 
-let escalaSlider = document.getElementById('escala');
-escalaSlider.addEventListener('input', updateEscala);
-
-// slider pen 
-let grosorLineas = document.getElementById('lines_slider');
-grosorLineas.addEventListener('input', update_lines);
-
-
-// slider vertices 
-let reduccionVertices = document.getElementById('vertices_slider');
-reduccionVertices.addEventListener('input', update_lines);
-
-
-
-function update_lines(){
-    lines_value.textContent = lines_slider.value;
-    vertices_value.textContent = vertices_slider.value;
-    obtener_lineas();
-}
-
-
-function updateEscala() {
-    escala_value.textContent = escalaSlider.value;
- //   if (originalCanvas.width > 0 && originalCanvas.height > 0) {
-   //     obtener_lineas();
-   // }
-    escala = escalaSlider.value;
-
-
-    if (originalCanvas.getContext) {
-        originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
-     
-      //  draw_image(imagen.src,page.page_pos_x,page.page_pos_y,imagen.width*escala,imagen.height*escala,true,originalCtx);
-        originalCtx.drawImage(imagen,page.page_pos_x,page.page_pos_y, imagen.width*escala,imagen.height*escala);
-
-
-       obtener_lineas();
-    }
-}
-
-
-        function toggleOriginalImage() {
-            showOriginalImage = !showOriginalImage;
-            
-            if (showOriginalImage) {
-                originalCanvas.style.display = 'block';
-                toggleImageBtn.textContent = 'Ocultar Imagen Original';
-            } else {
-                originalCanvas.style.display = 'none';
-                toggleImageBtn.textContent = 'Mostrar Imagen Original';
-            }
-        }
-
-
-//CARGAR imagen
-let imageLoader = document.getElementById('imageLoader');
-imageLoader.addEventListener('change', handleImage, false);
-imagen =false;
-
-function handleImage(e) {
-    let reader = new FileReader();
-    reader.onload = function(event) {
-        let img = new Image();
-        img.onload = function() {
-           
-            // Ajustar tamaño de los canvases al de la imagen
-            originalCanvas.width = lineCanvas.width = img.width;
-            originalCanvas.height = lineCanvas.height = img.height;
-            
-            // Dibujar imagen en el canvas original
-            originalCtx.drawImage(img, 0, 0);
-        
-          /*
-            // Ajustar tamaño de los canvases al del canvar ppal
-            originalCanvas.width = lineCanvas.width =  canvas.width;
-            originalCanvas.height =  lineCanvas.height = canvas.height;
-*/
-
-            originalCtx.translate(offsetX, offsetY);
-            originalCtx.scale(scale,scale);    
-
-          
-         
-         //   originalCtx.drawImage(img,page.page_pos_x,page.page_pos_y,img.width,img.height);
-
-
-            draw_image(img.src,page.page_pos_x,page.page_pos_y,img.width,img.height,true,originalCtx);
-
-            imagen=img;
-
-        //    draw_image(img.src,page.page_pos_x,page.page_pos_y,page.page_width,page.page_height);
-            // Procesar imagen y detectar contornos
-            obtener_lineas();
-        }
-        img.src = event.target.result;
-    }
-    reader.readAsDataURL(e.target.files[0]);
-}
-
-
