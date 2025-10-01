@@ -9,6 +9,18 @@ let dibujo = false;
 
 
 
+let lineCanvas = document.getElementById('lineCanvas');
+let lineCtx = lineCanvas.getContext('2d');
+
+
+let lineOutput = document.getElementById('log');
+let downloadBtn = document.getElementById('downloadBtn');
+let umbral_value = document.getElementById('umbral_value');
+let escala_value = document.getElementById('escala_value');
+let grosor_value = document.getElementById('grosor_value');
+
+
+
 // slider umbral de deteccion
 let umbral_slider = document.getElementById('umbral_slider');
 umbral_slider.addEventListener('input', update_umbral);
@@ -609,3 +621,78 @@ function processImage(umbralDeteccion, porcentaje_vertices_eliminados=10,radio_p
         
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+function dibujar_captura(dibujo,detalle_lineas = true){
+
+    //eco(dibujo.obtenerInfoLineas());
+
+   // mostrar_imagen_original();
+
+    lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+    lineCtx.save();
+
+    if ($("#mostrar_imagen").prop("checked") ){
+        lineCtx.drawImage(imagen, 0, 0);
+    }   
+    
+    lineCtx.lineWidth = 1;
+
+    if (!detalle_lineas){
+        lineCtx.strokeStyle ="#000000";     
+    }       
+
+    dibujo.lineas.forEach(function(linea) {                 
+        lineCtx.beginPath();
+
+        if (detalle_lineas){  
+             lineCtx.strokeStyle = linea.color;
+        }   
+         
+        // Dibujar líneas
+        lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);       
+        d=distancia(linea.vertices[0],linea.vertices[linea.vertices.length-1]);        
+        for (i=1;i< linea.vertices.length;i++){                                          
+            lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
+            lineCtx.stroke();                      
+        }    
+      
+    });
+
+
+
+    lineCtx.restore();
+
+   // lineCtx.closePath();
+}  
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function obtener_lineas(){
+
+    let radio_pen = parseInt(grosor_slider.value);
+    let umbral = parseInt(umbral_slider.value);
+    let unificarAdyacentes = $("#unificar_lineas_adyacentes").prop("checked") ;
+    let detalle_lineas =  $("#detalle_lineas").prop("checked") ;
+    let vertices_eliminados =  parseInt(vertices_slider.value);
+
+
+    // capturo las lineas de la imagen con los parametros seleccionados
+    dibujo_importado = processImage(umbral,vertices_eliminados,radio_pen,unificarAdyacentes );
+
+    // muestro las estadisticas de la imagen
+    $("#lineas").text("Lineas:"+dibujo_importado.cantidadLineas() + ", vertices:"+dibujo_importado.cantidadVertices());
+
+   // console.log(dibujo);    
+    
+
+    // dibujo la figura
+
+    dibujar_captura(dibujo_importado,detalle_lineas );
+
+
+}

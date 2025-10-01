@@ -13,6 +13,15 @@
         text-align:right;
     }
 
+    .select-fijo {
+        width: 200px; /* Ancho fijo que prefieras */
+        max-width: 200px;
+        min-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
 
     /*estilos de tabs*/
     .container {width: 230px;}

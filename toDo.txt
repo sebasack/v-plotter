@@ -16,12 +16,18 @@ importar svg
         elegir partes de svg
     generar gcode a partir de lo elegido
 
-importar imagenes
+capturar imagenes
     abrir archivo
     capturar lineas  
+
+importar capturas
     unir lineas cercanas  
     reducir puntos
     ordenar recorrido del dibujado
 
+    escalar y centrar
+    seleccionar sector (puedo buscar vertices dentro de un cuadro)
+    importar 
+        ocultar canvas imagen
 
-generar gcode a partir de vectores
+generar gcode a partir de importacion

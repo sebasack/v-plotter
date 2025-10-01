@@ -38,36 +38,10 @@
                     </div>
 
                     <div class="tab-content" id="captura">
-                        <fieldset>
-                            <legend>Capturar imagen</legend>         
-
-                            <input type="file" id="imageLoader"  style="display: none;" accept="image/*"   onchange="actualizarNombreArchivo()"/>
-                            <button type="button" class="boton-archivo" onclick="document.getElementById('imageLoader').click()">Examinar</button>
-                            <span id="nombreArchivo" class="nombre-archivo"></span>
-
-                             <div class="slider-container">
-                                <label for="umbral_slider">Umbral de detección: <span id="umbral_value">50</span></label><br>
-                                <input type="range" id="umbral_slider" min="10" max="500" value="50">
-                            </div>
-                             Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" onchange="update_lines()" title="Unifica lineas adyacentes"/><br>                               
-                             <div class="slider-container">
-                                <label for="grosor_slider">Grosor lineas: <span id="grosor_value">2</span></label><br>
-                                <input type="range" id="grosor_slider" min="1" max="6"  step="1" value="2">
-                            </div>
-                             <div class="slider-container">
-                                <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
-                                <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
-                            </div>
-                            <hr>
-                            Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked onchange="obtener_lineas()"/><br>
-                            Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ onchange="update_lines()"/>                               
-                             <div class="slider-container">
-                                <label for="escala_captura">Escala: <span id="escala_value">1</span></label><br>
-                                <input type="range" id="escala_captura" min="0.1" max="2"  step="0.1" value="1">
-                            </div>                               
-                            <div id="lineas"></div> 
-                            <button type="button" class="boton-archivo" onclick="importar_dibujo()">Importar</button>
+                        <select name="capturar" id="select_capturar" class="select-fijo" ></select>
+                        <fieldset id="parametros_captura">
                         </fieldset>
+                         <button type="button" class="boton-archivo" onclick="importar_dibujo()">Importar</button>
                     </div>           
 
                     <div class="tab-content" id="config">                                    
@@ -114,8 +88,6 @@
         <td align="right"  valign="top">
             <div class="canvas-container">
                 <canvas id="machine" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
-               
-            <!--    <canvas id="originalCanvas"  width="0%" height="0%" ></canvas>-->
                 <canvas id="lineCanvas"  width="0%" height="0%" ></canvas>
             </div>
         </td>
