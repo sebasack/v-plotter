@@ -1,8 +1,23 @@
-buscar forma de activar o desactivar distintos listeners segun este importando un svg o dibujando
 
-convertir las lineas de tipo [[x,y,x1,y1],[x1,y1,x2,y2],[x2,y2,x3,y3],[x10,y10,x11,y11],[x11,y11,x12,y12]] a 
 
-[x,y]->[x1,y1]->[x2,y2]->[x3,y3]
+
+
+control:
+    gestiona la maquina
+
+    capture_lines:
+        elije plugin de captura
+        importa el objeto tipo dibujo que genera el plugin de captura 
+        acomoda el objeto en la posicion y con el zoom necesario
+        genera gcode y lo entrega a control
+
+        plugins de captura:
+            agrega controles necesarios en control
+            gestiona parametros 
+            genera el objeto tipo dibujo y lo entrega a capture_lines
+
+
+
 
 
 importar svg

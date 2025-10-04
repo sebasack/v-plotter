@@ -41,7 +41,12 @@
                         <select name="capturar" id="select_capturar" class="select-fijo" ></select>
                         <fieldset id="parametros_captura">
                         </fieldset>
-                         <button type="button" class="boton-archivo" onclick="importar_dibujo()">Importar</button>
+
+                        <fieldset id="parametros_importacion">
+                        </fieldset>
+                        <br>
+                        <button type="button" class="boton-archivo" onclick="importar_tareas()">Importar tareas</button>
+                         
                     </div>           
 
                     <div class="tab-content" id="config">                                    
@@ -84,14 +89,12 @@
         </td>
 
 
-
         <td align="right"  valign="top">
             <div class="canvas-container">
                 <canvas id="machine" title="Haga click para mover o la rueda para hacer zoom, doble click mueve la gondola."></canvas>
                 <canvas id="lineCanvas"  width="0%" height="0%" ></canvas>
             </div>
         </td>
-
 
 
         <td align="center"  width="300px" valign="top">       

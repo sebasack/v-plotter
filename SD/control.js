@@ -21,8 +21,7 @@ let offsetY = 0;
 let scale =1;
 let pen_down = true; // down
 
-// defino la variable donde guardaran los dibujos importados
-let dibujo_importado = false;
+
 
 // creo la cola de tareas
 const tareas = new ColaTareas();
@@ -44,8 +43,7 @@ function guardar_parametros() {
         page_height : parseInt($("#page_height").val()),
         page_pos_x  : parseInt($("#page_pos_x").val()),
         page_pos_y  : parseInt($("#page_pos_y").val()),
-    }
-
+    };
 
     const pen_tmp = {
         x : parseInt($("#pen_x").val()),
@@ -419,6 +417,14 @@ function init_tabs(){
             // Activar la pestaña clickeada
             tab.classList.add('active');
             document.getElementById(target).classList.add('active');
+
+
+            // activo y desactivo el canvas de captura
+            if (tab.getAttribute('data-tab') == 'captura'){
+                $('#lineCanvas').show();
+            }else{
+                $('#lineCanvas').hide();
+            }
         });
     });
 };
@@ -506,13 +512,10 @@ document.getElementById('select_capturar').addEventListener('change', function(e
 // Event listener para el input de archivo GCODE
 document.getElementById('fileInput').addEventListener('change', function(event) {
     selectedFile = event.target.files[0];
-    
- 
-
+     
     if (selectedFile) {        
         const reader = new FileReader();    
         reader.onload = function(e) {
-
          
             // Crear objeto con información del archivo
             const fileData = {
@@ -672,16 +675,17 @@ document.getElementById('comando_gcode').addEventListener("keydown", function(ev
     }
 });
 
+
+
 /******************************** IMPORTACION IMAGENES *************************/
 
+function importar_tareas(){
 
-
-
-function importar_dibujo(){
-    if (dibujo_importado === false){
+    if (captura.dibujo === false){
         alert('No importo ningun dibujo!');
         return;
     }
+    
 alert('no implementado');
 
 }

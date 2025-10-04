@@ -1,8 +1,7 @@
 
-$("#version").append(".u04"); // agrego la version de util.js
 
-  const colores = ['#000000','#ffffff','#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', 
-                                     '#ff7700', '#7700ff', '#abcdef', '#ff0077', '#77ff00', '#0077ff','#17f8edff','#80c5ecff'];       
+const colores = ['#000000','#ffffff','#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', 
+                 '#ff7700', '#7700ff', '#abcdef', '#ff0077', '#77ff00', '#0077ff','#17f8edff','#80c5ecff'];       
                 
 
 
@@ -158,8 +157,6 @@ function angleDifference(angle1, angle2) {
     diff = diff > Math.PI ? (2 * Math.PI - diff) : diff;
     return Math.abs(diff * 180 / Math.PI); // Convertir a grados
 }
-        
-
 
 function calc_motorA(x,y){
    return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(x,2) + Math.pow(y,2))) / machine_specs.mmPerRev);
@@ -186,8 +183,8 @@ function getCartesianY( cX,  motorA){
 }
 
 function distancia(v1,v2) {
-                return Math.sqrt((v1.x - v2.x) ** 2 + (v1.y - v2.y) ** 2);
-            }
+    return Math.sqrt((v1.x - v2.x) ** 2 + (v1.y - v2.y) ** 2);
+}
 
 function formatTime(date) {
     const hours = date.getHours().toString().padStart(2, '0');
@@ -298,8 +295,6 @@ function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#0000
     ctx.setLineDash([]); // reestablezco linea solida
 }
 
-
-
 function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle =line_color;
@@ -336,7 +331,6 @@ function text(text, x, y,line_color='#000000') {
     ctx.fillStyle = line_color;
     ctx.fillText(text, x, y);
 }
-
 
 function draw_queue() {
     //dibujo lo que esta guardado en la cola
@@ -377,7 +371,6 @@ function draw_queue() {
     ctx.closePath();
     ctx.stroke();
 
-
     pen_is_down = true;
 
     // dibujo las tareas terminadas
@@ -408,7 +401,6 @@ function draw_queue() {
   //  ctx.closePath();
     ctx.stroke();
 
-
 };
 
 
@@ -416,14 +408,3 @@ function draw_queue() {
 //////////////////////////////////////////////// FUNCIONES VARIAS ////////////////////////////////////////////////
 
 
-
-function actualizarNombreArchivo() {
-    const input = document.getElementById('imageLoader');
-    const nombreSpan = document.getElementById('nombreArchivo');
-    
-    if (input.files.length > 0) {
-        nombreSpan.textContent = input.files[0].name;
-    }else{
-        nombreSpan.textContent = '';
-    }
-}

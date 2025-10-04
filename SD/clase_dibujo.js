@@ -3,7 +3,8 @@ class Vertice {
     constructor(x, y) {
         this.id = `v_${Math.random().toString(36).substr(2, 9)}`;
         this.x = x;
-        this.y = y;             
+        this.y = y;     
+        this.elegido = false;        
     }
 
     distanciaA(vertice) {
@@ -17,6 +18,7 @@ class Linea {
         this.id = id;
         this.color = color || this.generarColorAleatorio();
         this.vertices = [];
+        this.elegida = false;
     }    
     
     generarColorAleatorio() {
@@ -143,6 +145,9 @@ class Dibujo {
     constructor() {
         this.lineas = [];
         this.contadorLineas = 0;
+
+        this.lineas_originales = [];
+        this.contadorLineasOriginales = 0;
     }
 
     crearLinea(color = null) {
@@ -196,7 +201,48 @@ class Dibujo {
         return cant;
     }
 
+    backupLineas(){
+        this.lineas_originales = [];
+        this.contadorLineasOriginales = 0;
+        this.lineas.forEach(linea => {
+            //creo linea nueva 
+            const nuevaLinea = new Linea(linea.id, linea.color);
+            this.lineas_originales.push(nuevaLinea);
+            this.contadorLineasOriginales++; 
+            //copio los vertices
+            linea.vertices.forEach(ver => {
+                nuevaLinea.agregarVertice(ver.x,ver.y);
+            });
+        });
+    };
+
+
+    restoreLineas(){
+        this.lineas = [];
+        this.contadorLineas = 0;
+        this.lineas_originales.forEach(linea => {
+            //creo linea nueva 
+            const nuevaLinea = new Linea(linea.id, linea.color);
+            this.lineas.push(nuevaLinea);
+            this.contadorLineas++; 
+            //copio los vertices
+            linea.vertices.forEach(ver => {
+                nuevaLinea.agregarVertice(ver.x,ver.y);
+            });
+        });
+    };
+
+
     reducirVertices(eliminar){
+
+         // guardo una copia del dibujo por que la reduccion es destructiva
+        if (this.contadorLineasOriginales == 0){             
+            this.backupLineas();
+        }else{
+            //recupero la copia de las lineas guardadas
+            this.restoreLineas();
+        }
+               
 
         this.lineas.forEach(function(linea) {   
             let diferencias=[];
@@ -226,9 +272,8 @@ class Dibujo {
                 linea.eliminarVertice(diferencias[i].indice);                        
             }        
         });
-    }
-    
-            
+    }   
+
     
 
     unificarLineas(cercaniaMinima = 5){ 
@@ -321,5 +366,49 @@ class Dibujo {
                 termine=true;
             }                  
         };
-    }                        
+    }        
+    
+    limpiarSeleccionElementos(){
+         this.lineas.forEach(linea => {
+            linea.elegida=false;           
+            linea.vertices.forEach( vertice => {                              
+                vertice.elegido=false;                      
+            });             
+        });
+    }
+
+    seleccionarElementos(box,limpiar_seleccion = true,quitar_encontrados = false){
+        let seleccionar = true;
+        if (quitar_encontrados){
+            seleccionar = false; // deseleccionando
+        }else if(limpiar_seleccion){
+            this.limpiarSeleccionElementos();
+        }
+
+        this.lineas.forEach(linea => {
+            // eco('aca busco que vertices estan dentro del cuadro');
+            linea.vertices.forEach( vertice => {                  
+                if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
+                    vertice.y >= box.y && vertice.y <= box.y + box.height){
+                    vertice.elegido=seleccionar;
+                    linea.elegida=seleccionar;
+                }
+            });             
+        });
+
+    }
+    
+    elementosEnBox(box){
+        let vertices_elegidos = new Set();
+        this.lineas.forEach(linea => {
+            // eco('aca busco que vertices estan dentro del cuadro');
+            linea.vertices.forEach( vertice => {                  
+                if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
+                    vertice.y >= box.y && vertice.y <= box.y + box.height){
+                        vertices_elegidos.add(vertice.id);
+                }
+            });             
+        });
+        return vertices_elegidos;
+    }
 }
