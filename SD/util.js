@@ -29,7 +29,6 @@ class ColaTareas {
             }
         }
         
-
         this.tareas.push(tareaObj);
         //console.log(`➕ Tarea agregada: ${nombre}`);
 
@@ -138,53 +137,11 @@ class ColaTareas {
 };
 
 
-//////////////////////////////////////////////// CALC ////////////////////////////////////////////////
+//////////////////////////////////////////////// FUNCIONES VARIAS ////////////////////////////////////////////////
+
 function eco(obj){
     console.log(obj);
 };
-
-
-// Calcular el ángulo de una línea en radianes
-function calculateAngle(v1,v2) {
-    const dx = v2.x - v1.x;
-    const dy = v2.y - v1.y;
-    return Math.atan2(dy, dx);
-}
-
-// Calcular la diferencia entre dos ángulos (en grados)
-function angleDifference(angle1, angle2) {
-    let diff = Math.abs(angle1 - angle2) % (2 * Math.PI);
-    diff = diff > Math.PI ? (2 * Math.PI - diff) : diff;
-    return Math.abs(diff * 180 / Math.PI); // Convertir a grados
-}
-
-function calc_motorA(x,y){
-   return Math.round((machine_specs.stepsPerRev * Math.sqrt(Math.pow(x,2) + Math.pow(y,2))) / machine_specs.mmPerRev);
-};
-
-function calc_motorB(x,y){
-    return Math.round((1/machine_specs.stepMultiplier) * Math.sqrt(Math.pow((machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev)),2) + Math.pow( (Math.sqrt( Math.pow(x,2) + Math.pow(y,2)) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier))),2) - (2 * machine_specs.machineSizeMm_x * (machine_specs.stepMultiplier * machine_specs.stepsPerRev / machine_specs.mmPerRev) * x) / (machine_specs.mmPerRev/(machine_specs.stepsPerRev*machine_specs.stepMultiplier)) ));
-};
-
-function multiplier(valor){
-  return valor * machine_specs.stepMultiplier;
-}  
-
-function getCartesianX(motorA,motorB){
-    stepsPerMm = multiplier(machine_specs.stepsPerRev) / machine_specs.mmPerRev;
-    machineSizeStepsX= machine_specs.machineSizeMm_x * stepsPerMm;
-    calcX = (Math.pow(machineSizeStepsX, 2) - Math.pow(multiplier(motorB), 2) + Math.pow(multiplier(motorA), 2)) / (machineSizeStepsX*2);
-    return calcX;
-}
-
-function getCartesianY( cX,  motorA){
-    calcY = Math.sqrt(Math.pow(multiplier(motorA),2)-Math.pow(cX,2));
-    return calcY;
-}
-
-function distancia(v1,v2) {
-    return Math.sqrt((v1.x - v2.x) ** 2 + (v1.y - v2.y) ** 2);
-}
 
 function formatTime(date) {
     const hours = date.getHours().toString().padStart(2, '0');
@@ -192,20 +149,6 @@ function formatTime(date) {
     const seconds = date.getSeconds().toString().padStart(2, '0');
     const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-}
-
-function screenToWorld(x, y) {
-    return {
-        x: (x - offsetX) /scale,
-        y: (y - offsetY) / scale
-    };
-}
-
-function worldToScreen(x, y) {
-    return {
-        x: x * scale + offsetX,
-        y: y * scale + offsetY
-    };
 }
 
 function gcode_valido(gcode){   
@@ -234,177 +177,3 @@ function gcode_valido(gcode){
 
     return false;
 };
-//////////////////////////////////////////////// DRAW ////////////////////////////////////////////////
-
-
-
-function aplicar_offset_scale(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(offsetX, offsetY);
-    ctx.scale(scale,scale);    
-}
-
-
-
-function draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1,ctx1= ctx){
-
-    const img = new Image();
-    img.onload = function () {
-
-           // Establecer transparencia global
-        ctx1.globalAlpha = globalAlpha;
-      
-        // Calcular dimensiones manteniendo la proporcion
-        aspectRatio = 1;
-        if(!width){
-            width= img.width;
-        }
-
-        if(!height){
-            height= img.height;
-        }
-
-        if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
-            height=width;
-            aspectRatio = img.height / img.width;
-        }        
-   
-        // Dibujar la imagen manteniendo proporcion
-        s = worldToScreen(x, y);
-        ctx1.drawImage(img,s.x, s.y, width*scale, (height * aspectRatio)*scale);
-
-
-        // Restaurar opacidad para las lineas
-        ctx1.globalAlpha = 1.0;
-
-       
-    };
-    img.src = src;
-}
-
-function linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
-    ctx.lineWidth = 0.5;
-    ctx.strokeStyle =line_color; 
-    ctx.fillStyle = line_color;
-    ctx.setLineDash([ancho_punto,acho_separacion]);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x1,y1);
-    ctx.stroke();
-    ctx.setLineDash([]); // reestablezco linea solida
-}
-
-function line(x, y, x1, y1,line_color='#000000',lineWidth=1) {    
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle =line_color;
-    ctx.moveTo(x, y);
-    ctx.lineTo(x1, y1);
-    ctx.stroke();
-}
-
-function circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle =line_color;    
-    ctx.beginPath(); 
-    ctx.arc(x, y, radio, 0, 2 * Math.PI);     
-    if (color){
-        ctx.fillStyle =color;
-        ctx.fill(); 
-    }     
-    ctx.stroke();
-   
-}
-
-function rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle =line_color;
-    ctx.fillStyle = line_color;
-    if (color){
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, ancho, alto);
-    }
-    ctx.strokeRect(x, y, ancho, alto);
-}
-
-function text(text, x, y,line_color='#000000') {
-    ctx.fillStyle = line_color;
-    ctx.fillText(text, x, y);
-}
-
-function draw_queue() {
-    //dibujo lo que esta guardado en la cola
-
-    lista = tareas.listarTareas();
-    //  console.log(lista);
-
-    pen_is_down = true;
-
-    ctx.lineWidth = pen.penWidth;
-
-    //dibujo las tareas pendientes
-    ctx.strokeStyle ="#aaa";
-    ctx.beginPath();
-    for (const tarea of lista) {
-        gcode = tarea.nombre.split(',');
-        if (gcode[0]=='C14'){ // pen up
-            pen_is_down = false;
-        }else  if (gcode[0]=='C13'){ // pen down
-            pen_is_down = true;
-        }
-
-        // calculo las coordenadas cartesianas del punto
-        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
-        cartesianX = getCartesianX(gcode[1],gcode[2]);
-        x = Math.round(cartesianX*mmPerStep);
-        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
-        //  circle(x,y,2);
-
-        if (pen_is_down) {
-            ctx.lineTo(x,y);
-        } else {
-            ctx.moveTo(x,y);
-        }
-
-        //  console.log(tarea.nombre);
-    }
-    ctx.closePath();
-    ctx.stroke();
-
-    pen_is_down = true;
-
-    // dibujo las tareas terminadas
-    ctx.strokeStyle ="#000";
-    ctx.beginPath();
-    for (const tarea of tareas_completadas) {
-        gcode = tarea.split(',');
-        if (gcode[0]=='C14'){ // pen up
-            pen_is_down = false;
-        }else  if (gcode[0]=='C13'){ // pen down
-            pen_is_down = true;
-        }
-
-        // calculo las coordenadas cartesianas del punto
-        mmPerStep = machine_specs.mmPerRev / multiplier(machine_specs.stepsPerRev);
-        cartesianX = getCartesianX(gcode[1],gcode[2]);
-        x = Math.round(cartesianX*mmPerStep);
-        y = Math.round(getCartesianY(cartesianX,gcode[1])*mmPerStep);
-        //  circle(x,y,2);
-
-        if (pen_is_down) {
-            ctx.lineTo(x, y);
-        } else {
-            ctx.moveTo(x, y);
-        }        
-    }
-
-  //  ctx.closePath();
-    ctx.stroke();
-
-};
-
-
-
-//////////////////////////////////////////////// FUNCIONES VARIAS ////////////////////////////////////////////////
-
-

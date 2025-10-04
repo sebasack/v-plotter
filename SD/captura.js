@@ -21,16 +21,17 @@ class Captura {
         this.scale = 1;
         this.lastX = 0;
         this.lastY = 0;
-        
-        this.init();
-        
+                
         this.vertices_eliminados = 10; // %        
         this.mostrar_imagen = true;
         this.detalle_lineas = false;
+        this.mostrar_vertices = false;
         this.modo_seleccion = 0;
 
         this.imagen = false;
         this.dibujo = false;
+
+        this.init();
     }
 
 
@@ -68,13 +69,11 @@ class Captura {
         }
     };
 
-    
+    dibujar_maquina(){
 
-    dibujar_captura(){
-      
-        //redimensiono el canvas
-        this.lineCanvas.width = canvas.width;
-        this.lineCanvas.height = canvas.height;
+           //redimensiono el canvas
+        this.lineCanvas.width = control.canvas.width;
+        this.lineCanvas.height = control.canvas.height;
 
         // limpio el canvas
         this.lineCtx.clearRect(0, 0,this.lineCanvas.width,this.lineCanvas.height);
@@ -85,17 +84,17 @@ class Captura {
         this.lineCtx.fillRect(0,0, this.lineCanvas.width,this.lineCanvas.height);
 
         // Calcular el 90% del espacio disponible
-        const maxWidth = canvas.width * 0.95;
-        const maxHeight = canvas.height * 0.95;
+        const maxWidth = control.canvas.width * 0.95;
+        const maxHeight = control.canvas.height * 0.95;
 
         // Calcular la escala para mantener la proporción
-        const scaleX = maxWidth / page.page_width ;
-        const scaleY = maxHeight/ page.page_height;
+        const scaleX = maxWidth / control.page.page_width ;
+        const scaleY = maxHeight/ control.page.page_height;
         const scale = Math.min(scaleX, scaleY);
         
         // Calcular las dimensiones escaladas
-        const scaledWidth = page.page_width * scale;
-        const scaledHeight =  page.page_height * scale;
+        const scaledWidth = control.page.page_width * scale;
+        const scaledHeight =  control.page.page_height * scale;
         
         // Calcular la posición para centrar
         const x = (this.lineCanvas.width - scaledWidth) / 2;
@@ -109,7 +108,26 @@ class Captura {
         this.lineCtx.strokeStyle = '#000000';
         this.lineCtx.lineWidth = 3;
         this.lineCtx.strokeRect(x, y, scaledWidth, scaledHeight);
-        
+
+        /*
+        // dibujar lineas de home
+    this.lineCtx.setLineDash([2,2]);
+    this.lineCtx.strokeStyle ="#777"; 
+    this.lineCtx.fillStyle = "#777";
+    this.lineCtx.beginPath();
+    this.lineCtx.moveTo(0, home.y);
+    this.lineCtx.lineTo(this.lineCtx.width,home.y);
+    this.lineCtx.stroke();
+    this.lineCtx.setLineDash([]); // reestablezco linea solida
+        //     linedash(0,home.y,machine_specs.machineSizeMm_x,home.y,5,5,"#777");
+//        linedash(home.x,0,home.x,machine_specs.machineSizeMm_y,5,5,"#777");
+*/
+
+    }
+
+    dibujar_captura(){
+      
+        this.dibujar_maquina();
 
         // Aplicar transformaciones de vista
         this.lineCtx.translate(this.viewX, this.viewY);
@@ -127,8 +145,50 @@ class Captura {
             this.lineCtx.strokeStyle ="#000000";                
         }       
 
-
         // dibujo las lineas generadas
+        this.dibujo.lineas.forEach((linea) => {
+
+            if (linea.elegida){ // la linea esta seleccionada
+               this.lineCtx.strokeStyle = '#ff0000';
+            }else{
+                if (this.detalle_lineas){  
+                    this.lineCtx.strokeStyle = linea.color;
+                }else{
+                    this.lineCtx.strokeStyle = '#000000';
+                }
+            }
+
+            this.lineCtx.beginPath();           
+            
+            // Dibujar líneas
+            this.lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);                       
+            for (let i=1;i< linea.vertices.length;i++){                    
+                this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
+                this.lineCtx.stroke();                                 
+            }        
+        });
+
+
+        if (this.mostrar_vertices){
+             //dibujo vertices 
+            this.dibujo.lineas.forEach((linea) => {                                           
+                for (let i = 1; i < linea.vertices.length; i++){   
+                    if (linea.vertices[i].elegido){
+                        this.lineCtx.strokeStyle ='#ff0000';    
+                    }else{
+                        this.lineCtx.strokeStyle ='#00ff00';     
+                    }
+                    // dibujo un rectangulo chiquito                                       
+                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.5, 0.5);
+                }        
+            });
+
+        }
+       
+
+        /**
+         
+ // dibujo las lineas generadas
         this.dibujo.lineas.forEach((linea) => {
 
             if (linea.elegida){ // la linea esta seleccionada
@@ -149,7 +209,7 @@ class Captura {
 
                 let color_ant = this.lineCtx.strokeStyle;// guardo el color anterior
 
-                if (this.modo_seleccion ==0){ // muestra lineas compleatas
+                if (this.modo_seleccion === 0){ // muestra lineas compleatas
                     this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
                     this.lineCtx.stroke();   
                 }else{                        // muestra lineas entre vertices elegidos
@@ -165,7 +225,7 @@ class Captura {
 
                 //this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
                 //this.lineCtx.stroke();   
-                if (this.modo_seleccion ==0){ // muestra vertices sobre las lineas
+                if (this.modo_seleccion === 0){ // muestra vertices sobre las lineas
                     if (linea.vertices[i].elegido){
                         this.lineCtx.strokeStyle ='#00ff00';                                                    
                         this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 1, 1);
@@ -177,7 +237,9 @@ class Captura {
 
                 this.lineCtx.strokeStyle=color_ant; // restauro el color anterior
             }        
-        });
+        });         
+         
+         */
 
         this.lineCtx.restore();
 
@@ -194,7 +256,8 @@ class Captura {
 
                 <hr>
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
-                Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />                                                
+                Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
+                Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
                 
                 <select id="modo_seleccion">
                     <option value='0'>seleccionar lineas</option>
@@ -210,8 +273,7 @@ class Captura {
         $('#vertices_value').html(event.target.value);
 
         // reduzco cantidad de vertices
-        if (this.dibujo !== false){
-            
+        if (this.dibujo !== false){            
             this.dibujo.reducirVertices(this.vertices_eliminados);
             this.dibujar_captura();
         }
@@ -221,8 +283,32 @@ class Captura {
     cambio_mostrar_imagen_o_detalle(event){      
         this.mostrar_imagen = $("#mostrar_imagen").prop("checked") ;
         this.detalle_lineas = $("#detalle_lineas").prop("checked") ;
+        this.mostrar_vertices = $("#mostrar_vertices").prop("checked") ;        
+        // redibujo 
+        if (this.dibujo !== false){          
+            this.dibujar_captura();
+        }
+    }
+
+    cambio_modo_seleccion(evento){
         this.modo_seleccion = $("#modo_seleccion").val();
-         // reduzco cantidad de vertices
+
+        //borro la seleccion del modo no elegido
+        if (this.modo_seleccion == 0 ){
+            // quito mostrar vertices
+            if (this.mostrar_vertices){
+                document.getElementById('mostrar_vertices').click();
+            }
+            this.dibujo.limpiarSeleccionElementos(1);
+        }else{
+            // fuerzo mostrar vertices
+            if (!this.mostrar_vertices){
+                document.getElementById('mostrar_vertices').click();
+            }
+            this.dibujo.limpiarSeleccionElementos(0);
+        }
+
+        // redibujo 
         if (this.dibujo !== false){          
             this.dibujar_captura();
         }
@@ -265,7 +351,8 @@ class Captura {
         document.getElementById("vertices_slider").addEventListener('change', this.cambio_vertices_eliminados.bind(this), false);
         document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
-        document.getElementById('modo_seleccion').addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);                        
+        document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
+        document.getElementById('modo_seleccion').addEventListener('change', this.cambio_modo_seleccion.bind(this), false);                        
     
         // seteo el title al canvas
         this.lineCanvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
@@ -426,10 +513,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             height: Math.abs(this.currentY - this.startY)
         };
 
-        //this.vertices_elegidos.clear();
-    
-        
-        this.dibujo.seleccionarElementos(box,!this.ControlLeftPressed,this.ControlRightPressed);
+        this.dibujo.seleccionarElementos(box,this.modo_seleccion,!this.ControlLeftPressed,this.ControlRightPressed);
 
         this.lineCanvas.style.cursor = 'default';
 

@@ -46,16 +46,16 @@ class Linea {
     }
 
     reducirVerticesLinea(ciclos){
-        this.lineas.forEach(function(linea) {   
+        this.lineas.forEach((linea) => {   
             let termine =false;
             
             let angulo_ant =360;
             for (let i=0;y<linea.vertices.length-2; y = y+2){
                 // para cada tres vertices calculo el angulo
-                let angulo=  calculateAngle(linea.vertices[i],linea.vertices[i+1]);
+                let angulo = this.calculateAngle(linea.vertices[i],linea.vertices[i+1]);
 
-                let diff=angleDifference(angulo_ant, angulo);
-                console.log(i + ' '+diff)
+                let diff = this.angleDifference(angulo_ant, angulo);
+                console.log(i + ' '+ diff)
             }            
         });
     }
@@ -137,7 +137,6 @@ class Linea {
             vertices: this.vertices.map(v => ({ x: v.x, y: v.y}))
         };
     }
-
 }
 
 // Clase Dibujo
@@ -216,7 +215,6 @@ class Dibujo {
         });
     };
 
-
     restoreLineas(){
         this.lineas = [];
         this.contadorLineas = 0;
@@ -232,6 +230,19 @@ class Dibujo {
         });
     };
 
+    // Calcular el ángulo de una línea en radianes
+    calculateAngle(v1,v2) {
+        const dx = v2.x - v1.x;
+        const dy = v2.y - v1.y;
+        return Math.atan2(dy, dx);
+    }
+
+    // Calcular la diferencia entre dos ángulos (en grados)
+    angleDifference(angle1, angle2) {
+        let diff = Math.abs(angle1 - angle2) % (2 * Math.PI);
+        diff = diff > Math.PI ? (2 * Math.PI - diff) : diff;
+        return Math.abs(diff * 180 / Math.PI); // Convertir a grados
+    } 
 
     reducirVertices(eliminar){
 
@@ -243,16 +254,15 @@ class Dibujo {
             this.restoreLineas();
         }
                
-
-        this.lineas.forEach(function(linea) {   
+        this.lineas.forEach((linea) => {   
             let diferencias=[];
-            let angulo_ant =calculateAngle(linea.vertices[0],linea.vertices[1]);
+            let angulo_ant = this.calculateAngle(linea.vertices[0],linea.vertices[1]);
             for (let i=1;i<linea.vertices.length-1; i++){
 
                 // para cada par de vertices calculo el angulo
-                let angulo=  calculateAngle(linea.vertices[i],linea.vertices[i+1]);
+                let angulo = this.calculateAngle(linea.vertices[i],linea.vertices[i+1]);
 
-                let diff=angleDifference(angulo_ant, angulo);
+                let diff = this.angleDifference(angulo_ant, angulo);
                 //guardo el angulo en un arreglo
                 diferencias.push({indice:i, angulo: diff});
                 angulo_ant=angulo;
@@ -273,9 +283,7 @@ class Dibujo {
             }        
         });
     }   
-
     
-
     unificarLineas(cercaniaMinima = 5){ 
 
         // busco cercania entre los vertices de iniciales y finales de una linea y los de otra,
@@ -368,21 +376,25 @@ class Dibujo {
         };
     }        
     
-    limpiarSeleccionElementos(){
+    limpiarSeleccionElementos(modo = 0){ //0=lineas 1=vertices
          this.lineas.forEach(linea => {
-            linea.elegida=false;           
-            linea.vertices.forEach( vertice => {                              
-                vertice.elegido=false;                      
+            if (modo == 0){  //0=lineas 1=vertices
+                linea.elegida=false;    
+            }       
+            linea.vertices.forEach( vertice => {     
+                if (modo == 1){  //0=lineas 1=vertices                         
+                    vertice.elegido=false;     
+                }                 
             });             
         });
     }
 
-    seleccionarElementos(box,limpiar_seleccion = true,quitar_encontrados = false){
+    seleccionarElementos(box,modo = 0,limpiar_seleccion = true,quitar_encontrados = false){
         let seleccionar = true;
         if (quitar_encontrados){
             seleccionar = false; // deseleccionando
         }else if(limpiar_seleccion){
-            this.limpiarSeleccionElementos();
+            this.limpiarSeleccionElementos(modo);
         }
 
         this.lineas.forEach(linea => {
@@ -390,12 +402,14 @@ class Dibujo {
             linea.vertices.forEach( vertice => {                  
                 if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
                     vertice.y >= box.y && vertice.y <= box.y + box.height){
-                    vertice.elegido=seleccionar;
-                    linea.elegida=seleccionar;
+                    if (modo == 0){  //0=lineas 1=vertices
+                        linea.elegida = seleccionar;
+                    }else{
+                        vertice.elegido = seleccionar;
+                    }                                      
                 }
             });             
         });
-
     }
     
     elementosEnBox(box){
