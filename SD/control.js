@@ -901,8 +901,56 @@ Doble click: mueve la gondola`;
         if (captura.dibujo === false){
             alert('No importo ningun dibujo!');
             return;
-        }        
-        alert('no implementado');
+        }   
+
+        if (this.tareas.tamano() > 0 && !this.tareas.pausado){
+            alert(`La maquina esta procesando una cola en este momento, 
+Pausela o elimine las tareas para importar una nueva cola.`);
+            return;
+        };
+        
+        // limpio la cola de tareas 
+        this.limpiar_cola();
+
+        //encolo tareas de volver a home
+        this.return_to_home();
+
+        // para cada linea del dibujo
+        captura.dibujo.lineas.forEach((linea) => {         
+            // subo el pen      
+            this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
+            if (linea.elegida){
+                let pen_is_down = false;
+                linea.vertices.forEach((vertice) => {
+                    // muevo la gondola al proximo punto
+                    let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
+                    let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
+                    this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                    if (!pen_is_down){
+                        // bajo el pen
+                        this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
+                        pen_is_down = true;
+                    }
+                });
+            }
+        });
+
+        // encolo tarea de volver a home al final
+        this.return_to_home();
+
+        //limpio las tareas ejecutadas
+        this.limpiar_ejecutadas();
+        
+        
+        //pauso la cola
+        this.tareas.pausar();
+
+        //voy a la solapa de dibujado
+        document.getElementById('tab_dibjuar').click();
+
+        //mustro la maquina con la captura
+        this.draw_machine();
+        
     }    
 }
 
