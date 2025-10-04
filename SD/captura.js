@@ -2,8 +2,6 @@ class Captura {
     constructor(canvasId) {
         this.lineCanvas = document.getElementById(canvasId);
         this.lineCtx = this.lineCanvas.getContext('2d');
-
-        //this.vertices_elegidos = new Set();
         
         // Estados de interacción
         this.isDrawing = false;
@@ -33,8 +31,6 @@ class Captura {
 
         this.init();
     }
-
-
 
     // funcion que muestra la matriz donde se procesan los graficos
     mostrar_matriz_debug(canvas,matriz){
@@ -70,8 +66,7 @@ class Captura {
     };
 
     dibujar_maquina(){
-
-           //redimensiono el canvas
+        //redimensiono el canvas
         this.lineCanvas.width = control.canvas.width;
         this.lineCanvas.height = control.canvas.height;
 
@@ -122,7 +117,6 @@ class Captura {
         //     linedash(0,home.y,machine_specs.machineSizeMm_x,home.y,5,5,"#777");
 //        linedash(home.x,0,home.x,machine_specs.machineSizeMm_y,5,5,"#777");
 */
-
     }
 
     dibujar_captura(){
@@ -182,67 +176,9 @@ class Captura {
                     this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.5, 0.5);
                 }        
             });
-
-        }
-       
-
-        /**
-         
- // dibujo las lineas generadas
-        this.dibujo.lineas.forEach((linea) => {
-
-            if (linea.elegida){ // la linea esta seleccionada
-               this.lineCtx.strokeStyle = '#ff0000';
-            }else{
-                if (this.detalle_lineas){  
-                    this.lineCtx.strokeStyle = linea.color;
-                }else{
-                    this.lineCtx.strokeStyle = '#000000';
-                }
-            }
-
-            this.lineCtx.beginPath();           
-            
-            // Dibujar líneas
-            this.lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);                       
-            for (let i=1;i< linea.vertices.length;i++){     
-
-                let color_ant = this.lineCtx.strokeStyle;// guardo el color anterior
-
-                if (this.modo_seleccion === 0){ // muestra lineas compleatas
-                    this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
-                    this.lineCtx.stroke();   
-                }else{                        // muestra lineas entre vertices elegidos
-                    if (linea.vertices[i].elegido){
-                        // el vertice esta entre los elegidos, muestro la linea
-                        this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
-                        this.lineCtx.stroke();   
-                    }else{ 
-                        // el vertice no esta entre los elegidos, paso al proximo sin dibujar la linea
-                        this.lineCtx.moveTo(linea.vertices[i].x, linea.vertices[i].y);               
-                    }
-                }
-
-                //this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
-                //this.lineCtx.stroke();   
-                if (this.modo_seleccion === 0){ // muestra vertices sobre las lineas
-                    if (linea.vertices[i].elegido){
-                        this.lineCtx.strokeStyle ='#00ff00';                                                    
-                        this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 1, 1);
-                    }
-                }else{                        // muestra vertices
-                    this.lineCtx.strokeStyle ='#000000';                                                    
-                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 1, 1);
-                }
-
-                this.lineCtx.strokeStyle=color_ant; // restauro el color anterior
-            }        
-        });         
-         
-         */
+        }        
 
         this.lineCtx.restore();
-
     }  
 
     agregar_controles_captura(){                
@@ -277,7 +213,6 @@ class Captura {
             this.dibujo.reducirVertices(this.vertices_eliminados);
             this.dibujar_captura();
         }
-
     }
 
     cambio_mostrar_imagen_o_detalle(event){      
@@ -500,7 +435,6 @@ Shift + click izquierdo: Zoom al área seleccionada`;
     }
 
     selectLinesInBox() {
-
         // fuerzo el color de las lineas en negro
         if (this.detalle_lineas){
             document.getElementById('detalle_lineas').click();
@@ -516,112 +450,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.dibujo.seleccionarElementos(box,this.modo_seleccion,!this.ControlLeftPressed,this.ControlRightPressed);
 
         this.lineCanvas.style.cursor = 'default';
-
-   //     this.vertices_elegidos = this.dibujo.elementosEnBox(box);
-
-
     }
-/*
-    vertices_en_recuadro(linea,box){
-
-        // eco('aca busco que vertices estan dentro del cuadro');
-        linea.vertices.forEach( vertice => {                  
-            if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
-                vertice.y >= box.y && vertice.y <= box.y + box.height){
-                    this.vertices_elegidos.add(vertice.id);
-            }
-        });
-
-    };
-    */
-/*
-    isLineInBox(linea, box) {
-        const p1InBox = this.isPointInBox(linea.x1, linea.y1, box);
-        const p2InBox = this.isPointInBox(linea.x2, linea.y2, box);
-        
-        return p1InBox && p2InBox || 
-                this.lineIntersectsBox(linea, box);
-    }
-
-    isPointInBox(x, y, box) {
-        return x >= box.x && x <= box.x + box.width &&
-                y >= box.y && y <= box.y + box.height;
-    }
-
-    lineIntersectsBox(line, box) {
-        const edges = [
-            { x1: box.x, y1: box.y, x2: box.x + box.width, y2: box.y },
-            { x1: box.x + box.width, y1: box.y, x2: box.x + box.width, y2: box.y + box.height },
-            { x1: box.x, y1: box.y + box.height, x2: box.x + box.width, y2: box.y + box.height },
-            { x1: box.x, y1: box.y, x2: box.x, y2: box.y + box.height }
-        ];
-
-        for (let edge of edges) {
-            if (this.linesIntersect(line, edge)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    linesIntersect(line1, line2) {
-        const a1 = line1.y2 - line1.y1;
-        const b1 = line1.x1 - line1.x2;
-        const c1 = a1 * line1.x1 + b1 * line1.y1;
-
-        const a2 = line2.y2 - line2.y1;
-        const b2 = line2.x1 - line2.x2;
-        const c2 = a2 * line2.x1 + b2 * line2.y1;
-
-        const determinant = a1 * b2 - a2 * b1;
-
-        if (determinant === 0) {
-            return false;
-        }
-
-        const x = (b2 * c1 - b1 * c2) / determinant;
-        const y = (a1 * c2 - a2 * c1) / determinant;
-
-        return this.isBetween(x, line1.x1, line1.x2) &&
-                this.isBetween(y, line1.y1, line1.y2) &&
-                this.isBetween(x, line2.x1, line2.x2) &&
-                this.isBetween(y, line2.y1, line2.y2);
-    }
-
-    isBetween(value, bound1, bound2) {
-        return value >= Math.min(bound1, bound2) && value <= Math.max(bound1, bound2);
-    }
-
-    updateUI() {
-        document.getElementById('zoomLevel').textContent = Math.round(this.scale * 100) + '%';
-    }
-
-    removevertices_elegidos() {
-        this.lines = this.lines.filter(line => !this.vertices_elegidos.has(line.id));
-        this.vertices_elegidos.clear();
-        this.dibujar_captura();
-    }
-
-    getvertices_elegidos() {
-        return this.lines.filter(line => this.vertices_elegidos.has(line.id));
-    }
-
-    clearSelection() {
-        this.vertices_elegidos.clear();
-        this.dibujar_captura();
-    }
-
-    resetView() {
-        this.viewX = 0;
-        this.viewY = 0;
-        this.scale = 1;
-        this.dibujar_captura();
-    }
-*/
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

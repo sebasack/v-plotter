@@ -60,7 +60,6 @@ class Linea {
         });
     }
     
-
     obtenerSegmentos() {
         const segmentos = [];
         
@@ -74,8 +73,7 @@ class Linea {
         }                                     
         return segmentos;
     }
-    
-                            
+                                
     obtenerVerticeCercano(x, y, radio = 10) {
         for (let i = 0; i < this.vertices.length; i++) {
             const vertice = this.vertices[i];
@@ -102,7 +100,6 @@ class Linea {
     concatenarLinea(otraLinea) {
         this.vertices = this.vertices.concat(otraLinea.vertices);        
     }
-
     
     escalar(factor, centroX = null, centroY = null) {
         if (centroX === null || centroY === null) {
@@ -285,7 +282,6 @@ class Dibujo {
     }   
     
     unificarLineas(cercaniaMinima = 5){ 
-
         // busco cercania entre los vertices de iniciales y finales de una linea y los de otra,
         // si encuentro dos que estan cerca uno las lineas
 
@@ -379,7 +375,7 @@ class Dibujo {
     limpiarSeleccionElementos(modo = 0){ //0=lineas 1=vertices
          this.lineas.forEach(linea => {
             if (modo == 0){  //0=lineas 1=vertices
-                linea.elegida=false;    
+                linea.elegida = false;    
             }       
             linea.vertices.forEach( vertice => {     
                 if (modo == 1){  //0=lineas 1=vertices                         

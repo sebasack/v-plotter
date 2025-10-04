@@ -11,7 +11,6 @@ class lineas {
 
         this.init();
     }
-
          
     agregar_controles_captura(){
 
@@ -67,9 +66,7 @@ class lineas {
     }
 
     // funcion que dado un punto negro parte del borde y un punto blanco adyacente sigue el borde y agrega los puntos a la linea
-    seguir_linea(linea,binaryEdges,radio_pen,y,x,borde_y,borde_x,color=10,sentido_antihorario=true,unificar_adyacentes=true){        
-
-         //  console.log(linea.id +'  seguir_linea ' + x + ',' + y + ' / '+borde_x+','+ borde_y + ' / '+ color);
+    seguir_linea(linea,binaryEdges,radio_pen,y,x,borde_y,borde_x,color=10,sentido_antihorario=true,unificar_adyacentes=true){      
 
         let i_borde=1;
         while (i_borde > -1){
@@ -120,10 +117,8 @@ class lineas {
         return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     }
 
-
     // funcion que pinta del color elegido los puntos blancos dentro del circulo que respresenta el marcador
-    marcar_nodo(binaryEdges,circlePoints,unificar_adyacentes,y,x,color){   
-        //console.log(JSON.stringify(circlePoints.relleno));    
+    marcar_nodo(binaryEdges,circlePoints,unificar_adyacentes,y,x,color){ 
         
         binaryEdges[y][x] = color;   // marco el primer punto, es la semilla si no voy a marcar lineas adyacentes
 
@@ -155,8 +150,6 @@ class lineas {
     // funcion que genera la circunsferencia y el relleno del marcador 
     getCirclePoints(binaryEdges,centerX, centerY, radius, borderX=0, borderY=0, sentido_antihorario=true) {
 
-        //  console.log('getCirclePoints('+centerX +','+ centerY+','+ radius+','+ borderX+','+ borderY+','+ sentido_antihorario+')' );
-
         const tipos = [];
                                 
                 /*|  1 |  2 | 3 | 4 | 5 |  6 | 7  | 8 */
@@ -174,7 +167,7 @@ class lineas {
         *  2          6 
         *    3  4  5
         */        
-                    
+
                     /*  1    2    3    4   5   6   7   8   9   10   11   12   13    14    15    16 */              
         tipos[3] = [-3,0,-3,1,-2,2,-1,3,0,3,1,3,2,2,3,1,3,0,3,-1,2,-2,1,-3,0,-3,-1,-3,-2,-2,-3,-1]; 
         /*   14 13 12
@@ -186,7 +179,6 @@ class lineas {
         *    4  5  6
         */
         
-
                     /*| 1 |  2 |  3 |  4 |  5 | 6 | 7 | 8 | 9 | 10| 11| 12 | 13 | 14 | 15 | 16 |  17 |  18 |  19 |  20 */              
         //  tipos[4] = [-4,0,-4,1,-3,2,-2,3,-1,4,0,4,1,4,2,3,3,2,4,1,4,0,4,-1,3,-2,2,-3,1,-4,0,-4,-1,-4,-2,-3,-3,-2,-4,-1];
         /*     17 16 15
@@ -213,9 +205,7 @@ class lineas {
         *   4  5         9 10
         *        6  7  8
         */               
-        
-                
-
+                       
 
                     /* | 1 | 2  |  3 |  4 |  5 |  6 |  7 | 8 | 9 | 10| 11| 12| 13| 14| 15| 16 | 17 | 18 | 19 | 20 | 21 | 22 |  23 |  24 |  25 |  26 |  27 | 28  */    
         tipos[5] = [-5,0,-5,1,-4,2,-4,3,-3,4,-2,4,-1,5,0,5,1,5,2,4,3,4,4,3,4,2,5,1,5,0,5,-1,4,-2,3,-4,4,-3,2,-4,1,-5,0,-5,-1,-5,-2,-4,-3,-4,-4,-3,-4,-2,-5,-1];
@@ -253,8 +243,6 @@ class lineas {
         let fill =[];                                 
         let closestIndex = 0;
 
-
-
         //agrego el centro a los puntos de relleno (fue movido a marcar_nodo para ser usado como semilla en la buzqueda de adyacentes)
         //fill.push([centerX, centerY]);
 
@@ -263,7 +251,6 @@ class lineas {
         let a3=[]; // anillo 3 del relleno
         let a4=[]; // anillo 4 del relleno
         let a5=[]; // anillo 5 del relleno
-
 
         // busco el pixel con menos distancia al borde inicial
         let minDistance = this.distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
@@ -391,7 +378,6 @@ class lineas {
             }
         }
         
-
         //   mostrar_matriz_debug('debug',edgeMatrix);
 
         // Umbralizar para obtener bordes binarios
@@ -450,10 +436,8 @@ class lineas {
         }
 
         // la ultima linea creada nunca se va a llenar
-        this.dibujo.eliminarLinea(linea.id);
-            
+        this.dibujo.eliminarLinea(linea.id);            
     }
-
 
     obtener_lineas(){
 
@@ -512,6 +496,7 @@ class lineas {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Ejecutar el modulo cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function(){

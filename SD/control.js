@@ -9,18 +9,17 @@ class Control {
         this.home = {};
         this.config = {};
 
-        this.tareas_completadas = [];
-
         this.isDragging = false;
         this.lastX = 0;
         this.lastY = 0;
         this.offsetX = 0;
         this.offsetY = 0;
-        this.scale =1;
+        this.scale = 1;
         this.pen_down = true; // down
 
         // creo la cola de tareas
         this.tareas = new ColaTareas();
+        this.tareas_completadas = [];
      
         this.init();
     }
@@ -133,8 +132,6 @@ class Control {
         }
     }
 
-
-
     // Eventos para el zoom
     wheel_canvas(event){
         event.preventDefault();
@@ -155,13 +152,11 @@ class Control {
         this.draw_machine();
     }
 
-
     // Pan (arrastrar)
     mousedown_canvas(event){
         this.isDragging = true;
         this.lastX = event.clientX;
         this.lastY = event.clientY;
-
     }
 
     mousemove_canvas(event){
@@ -173,7 +168,6 @@ class Control {
             this.draw_machine();       
         }
     }
-
 
     mouseup_canvas(event){
         this.isDragging = false;
@@ -510,8 +504,7 @@ Doble click: mueve la gondola`;
             this.ctx.fillStyle = color;
             this.ctx.fill(); 
         }     
-        this.ctx.stroke();
-    
+        this.ctx.stroke();    
     }
 
     rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
@@ -543,6 +536,7 @@ Doble click: mueve la gondola`;
         //dibujo las tareas pendientes
         this.ctx.strokeStyle ="#aaa";
         this.ctx.beginPath();
+
         for (const tarea of lista) {
             let gcode = tarea.nombre.split(',');
             if (gcode[0]=='C14'){ // pen up
@@ -566,6 +560,7 @@ Doble click: mueve la gondola`;
 
             //  console.log(tarea.nombre);
         }
+
         this.ctx.closePath();
         this.ctx.stroke();
 
@@ -622,7 +617,6 @@ Doble click: mueve la gondola`;
             this.linedash(0,this.home.y,this.machine_specs.machineSizeMm_x,this.home.y,5,5,"#777");
             this.linedash(this.home.x,0,this.home.x,this.machine_specs.machineSizeMm_y,5,5,"#777");
 
-
             // dibujo la gondola y el marcador
             this.rectangle(this.pen.x - 10, this.pen.y - 10, 20, 30, "#000000", "#ccc");
             this.circle(this.pen.x, this.pen.y, 3, "#000000", "#000000");
@@ -655,8 +649,6 @@ Doble click: mueve la gondola`;
             this.pen.x = Math.round(cartesianX * mmPerStep);
             this.pen.y = Math.round(this.getCartesianY(cartesianX, this.pen.motorA) * mmPerStep);
 
-            // console.log(pen);
-
             $("#pen_motorA").html(this.pen.motorA);
             $("#pen_motorB").html(this.pen.motorB);
 
@@ -667,7 +659,6 @@ Doble click: mueve la gondola`;
         }
     }
 
-
     actualizar_estado_pen(){
         if (this.pen_down){
             $("#cambiar_status_pen").html("Down");
@@ -675,8 +666,7 @@ Doble click: mueve la gondola`;
             $("#cambiar_status_pen").html("Up");
         }  
         this.draw_machine();    
-    }    
-
+    }
 
     cambiar_status_pen() {
         if (this.pen_down){                                     // esta bajado, lo subo
@@ -713,7 +703,6 @@ Doble click: mueve la gondola`;
         }
     }
 
-
     send_machine_specs(){               
         this.encolar_tarea("C25,NOMBRE_PG,END", this.resultado_tarea_ok.bind(this));// cambio el nombre de la maquina, no esta implementado
         this.encolar_tarea("C24," + this.machine_specs.machineSizeMm_x + "," + this.machine_specs.machineSizeMm_y + ",END", this.resultado_tarea_ok.bind(this));// cambio el tamaño de la maquina
@@ -726,8 +715,7 @@ Doble click: mueve la gondola`;
         this.encolar_tarea("C02," + this.pen.penWidth +",END", this.resultado_tarea_ok.bind(this));// cambio el tamaño del pen   
     }
 
-    async ejecutar_comando(parametros, funcionExito) {
-    
+    async ejecutar_comando(parametros, funcionExito) {    
         /*parametros va en la forma
                 "getPosition"                  cuando es solo el comando sin otros parametros
                 "C06,15664,15664,END"          cuando es gcode
@@ -818,7 +806,6 @@ Doble click: mueve la gondola`;
     }
 
     encolar_tarea(tarea, funcionExito) {
-
         this.tareas.agregarTarea(() => this.ejecutar_comando(tarea, funcionExito), tarea);
         $("#tareas").val(this.tareas.mostrar());
     }
@@ -831,7 +818,6 @@ Doble click: mueve la gondola`;
         }
         $("#estado_cola").text(this.tareas.obtenerEstado().estado);
     }    
-
 
     return_to_home() {
         this.encolar_tarea("C14,END"); // levanto el pen antes de moverlo
@@ -858,7 +844,6 @@ Doble click: mueve la gondola`;
                 tab.classList.add('active');
                 document.getElementById(target).classList.add('active');
 
-
                 // activo y desactivo el canvas de captura
                 if (tab.getAttribute('data-tab') == 'captura'){
                     $('#lineCanvas').show();
@@ -873,7 +858,7 @@ Doble click: mueve la gondola`;
         // Obtener dimensiones del td que contiene el canvas
         const td = this.canvas.closest('td');       
 
-    // Cambiar dimensiones del canvas
+        // Cambiar dimensiones del canvas
         this.canvas.width = td.clientWidth;
         this.canvas.height = td.clientHeight;    
 
