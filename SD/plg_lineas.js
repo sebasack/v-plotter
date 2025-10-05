@@ -12,9 +12,7 @@ class lineas {
         this.init();
     }
          
-    agregar_controles_captura(){
-
-        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');
+    agregar_controles_captura(){        
 
         $("#parametros_captura").html(`
             <legend>Contornos</legend>
@@ -34,17 +32,22 @@ class lineas {
 
             Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" title="Unifica lineas adyacentes"/><br>      
             `);
-    }
-
-    init() {        
-        // Event listeners del mouse
-        this.agregar_controles_captura();        
 
         // listeners de botones y sliders
         document.getElementById('imageLoader').addEventListener('change', this.cargar_imagen.bind(this), false);
         document.getElementById('umbral_slider').addEventListener('change', this.update_umbral.bind(this), false);
         document.getElementById('grosor_slider').addEventListener('change', this.update_grosor.bind(this), false);      
-        document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                        
+        document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
+    }
+
+    init() {        
+        
+        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');
+
+             
+        this.agregar_controles_captura();        
+
+                       
     }
     
     update_umbral(event){   
@@ -430,8 +433,7 @@ class lineas {
                 
                 if (color_linea ==16){
                     color_linea =2;
-                }
-                
+                }                
             }             
         }
 
@@ -440,6 +442,10 @@ class lineas {
     }
 
     obtener_lineas(){
+        if (this.imagen === false){
+            eco('sin imagen que procesar');
+            return;
+        }
 
         // capturo las lineas de la imagen con los parametros seleccionados
         this.procesar_imagen();
@@ -453,7 +459,7 @@ class lineas {
         // entrego a captura el dibujo y la imagen que lo genero
         captura.dibujo = this.dibujo;
         captura.imagen = this.imagen;
-        captura.dibujar_captura();
+        captura.dibujar_captura(true);
     }
     
     actualizarNombreArchivo() {
@@ -481,8 +487,8 @@ class lineas {
                 this.actualizarNombreArchivo();
             
                 // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
-                this.originalCanvas.width =  this.imagen.width;
-                this.originalCanvas.height =  this.imagen.height;
+                this.originalCanvas.width = this.imagen.width;
+                this.originalCanvas.height = this.imagen.height;
                 
                 // Dibujar imagen en el canvas original
                 this.originalCtx.drawImage(img, 0, 0);     
@@ -497,6 +503,13 @@ class lineas {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
+let captureLines = false;
+
+function cargar_config_lines(){
+    captureLines.agregar_controles_captura();
+}
 
 // Ejecutar el modulo cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function(){

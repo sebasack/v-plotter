@@ -14,8 +14,8 @@ class Captura {
         this.ControlRightPressed = false;
         
         // Transformaciones de vista
-        this.viewX = 10;
-        this.viewY = 10;
+        this.offsetX = 0;
+        this.offsetY = 0;
         this.scale = 1;
         this.lastX = 0;
         this.lastY = 0;
@@ -78,7 +78,7 @@ class Captura {
         this.lineCtx.fillStyle = "#FFE6C9";
         this.lineCtx.fillRect(0,0, this.lineCanvas.width,this.lineCanvas.height);
 
-        // Calcular el 90% del espacio disponible
+        // Calcular el 99% del espacio disponible
         const maxWidth = control.canvas.width * 0.95;
         const maxHeight = control.canvas.height * 0.95;
 
@@ -104,31 +104,48 @@ class Captura {
         this.lineCtx.lineWidth = 3;
         this.lineCtx.strokeRect(x, y, scaledWidth, scaledHeight);
 
-        /*
+       
         // dibujar lineas de home
-    this.lineCtx.setLineDash([2,2]);
-    this.lineCtx.strokeStyle ="#777"; 
-    this.lineCtx.fillStyle = "#777";
-    this.lineCtx.beginPath();
-    this.lineCtx.moveTo(0, home.y);
-    this.lineCtx.lineTo(this.lineCtx.width,home.y);
-    this.lineCtx.stroke();
-    this.lineCtx.setLineDash([]); // reestablezco linea solida
-        //     linedash(0,home.y,machine_specs.machineSizeMm_x,home.y,5,5,"#777");
-//        linedash(home.x,0,home.x,machine_specs.machineSizeMm_y,5,5,"#777");
-*/
     }
 
-    dibujar_captura(){
+    ajustarImagenEnPantalla() {
+        // Obtener dimensiones del canvas
+        const canvasWidth = this.lineCanvas.width;
+        const canvasHeight = this.lineCanvas.height;
+        
+        // Calcular la escala para que la imagen quepa en el canvas
+        const scaleX = canvasWidth / this.imagen.width;
+        const scaleY = canvasHeight / this.imagen.height;
+        const scale = Math.min(scaleX, scaleY) * 0.70; // 70% para que no ocupe toda la pantalla
+        
+        // Calcular el offset para centrar la imagen
+        const offsetX = (canvasWidth - this.imagen.width * scale) / 2;
+        const offsetY = (canvasHeight - this.imagen.height * scale) / 2;        
+        
+        //ajusto el offset y escala 
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.scale = scale;        
+    }
+
+    dibujar_captura(ajuste_inicial_offset_scale = false){
       
         this.dibujar_maquina();
 
+        //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
+        if (ajuste_inicial_offset_scale){
+            this.ajustarImagenEnPantalla() ;
+        }
+
+        eco("x:" +this.offsetX+ " y:" + this.offsetY+ " escala:" +this.scale);             
+        
+
         // Aplicar transformaciones de vista
-        this.lineCtx.translate(this.viewX, this.viewY);
+        this.lineCtx.translate(this.offsetX, this.offsetY);
         this.lineCtx.scale(this.scale, this.scale);
 
         // muestro la imagen importada
-        if (this.mostrar_imagen){
+        if (this.mostrar_imagen && this.imagen){
             this.lineCtx.drawImage(this.imagen, 0, 0);
         }   
         
@@ -213,13 +230,20 @@ class Captura {
             this.dibujo.reducirVertices(this.vertices_eliminados);
             this.dibujar_captura();
         }
+
+        //si se importo alguna imagen muestro estadisticas
+        if (this.dibujo){        
+            // muestro las estadisticas de la imagen luego de modificar la cantidad de vertices
+            $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
+        }
+
     }
 
     cambio_mostrar_imagen_o_detalle(event){      
         this.mostrar_imagen = $("#mostrar_imagen").prop("checked") ;
         this.detalle_lineas = $("#detalle_lineas").prop("checked") ;
         this.mostrar_vertices = $("#mostrar_vertices").prop("checked") ;        
-        // redibujo 
+        // redibujo       
         if (this.dibujo !== false){          
             this.dibujar_captura();
         }
@@ -300,8 +324,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
      
     handleMouseDown(e) {
         const rect = this.lineCanvas.getBoundingClientRect();
-        this.startX = (e.clientX - rect.left - this.viewX) / this.scale;
-        this.startY = (e.clientY - rect.top - this.viewY) / this.scale;
+        this.startX = (e.clientX - rect.left - this.offsetX) / this.scale;
+        this.startY = (e.clientY - rect.top - this.offsetY) / this.scale;
         this.currentX = this.startX;
         this.currentY = this.startY;
         
@@ -322,16 +346,16 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         const mouseY = e.clientY - rect.top;
         
         if (this.isDrawing) {
-            this.currentX = (mouseX - this.viewX) / this.scale;
-            this.currentY = (mouseY - this.viewY) / this.scale;
+            this.currentX = (mouseX - this.offsetX) / this.scale;
+            this.currentY = (mouseY - this.offsetY) / this.scale;
             this.dibujar_captura();
             this.drawSelectionBox();
         } else if (this.isPanning) {
             const dx = mouseX - this.lastX;
             const dy = mouseY - this.lastY;
             
-            this.viewX += dx;
-            this.viewY += dy;
+            this.offsetX += dx;
+            this.offsetY += dy;
             
             this.lastX = mouseX;
             this.lastY = mouseY;
@@ -373,8 +397,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         const zoom = Math.exp(wheel * zoomIntensity);
         
         // Calcular la posición del mouse en coordenadas del mundo
-        const worldX = (mouseX - this.viewX) / this.scale;
-        const worldY = (mouseY - this.viewY) / this.scale;
+        const worldX = (mouseX - this.offsetX) / this.scale;
+        const worldY = (mouseY - this.offsetY) / this.scale;
         
         // Aplicar zoom
         this.scale *= zoom;
@@ -383,8 +407,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.scale = Math.max(0.1, Math.min(10, this.scale));
         
         // Ajustar la vista para mantener el punto del mouse en la misma posición
-        this.viewX = mouseX - worldX * this.scale;
-        this.viewY = mouseY - worldY * this.scale;
+        this.offsetX = mouseX - worldX * this.scale;
+        this.offsetY = mouseY - worldY * this.scale;
         
         this.dibujar_captura();
     }
@@ -405,8 +429,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.scale = Math.min(scaleX, scaleY);
         
         // Centrar el área en la vista
-        this.viewX = (this.lineCanvas.width - (box.x + box.width/2) * this.scale) / 2;
-        this.viewY = (this.lineCanvas.height - (box.y + box.height/2) * this.scale) / 2;
+        this.offsetX = (this.lineCanvas.width - (box.x + box.width/2) * this.scale) / 2;
+        this.offsetY = (this.lineCanvas.height - (box.y + box.height/2) * this.scale) / 2;
         
         this.dibujar_captura();
 
@@ -420,8 +444,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         
         this.lineCtx.beginPath();
         this.lineCtx.rect(
-            this.startX * this.scale + this.viewX, 
-            this.startY * this.scale + this.viewY, 
+            this.startX * this.scale + this.offsetX, 
+            this.startY * this.scale + this.offsetY, 
             (this.currentX - this.startX) * this.scale, 
             (this.currentY - this.startY) * this.scale
         );

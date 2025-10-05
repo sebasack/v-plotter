@@ -26,9 +26,12 @@ class Control {
 
 
     cambio_plugin_captura(event){
+
         // busco el nombre del plugin seleccionado
-        var seleccionado = $(this).val();        
-        // llamo a la funcion que carga las fonfiguraciones de captura
+        var seleccionado = $(this).val();   
+        
+        eco(seleccionado);
+        // llamo a la funcion que carga las configuraciones de captura
         window[seleccionado]();
     }
 
@@ -199,6 +202,10 @@ class Control {
         $("#tareas").val(this.tareas.mostrar());
     }
 
+    descargar_gcode(event){
+        alert('descargar_gcode no implementado');
+    }
+
     init(){        
         // Add a click event listener to the canvas
         this.canvas.addEventListener("dblclick",  this.dobleClick_canvas.bind(this));
@@ -206,14 +213,8 @@ class Control {
         this.canvas.addEventListener("mousedown",  this.mousedown_canvas.bind(this));
         this.canvas.addEventListener("mousemove",  this.mousemove_canvas.bind(this));
         this.canvas.addEventListener("mouseup", this.mouseup_canvas.bind(this) );
-        this.canvas.addEventListener("mouseleave", this.mouseleave_canvas.bind(this) );
-      
-        document.getElementById("comando_gcode").addEventListener('keydown', this.comando_gcode_keydown.bind(this));
-
-        // listener para elegir con que plugin se va a capturar la imagen
-        document.getElementById("select_capturar").addEventListener('change', this.cambio_plugin_captura.bind(this));
-        document.getElementById("fileInput").addEventListener('change', this.cargar_archivo_gcode.bind(this));
-
+        this.canvas.addEventListener("mouseleave", this.mouseleave_canvas.bind(this) );      
+         
         // agrego los listeners de interface
         //dibujar
         document.getElementById("mostrar_mapa_tension").addEventListener('change', this.guardar_parametros.bind(this), false);
@@ -233,6 +234,9 @@ class Control {
         document.getElementById("recalibrar").addEventListener('click', () => {this.encolar_tarea('calibrate');}, false);
 
         // captura
+        // listener para elegir con que plugin se va a capturar la imagen
+        document.getElementById("select_capturar").addEventListener('change', this.cambio_plugin_captura);
+        //genera tareas gcode
         document.getElementById("capturar_tareas").addEventListener('click',  this.capturar_tareas.bind(this), false);        
 
         //configs
@@ -259,11 +263,16 @@ class Control {
         document.getElementById("home_pos_y").addEventListener('change',this.guardar_parametros.bind(this), false); 
                 
         // cola
-        document.getElementById("estado_cola").addEventListener('click', this.cambiar_estado_cola.bind(this).bind(this), false);      
-        document.getElementById("cargar_gcode").addEventListener('click', () => {document.getElementById('fileInput').click();}, false);         
-        document.getElementById("limpiar_cola").addEventListener('click', this.limpiar_cola.bind(this), false);    
-        document.getElementById("limpiar_ejecutadas").addEventListener('click', this.limpiar_ejecutadas.bind(this), false);    
-        
+        document.getElementById("estado_cola").addEventListener('click', this.cambiar_estado_cola.bind(this), false);      
+        document.getElementById("fileInput").addEventListener('change', this.cargar_archivo_gcode.bind(this));
+        document.getElementById("cargar_gcode").addEventListener('click', () => {document.getElementById('fileInput').click();}, false);   
+        document.getElementById("descargar_gcode").addEventListener('click', this.descargar_gcode.bind(this), false);                   
+        document.getElementById("limpiar_cola").addEventListener('click', this.limpiar_cola.bind(this), false);  
+        document.getElementById("comando_gcode").addEventListener('keydown', this.comando_gcode_keydown.bind(this));       
+        document.getElementById("limpiar_ejecutadas").addEventListener('click', this.limpiar_ejecutadas.bind(this), false);                    
+
+
+
         // seteo el title al canvas
         this.canvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
 Arrastrar con click izquierdo: Mueve la vista
@@ -429,21 +438,21 @@ Doble click: mueve la gondola`;
         this.ctx.scale(this.scale,this.scale);    
     }
 
-    screenToWorld(x, y) {
+    screenToWorld(x, y,offsetX = this.offsetX, offsetY =this.offsetY,scale = this.scale) {
         return {
-            x: (x - this.offsetX) / this.scale,
-            y: (y - this.offsetY) / this.scale
+            x: (x - offsetX) / scale,
+            y: (y - offsetY) / scale
         };
     }
 
-    worldToScreen(x, y) {
+    worldToScreen(x, y, offsetX = this.offsetX, offsetY =this.offsetY,scale = this.scale) {
         return {
-            x: x * this.scale + this.offsetX,
-            y: y * this.scale + this.offsetY
+            x: x * scale + offsetX,
+            y: y * scale + offsetY
         };
     }
 
-    draw_image(src,x,y,width,height,aspectRatio = true,globalAlpha=1){
+    draw_image(src,x,y,width,height,globalAlpha=1){
         const img = new Image();
         img.onload = (event) => {
             // Establecer transparencia global
@@ -601,7 +610,7 @@ Doble click: mueve la gondola`;
         
             // muestra el mapa de tension si esta habilitado
             if (this.config.mostrar_mapa_tension) {        
-                this.draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,true,0.1);  
+                this.draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,0.1);  
             }
 
             // dibujo el contorno de la maquina maquina
@@ -852,6 +861,9 @@ Doble click: mueve la gondola`;
                 }
             });
         });
+
+        // selecciono el ultimo option que es el que quedo en pantalla
+        $('#select_capturar option:last').prop('selected', true);
     };
 
     zoom_default(){
@@ -908,6 +920,17 @@ Doble click: mueve la gondola`;
 Pausela o elimine las tareas para importar una nueva cola.`);
             return;
         };
+
+        if (captura.dibujo.lineas_elegidas == 0 && captura.dibujo.vertices_elegidos == 0){
+            alert('Debe seleccionar algun elemento!');
+            return;
+        }
+
+     eco("captura    x:" +captura.offsetX+ " y:" + captura.offsetY+ " escala:" +captura.scale);      
+    
+
+
+        eco('FALTA OPTIMIZAR RECORRIDO DE LA GONDOLA');
         
         // limpio la cola de tareas 
         this.limpiar_cola();
@@ -915,38 +938,72 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //encolo tareas de volver a home
         this.return_to_home();
 
-        // para cada linea del dibujo
-        captura.dibujo.lineas.forEach((linea) => {         
-            // subo el pen      
-            this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
-            if (linea.elegida){
+        if (captura.modo_seleccion == 0){ // selecciono lineas
+            // para cada linea del dibujo
+            captura.dibujo.lineas.forEach((linea) => {         
+                // subo el pen      
+                this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
+                if (linea.elegida){
+                    let pen_is_down = false;
+                    linea.vertices.forEach((vertice) => {
+                        // muevo la gondola al proximo punto
+                        let v = this.screenToWorld(vertice.x,vertice.y,0,0,captura.scale);
+                      //  vertice = this.worldToScreen(v.x,v.y,this.offsetX,this.offsetY,this.scale);
+                       
+                     
+                    
+                        let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
+                        let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
+                       
+                        //let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
+                        //let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
+                        this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                        if (!pen_is_down){
+                            // bajo el pen
+                            this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
+                            pen_is_down = true;
+                        }
+                    });
+                }
+            });
+        }else {                           // selecciono vertices
+            // para cada linea del dibujo
+            captura.dibujo.lineas.forEach((linea) => {         
+                // subo el pen      
+                this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
+               
                 let pen_is_down = false;
                 linea.vertices.forEach((vertice) => {
-                    // muevo la gondola al proximo punto
-                    let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
-                    let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
-                    this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
-                    if (!pen_is_down){
-                        // bajo el pen
-                        this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
-                        pen_is_down = true;
-                    }
-                });
-            }
-        });
+                    if (vertice.elegido){
+                         // muevo la gondola al proximo punto
+                        let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
+                        let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
+                        this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                        if (!pen_is_down){
+                            // bajo el pen
+                            this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
+                            pen_is_down = true;
+                        }
+                    }else{
+                        // subo el pen  
+                        this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
+                        pen_is_down = false;
+                    }                  
+                });            
+            });
+        }        
 
         // encolo tarea de volver a home al final
         this.return_to_home();
 
         //limpio las tareas ejecutadas
-        this.limpiar_ejecutadas();
+        this.limpiar_ejecutadas();        
         
-        
-        //pauso la cola
+        //pauso la cola para que no arranque inmediatamente
         this.tareas.pausar();
 
         //voy a la solapa de dibujado
-        document.getElementById('tab_dibjuar').click();
+        document.getElementById('tab_dibujar').click();
 
         //mustro la maquina con la captura
         this.draw_machine();

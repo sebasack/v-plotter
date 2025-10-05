@@ -4,13 +4,13 @@
             
             <div class="container">
                 <div class="tabs">
-                    <div class="tab active" data-tab="input">Dibujar</div>
-                    <div class="tab" data-tab="captura">Captura</div>
-                    <div class="tab" data-tab="config">Config</div>
+                    <div class="tab active" id="tab_dibujar" data-tab="dibujar">Dibujar</div>
+                    <div class="tab" id="tab_captura" data-tab="captura">Captura</div>
+                    <div class="tab" id="tab_config" data-tab="config">Config</div>
                 </div>        
                 <div class="content">
                     
-                    <div class="tab-content active" id="input">
+                    <div class="tab-content active" id="dibujar">
                         <fieldset>
                             <legend>Interface</legend>
                             Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension" />    
@@ -20,7 +20,7 @@
                         <fieldset>
                             <legend>Marcador</legend>
                             <table>                    
-                                <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441"/></td><td id="pen_motorA"></td></tr>                
+                                <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441"/></td><td width="60px" id="pen_motorA"></td></tr>                
                                 <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" /></td><td id="pen_motorB"></td></tr>                   
                                 <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" /></td><td rowspan="2">
                                     <button id="cambiar_status_pen" type="button"  title="Click para cambiar el estado" >Down</button></td></tr>

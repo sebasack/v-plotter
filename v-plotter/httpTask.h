@@ -101,8 +101,7 @@ void handleRoot(){
           cargarRecursos([\
               {tipo:'html',archivo:cdn+'control.html',contenedor:'#control-placeholder'},\
               {tipo:'css',archivo:cdn+'styles.css'},\
-              {tipo:'js',archivo:cdn+'util.js'},\
-              {tipo:'js',archivo:cdn+'clase_dibujo.js'},\
+              {tipo:'js',archivo:cdn+'clases.js'},\
               {tipo:'js',archivo:cdn+'plg_lineas.js'},\
               {tipo:'js',archivo:cdn+'captura.js'},\
               {tipo:'js',archivo:cdn+'control.js' }\
