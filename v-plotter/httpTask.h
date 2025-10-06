@@ -67,10 +67,9 @@ void handleRoot(){
     <title>Control v-plotter CDN</title>\
     <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
     <script> \
-      function cargarRecursos(recursos, alTerminar){\
+      function cargarRecursos(recursos){\
         function cargarSiguiente(i) {\
           if (i >= recursos.length) {\
-            if (alTerminar) alTerminar();\
             return;\
           }\
           const recurso = recursos[i];\
@@ -105,9 +104,7 @@ void handleRoot(){
               {tipo:'js',archivo:cdn+'plg_lineas.js'},\
               {tipo:'js',archivo:cdn+'captura.js'},\
               {tipo:'js',archivo:cdn+'control.js' }\
-          ],function(){\
-              init();\
-          });\
+          ]);\
       });\
     </script>\
   </head>\
