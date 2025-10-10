@@ -57,7 +57,7 @@ class Linea {
                 let angulo = this.calculateAngle(linea.vertices[i],linea.vertices[i+1]);
 
                 let diff = this.angleDifference(angulo_ant, angulo);
-                console.log(i + ' '+ diff)
+              //  console.log(i + ' '+ diff)
             }            
         });
     }
@@ -152,6 +152,14 @@ class Dibujo {
         // estadisticas de seleccion
         this.lineas_elegidas = 0;
         this.vertices_elegidos = 0;
+
+        // estadisticas de dibujo
+        this.min_x = 0;
+        this.max_x = 0;
+        this.min_y = 0;
+        this.max_y = 0;
+        this.width = 0;
+        this.height = 0;
     }
 
     crearLinea(color = null) {
@@ -400,7 +408,31 @@ class Dibujo {
         this.vertices_elegidos = 0;
     }
 
-    seleccionarElementos(box,modo = 0,limpiar_seleccion = true,quitar_encontrados = false){
+    calcularBordes(){
+        let minx = Infinity;
+        let maxx = -Infinity;
+        let miny = Infinity;
+        let maxy = -Infinity;
+
+        this.lineas.forEach(linea => {          
+            linea.vertices.forEach( vertice => {       
+                if (vertice.x < minx) minx = vertice.x;
+                if (vertice.x > maxx) maxx = vertice.x;
+                if (vertice.y < miny) miny = vertice.y;
+                if (vertice.y > maxy) maxy = vertice.y;                      
+            });             
+        });         
+                    
+        this.min_x = Math.round(minx);
+        this.max_x = Math.round(maxx);                    
+        this.min_y = Math.round(miny);
+        this.max_y = Math.round(maxy);
+        this.width = Math.round(maxx - minx);
+        this.height = Math.round(maxy - miny);
+    }
+
+    seleccionarElementos(box, modo = 0, limpiar_seleccion = true, quitar_encontrados = false){
+        eco(box);
         let seleccionar = true;
         let sumar = 1;
         if (quitar_encontrados){
@@ -409,24 +441,28 @@ class Dibujo {
         }else if(limpiar_seleccion){
             this.limpiarSeleccionElementos(modo);
         }
-
+     
         this.lineas.forEach(linea => {
+            let elegir_linea = false;
             // eco('aca busco que vertices estan dentro del cuadro');
             linea.vertices.forEach( vertice => {                  
                 if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
                     vertice.y >= box.y && vertice.y <= box.y + box.height){
-                    if (modo == 0){  //0=lineas 1=vertices
-                        linea.elegida = seleccionar;
-                        this.lineas_elegidas += sumar;
-                    }else{
+                    if (modo == 0){  // estoy seleccionando lineas               
+                        elegir_linea = true;
+                    }else{           // estoy seleccionando vertices
                         vertice.elegido = seleccionar;
                         this.vertices_elegidos += sumar;
                     }                                      
                 }
-            });             
-        });
-    }
-    
+            });   
+
+            if (elegir_linea){
+                linea.elegida = seleccionar;
+                this.lineas_elegidas += sumar;
+            }          
+        });     
+    }    
 }
 
 //////////////////////////////////////////////// CLASE COLA TAREAS ////////////////////////////////////////////////
@@ -448,7 +484,7 @@ class ColaTareas {
         // veo si la tarea ya esta cargada y es la proxima, si esta no la recargo
         if (this.tareas.length >0){           
             if (this.tareas[this.tareas.length-1].nombre == nombre){
-                console.log("La tarea "+nombre+ " ya esta cargada!");
+                //console.log("La tarea "+nombre+ " ya esta cargada!");
                 return false;
             }
         }
@@ -496,8 +532,8 @@ class ColaTareas {
             if (this.procesando) {
                 $("#estado_cola").text(`ℹ️  La tarea actual terminará, pero no se procesarán nuevas`);
             }
-        } else {
-            console.log(`ℹ️  La cola ya está pausada`);
+        //} else {
+           // console.log(`ℹ️  La cola ya está pausada`);
         }
         return this.pausado;
     }
@@ -512,8 +548,8 @@ class ColaTareas {
             if (this.tareas.length > 0 && !this.procesando) {
                 this.procesarSiguiente();
             }
-        } else {
-            console.log(`ℹ️  La cola ya está activa`);
+        //} else {
+           // console.log(`ℹ️  La cola ya está activa`);
         }
         return !this.pausado;
     }
@@ -587,7 +623,7 @@ function gcode_valido(gcode){
     
     cod = partes[0];
     num = cod.substring(1);
-    console.log (num);
+  //  console.log (num);
 
     if (!cod.startsWith('C')){
         return false;

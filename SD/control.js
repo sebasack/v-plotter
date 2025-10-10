@@ -26,11 +26,10 @@ class Control {
 
 
     cambio_plugin_captura(event){
-
+        const select = document.getElementById("select_capturar")
         // busco el nombre del plugin seleccionado
-        var seleccionado = $(this).val();   
+        var seleccionado = $(select).val();   
         
-        eco(seleccionado);
         // llamo a la funcion que carga las configuraciones de captura
         window[seleccionado]();
     }
@@ -73,8 +72,7 @@ class Control {
                                 if (tarea.startsWith("C") && tarea.includes(",END")) {
                                     this.encolar_tarea(tarea, this.update_pen_position.bind(this));
                                 } else {
-                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!"
-                                    );
+                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!");
                                 }
                             }
                             $("#estado_cola").text(
@@ -102,7 +100,6 @@ class Control {
         const rect = this.canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
-
 
         // corrijo las coordenadas teniendo en cuenta el zoom y el offset
         let w = this.screenToWorld(x, y);
@@ -239,7 +236,7 @@ class Control {
         //genera tareas gcode
         document.getElementById("capturar_tareas").addEventListener('click',  this.capturar_tareas.bind(this), false);        
 
-        //configs
+        // listeners de configuraciones de la maquina
         document.getElementById("machineSizeMm_x").addEventListener('click', this.guardar_parametros.bind(this), false);
         document.getElementById("machineSizeMm_y").addEventListener('click', this.guardar_parametros.bind(this), false);
         document.getElementById("stepMultiplier").addEventListener('click', this.guardar_parametros.bind(this), false);
@@ -251,7 +248,7 @@ class Control {
         document.getElementById("send_machine_specs").addEventListener('click', this.send_machine_specs.bind(this), false);       
         document.getElementById("releaseMotors").addEventListener('click', () => {this.encolar_tarea('releaseMotors', this.update_pen_position.bind(this));}, false);      
         document.getElementById("restart").addEventListener('click', () => {this.encolar_tarea('restart')}, false);           
-
+        
         document.getElementById("page_width").addEventListener('click', this.guardar_parametros.bind(this), false);
         document.getElementById("page_height").addEventListener('click', this.guardar_parametros.bind(this), false);
         document.getElementById("page_pos_x").addEventListener('click', this.guardar_parametros.bind(this), false);
@@ -262,7 +259,7 @@ class Control {
         document.getElementById("set_home").addEventListener('click', this.set_home.bind(this), false);      
         document.getElementById("home_pos_y").addEventListener('change',this.guardar_parametros.bind(this), false); 
                 
-        // cola
+        // listeners de la cola de tareas
         document.getElementById("estado_cola").addEventListener('click', this.cambiar_estado_cola.bind(this), false);      
         document.getElementById("fileInput").addEventListener('change', this.cargar_archivo_gcode.bind(this));
         document.getElementById("cargar_gcode").addEventListener('click', () => {document.getElementById('fileInput').click();}, false);   
@@ -438,17 +435,17 @@ Doble click: mueve la gondola`;
         this.ctx.scale(this.scale,this.scale);    
     }
 
-    screenToWorld(x, y,offsetX = this.offsetX, offsetY =this.offsetY,scale = this.scale) {
+    screenToWorld(x, y,offsetX = this.offsetX, offsetY = this.offsetY,scale = this.scale) {
         return {
             x: (x - offsetX) / scale,
             y: (y - offsetY) / scale
         };
     }
 
-    worldToScreen(x, y, offsetX = this.offsetX, offsetY =this.offsetY,scale = this.scale) {
+    worldToScreen(x, y, offsetX = this.offsetX, offsetY = this.offsetY,scale = this.scale) {
         return {
-            x: x * scale + offsetX,
-            y: y * scale + offsetY
+            x: (x * scale) + offsetX,
+            y: (y * scale) + offsetY
         };
     }
 
@@ -862,8 +859,10 @@ Doble click: mueve la gondola`;
             });
         });
 
-        // selecciono el ultimo option que es el que quedo en pantalla
-        $('#select_capturar option:last').prop('selected', true);
+        // selecciono el primer option 
+        $('#select_capturar option:first').prop('selected', true);
+
+        this.cambio_plugin_captura();
     };
 
     zoom_default(){
@@ -909,6 +908,31 @@ Doble click: mueve la gondola`;
         return calcY;
     }
 
+
+    // esta funcion ajusta los offsets y escala recibido de la captura
+    ajustarOffsetEscala(vertice,captura){
+
+         // copio el vertice por que si lo uso directamente le cambia el offset y la escala
+        let copia_vertice = {x: vertice.x, y:vertice.y};
+
+        // aca ajusto la escala
+        copia_vertice.x *= captura.scale / captura.scale_pagina;
+        copia_vertice.y *= captura.scale / captura.scale_pagina;                        
+
+        // ajusto el offset
+        copia_vertice.x += (captura.offsetX - captura.offsetX_pagina) / captura.scale_pagina;
+        copia_vertice.y += (captura.offsetY - captura.offsetY_pagina) / captura.scale_pagina;
+                            
+        // muevo la gondola al proximo punto
+        let motorA = this.calc_motorA(copia_vertice.x + this.page.page_pos_x ,copia_vertice.y + this.page.page_pos_y);
+        let motorB = this.calc_motorB(copia_vertice.x + this.page.page_pos_x ,copia_vertice.y + this.page.page_pos_y);    
+
+        return {motorA:motorA,motorB:motorB}
+
+    }
+
+
+
     capturar_tareas(){
         if (captura.dibujo === false){
             alert('No importo ningun dibujo!');
@@ -921,16 +945,34 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             return;
         };
 
+         
+
         if (captura.dibujo.lineas_elegidas == 0 && captura.dibujo.vertices_elegidos == 0){
-            alert('Debe seleccionar algun elemento!');
-            return;
+            // marco el modo_seleccion para que elija vertices
+            captura.modo_seleccion = 1;
+
+          
+            //calculo el box de la hoja donde voy a seleccionar
+            const box = {
+                    x: (captura.offsetX_pagina - captura.offsetX) / captura.scale,
+                    y: (captura.offsetY_pagina - captura.offsetY) / captura.scale,
+                    width: captura.width_pagina / captura.scale,
+                    height: captura.height_pagina / captura.scale
+                };
+
+            // dibujo el cuadro que indica que se seleccionara
+          //  captura.drawSelectionBox_TEST(box,4) ;     
+                                 
+
+            captura.dibujo.seleccionarElementos(box,captura.modo_seleccion );
+              
+            
+            //alert('Debe seleccionar algun elemento!');
+           // return;
         }
+        eco(captura.dibujo.lineas_elegidas + ' '+ captura.dibujo.vertices_elegidos);
 
-     eco("captura    x:" +captura.offsetX+ " y:" + captura.offsetY+ " escala:" +captura.scale);      
-    
-
-
-        eco('FALTA OPTIMIZAR RECORRIDO DE LA GONDOLA');
+       // eco('FALTA OPTIMIZAR RECORRIDO DE LA GONDOLA');
         
         // limpio la cola de tareas 
         this.limpiar_cola();
@@ -946,18 +988,8 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                 if (linea.elegida){
                     let pen_is_down = false;
                     linea.vertices.forEach((vertice) => {
-                        // muevo la gondola al proximo punto
-                        let v = this.screenToWorld(vertice.x,vertice.y,0,0,captura.scale);
-                      //  vertice = this.worldToScreen(v.x,v.y,this.offsetX,this.offsetY,this.scale);
-                       
-                     
-                    
-                        let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
-                        let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
-                       
-                        //let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
-                        //let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
-                        this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                        let ajustado = this.ajustarOffsetEscala(vertice,captura);
+                        this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
                         if (!pen_is_down){
                             // bajo el pen
                             this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
@@ -976,9 +1008,11 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                 linea.vertices.forEach((vertice) => {
                     if (vertice.elegido){
                          // muevo la gondola al proximo punto
-                        let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
-                        let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
-                        this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                        // let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
+                        // let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
+                        // this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
+                        let ajustado = this.ajustarOffsetEscala(vertice,captura);
+                        this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
                         if (!pen_is_down){
                             // bajo el pen
                             this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
@@ -1007,6 +1041,8 @@ Pausela o elimine las tareas para importar una nueva cola.`);
 
         //mustro la maquina con la captura
         this.draw_machine();
+
+        
         
     }    
 }

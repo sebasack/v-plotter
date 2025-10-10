@@ -17,6 +17,13 @@ class Captura {
         this.offsetX = 0;
         this.offsetY = 0;
         this.scale = 1;
+
+        this.offsetX_pagina = 0;
+        this.offsetY_pagina = 0;
+        this.width_pagina = 0;
+        this.height_pagina = 0;
+        this.scale_pagina = 0;
+
         this.lastX = 0;
         this.lastY = 0;
                 
@@ -31,39 +38,6 @@ class Captura {
 
         this.init();
     }
-
-    // funcion que muestra la matriz donde se procesan los graficos
-    mostrar_matriz_debug(canvas,matriz){
-
-        let canvas1 = document.getElementById(canvas);
-        let debugCtx = canvas1.getContext('2d');
-
-        canvas1.width =  imagen.width;
-        canvas1.height = imagen.height;
-
-        borde =0;
-        if (matriz[0] === undefined) {
-            borde =1;
-        }
-        let width = matriz[borde].length;
-        let  height= matriz.length; 
-                            
-        // Dibujar puntos        
-        for (let y = borde; y < height-borde; y++) {
-            for (let x = borde; x < width-borde; x++) {  
-                
-                color = colores[matriz[y][x]];               
-
-                debugCtx.lineWidth = 10;
-                debugCtx.strokeStyle =color;
-                debugCtx.fillStyle = color;
-
-                debugCtx.fillStyle =color;
-                debugCtx.fillRect(x, y, 1, 1); // x, y, ancho=1, alto=1
-                debugCtx.stroke(); // Dibujar la línea
-            }
-        }
-    };
 
     dibujar_maquina(){
         //redimensiono el canvas
@@ -87,6 +61,7 @@ class Captura {
         const scaleY = maxHeight/ control.page.page_height;
         const scale = Math.min(scaleX, scaleY);
         
+
         // Calcular las dimensiones escaladas
         const scaledWidth = control.page.page_width * scale;
         const scaledHeight =  control.page.page_height * scale;
@@ -103,12 +78,21 @@ class Captura {
         this.lineCtx.strokeStyle = '#000000';
         this.lineCtx.lineWidth = 3;
         this.lineCtx.strokeRect(x, y, scaledWidth, scaledHeight);
-
-       
+     
         // dibujar lineas de home
+
+
+        this.offsetX_pagina = x;
+        this.offsetY_pagina = y;
+        this.width_pagina = scaledWidth;
+        this.height_pagina = scaledHeight;
+        this.scale_pagina = scale;
+
     }
 
+    /*
     ajustarImagenEnPantalla() {
+        
         // Obtener dimensiones del canvas
         const canvasWidth = this.lineCanvas.width;
         const canvasHeight = this.lineCanvas.height;
@@ -125,8 +109,35 @@ class Captura {
         //ajusto el offset y escala 
         this.offsetX = offsetX;
         this.offsetY = offsetY;
-        this.scale = scale;        
+        this.scale = scale;      
     }
+    */
+
+
+    ajustarDibujoEnPantalla() {
+        // calculo bordes, ancho y alto del dibujo capturado
+        this.dibujo.calcularBordes();
+        //eco(this.dibujo.width + ' ' + this.dibujo.height);
+
+        // Obtener dimensiones del canvas
+        const canvasWidth = this.lineCanvas.width;
+        const canvasHeight = this.lineCanvas.height;
+        
+        // Calcular la escala para que el dibujo quepa en el canvas
+        const scaleX = canvasWidth / this.dibujo.width;
+        const scaleY = canvasHeight / this.dibujo.height;
+        const scale = Math.min(scaleX, scaleY) * 0.70; // 70% para que no ocupe toda la pantalla
+        
+        // Calcular el offset para centrar el dibujo
+        const offsetX = (canvasWidth - this.dibujo.width * scale) / 2;
+        const offsetY = (canvasHeight - this.dibujo.height * scale) / 2;        
+        
+        //ajusto el offset y escala 
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+        this.scale = scale;      
+    }
+
 
     dibujar_captura(ajuste_inicial_offset_scale = false){
       
@@ -134,11 +145,15 @@ class Captura {
 
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
         if (ajuste_inicial_offset_scale){
-            this.ajustarImagenEnPantalla() ;
+            //if (this.imagen){
+            //    this.ajustarImagenEnPantalla() ;      
+            //}else{
+                this.ajustarDibujoEnPantalla() ;      
+            //}
         }
 
-        eco("x:" +this.offsetX+ " y:" + this.offsetY+ " escala:" +this.scale);             
-        
+     //   eco("x:" +this.offsetX+ " y:" + this.offsetY+ " escala:" +this.scale+ " escala_pagina:"+ this.scale_pagina+ " offsetX_pagina:"+ this.offsetX_pagina+ " offsetY_pagina:"+ this.offsetY_pagina);
+        //eco ('x:'+(this.offsetX-this.offsetX_pagina) + ' y:' + (this.offsetY-this.offsetY_pagina));
 
         // Aplicar transformaciones de vista
         this.lineCtx.translate(this.offsetX, this.offsetY);
@@ -318,6 +333,7 @@ class Captura {
 Arrastrar con click derecho: Mueve la vista
 Dibujar rectángulo con click izquierdo: Selecciona líneas
 ControlLeft + Dibujar rectángulo con click izquierdo: Agrega líneas a la seleccion
+ControlLeft + rueda del mouse: Acerca/aleja la vista lentamente
 ControlRight + Dibujar rectángulo con click izquierdo: Quita líneas de la seleccion
 Shift + click izquierdo: Zoom al área seleccionada`;
     }
@@ -392,7 +408,10 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         
-        const zoomIntensity = 0.1;
+        let zoomIntensity = 0.1;
+        if (this.ControlLeftPressed){
+            zoomIntensity = zoomIntensity/10;
+        }
         const wheel = e.deltaY < 0 ? 1 : -1;
         const zoom = Math.exp(wheel * zoomIntensity);
         
@@ -458,7 +477,34 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCtx.restore();
     }
 
+/*
+    drawSelectionBox_TEST( box,color = 3) {
+        
+        this.lineCtx.save();
+        this.lineCtx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        this.lineCtx.beginPath();
+        this.lineCtx.rect(
+            box.x * this.scale + this.offsetX, 
+            box.y * this.scale + this.offsetY, 
+            box.width * this.scale, 
+            box.height * this.scale
+        );
+        
+        this.lineCtx.strokeStyle = colores[color];
+        this.lineCtx.lineWidth = 3;
+        this.lineCtx.setLineDash([5, 5]);
+        this.lineCtx.stroke();
+        this.lineCtx.setLineDash([]);
+
+        this.lineCtx.restore();
+    }
+
+*/
+
+
     selectLinesInBox() {
+      
         // fuerzo el color de las lineas en negro
         if (this.detalle_lineas){
             document.getElementById('detalle_lineas').click();
@@ -470,7 +516,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             width: Math.abs(this.currentX - this.startX),
             height: Math.abs(this.currentY - this.startY)
         };
-
+       
         this.dibujo.seleccionarElementos(box,this.modo_seleccion,!this.ControlLeftPressed,this.ControlRightPressed);
 
         this.lineCanvas.style.cursor = 'default';

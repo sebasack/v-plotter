@@ -40,14 +40,9 @@ class lineas {
         document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
     }
 
-    init() {        
-        
-        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');
-
-             
-        this.agregar_controles_captura();        
-
-                       
+    init() {
+        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');             
+        //this.agregar_controles_captura();
     }
     
     update_umbral(event){   
@@ -164,82 +159,82 @@ class lineas {
 
                 /*|  1 |  2 |  3 | 4 | 5 | 6 | 7 |  8 | 9  | 10 |  11 |  12 */
         tipos[2] = [-2,0,-2,1,-1,2,0,2,1,2,2,1,2,0,2,-1,1,-2,0,-2,-1,-2,-2,-1];
-        /*   11 10  9                           
-        * 12          8
-        *  1    .     7
-        *  2          6 
-        *    3  4  5
+        /*  111009                           
+        * 12      08
+        * 01   .  07
+        * 02      06 
+        *   030405
         */        
 
                     /*  1    2    3    4   5   6   7   8   9   10   11   12   13    14    15    16 */              
         tipos[3] = [-3,0,-3,1,-2,2,-1,3,0,3,1,3,2,2,3,1,3,0,3,-1,2,-2,1,-3,0,-3,-1,-3,-2,-2,-3,-1]; 
-        /*   14 13 12
-        *  15        11
-        *16            10
-        *1      .      9 
-        *2             8
-        *  3         7
-        *    4  5  6
+        /*   141312
+        *  15      11
+        *16          10
+        *01     .    09 
+        *02          08
+        *  03      07
+        *    040506
         */
         
                     /*| 1 |  2 |  3 |  4 |  5 | 6 | 7 | 8 | 9 | 10| 11| 12 | 13 | 14 | 15 | 16 |  17 |  18 |  19 |  20 */              
         //  tipos[4] = [-4,0,-4,1,-3,2,-2,3,-1,4,0,4,1,4,2,3,3,2,4,1,4,0,4,-1,3,-2,2,-3,1,-4,0,-4,-1,-4,-2,-3,-3,-2,-4,-1];
-        /*     17 16 15
-        *    18        14
-        *  19            13
-        *20                12
-        *1       .        11
-        *2                10
-        *  3             9
-        *    4         8
-        *      5  6  7
+        /*     171615
+        *    18      14
+        *  19          13
+        *20              12
+        *01      .       11
+        *02              10
+        *  03          09
+        *    04      08
+        *      050607
         */               
 
 
                 /* 1 |  2 |  3 |  4 |  5 | 6  | 7 | 8 | 9 | 10| 11| 12| 13| 14 | 15 | 16 | 17 | 18 | 19 |  20 |  21 |  22 |  23 |  24*/              
         tipos[4] = [-4,0,-4,1,-3,2,-3,3,-2,3,-1,4,0,4,1,4,2,3,3,3,3,2,4,1,4,0,4,-1,3,-2,3,-3,2,-3,1,-4,0,-4,-1,-4,-2,-3,-3,-3,-3,-2,-4,-1];
-        /*      20 19 18
-        *  22 21        17 16
-        *  23              15
-        *24                  14
-        * 1        .         13
-        * 2                  12
-        *   3              11
-        *   4  5         9 10
-        *        6  7  8
+        /*     201918
+        *  2221      1716
+        *  23          15
+        *24              14
+        *01       .      13
+        *02              12
+        *  03          11
+        *  0405      0910
+        *      060708
         */               
                        
 
                     /* | 1 | 2  |  3 |  4 |  5 |  6 |  7 | 8 | 9 | 10| 11| 12| 13| 14| 15| 16 | 17 | 18 | 19 | 20 | 21 | 22 |  23 |  24 |  25 |  26 |  27 | 28  */    
         tipos[5] = [-5,0,-5,1,-4,2,-4,3,-3,4,-2,4,-1,5,0,5,1,5,2,4,3,4,4,3,4,2,5,1,5,0,5,-1,4,-2,3,-4,4,-3,2,-4,1,-5,0,-5,-1,-5,-2,-4,-3,-4,-4,-3,-4,-2,-5,-1];
-        /*       23 22 21
-        *    25 24        20 19
-        *  26                  18
-        *  27                  17
-        *28                      16
-        * 1           .          15
-        * 2                      14
-        *  3                  13
-        *  4                  12
-        *    5 6         10 11
-        *        7  8  9                
+        /*       232221
+        *    2524      2019
+        *  26              18
+        *  27              17
+        *28                  16
+        *01         .        15
+        *02                  14
+        *  03              13
+        *  04              12
+        *    0506      1011
+        *        070809                
         */
 
                 /* | 1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 | 9 | 10| 11| 12| 13| 14| 15| 16| 17| 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 |  26 |  27 |  28 |  29 |  30 |  31 |  32  */    
         tipos[6] = [-6,0,-6,1,-5,2,-5,3,-4,4,-3,5,-2,5,-1,6,0,6,1,6,2,5,3,5,4,4,5,3,5,2,6,1,6,0,6,-1,5,-2,5,-3,4,-4,3,-5,2,-5,1,-6,0,-6,-1,-6,-2,-5,-3,-5,-4,-4,-5,-3,-5,-2,-6,-1];           
-        /*          26 25 24
-        *      28 17        23 22
-        *    29                  21
-        *  30                      20
-        *  31                      19
-        *32                           18 
-        * 1             .             17
-        * 2                           16
-        *   3                       15
-        *   4                       14
-        *     5                  13
-        *       6  7        11 12
-        *           8  9  10
+        /*         262524
+        *      2817      2322
+        *    29              21
+        *  30                  20
+        *  31                  19
+        *32                      18 
+        *01           .          17
+        *02                      16
+        *  03                  15
+        *  04                  14
+        *    05              13
+        *      0607      1112
+        *          080910
         */
                     
         const points = [];
@@ -335,6 +330,40 @@ class lineas {
         };
     }
 
+
+    // funcion que muestra la matriz donde se procesan los graficos
+    mostrar_matriz_debug(canvas,matriz){
+
+        let canvas1 = document.getElementById(canvas);
+        let debugCtx = canvas1.getContext('2d');
+
+        canvas1.width =  imagen.width;
+        canvas1.height = imagen.height;
+
+        borde =0;
+        if (matriz[0] === undefined) {
+            borde =1;
+        }
+        let width = matriz[borde].length;
+        let  height= matriz.length; 
+                            
+        // Dibujar puntos        
+        for (let y = borde; y < height-borde; y++) {
+            for (let x = borde; x < width-borde; x++) {  
+                
+                color = colores[matriz[y][x]];               
+
+                debugCtx.lineWidth = 10;
+                debugCtx.strokeStyle =color;
+                debugCtx.fillStyle = color;
+
+                debugCtx.fillStyle =color;
+                debugCtx.fillRect(x, y, 1, 1); // x, y, ancho=1, alto=1
+                debugCtx.stroke(); // Dibujar la línea
+            }
+        }
+    };
+
     //funcion que procesa la imagen poniendola en escala de grises, aplicando filtros sobel y pasandola a blanco y negro, para despues seguir las lineas
     procesar_imagen(){
 
@@ -370,11 +399,11 @@ class lineas {
             for (let x = 1; x < this.originalCanvas.width - 1; x++) {
                 // Aplicar kernel horizontal
                 let gx =   -grayMatrix[y-1][x-1] +  grayMatrix[y-1][x+1] + -2 * grayMatrix[y][x-1] + 
-                        2 * grayMatrix[y][x+1]   + -grayMatrix[y+1][x-1] + grayMatrix[y+1][x+1];
+                        2 * grayMatrix[y][x+1]   + -grayMatrix[y+1][x-1] +      grayMatrix[y+1][x+1];
                 
                 // Aplicar kernel vertical
                 let gy = -grayMatrix[y-1][x-1] - 2 * grayMatrix[y-1][x] - grayMatrix[y-1][x+1] +
-                            grayMatrix[y+1][x-1] + 2 * grayMatrix[y+1][x] + grayMatrix[y+1][x+1];
+                          grayMatrix[y+1][x-1] + 2 * grayMatrix[y+1][x] + grayMatrix[y+1][x+1];
                 
                 // Calcular magnitud del gradiente
                 edgeMatrix[y][x] = Math.sqrt(gx * gx + gy * gy);
@@ -441,9 +470,9 @@ class lineas {
         this.dibujo.eliminarLinea(linea.id);            
     }
 
-    obtener_lineas(){
+    obtener_lineas(ajuste_inicial_offset_scale = false){
         if (this.imagen === false){
-            eco('sin imagen que procesar');
+            //eco('sin imagen que procesar');
             return;
         }
 
@@ -459,15 +488,15 @@ class lineas {
         // entrego a captura el dibujo y la imagen que lo genero
         captura.dibujo = this.dibujo;
         captura.imagen = this.imagen;
-        captura.dibujar_captura(true);
+        captura.dibujar_captura(ajuste_inicial_offset_scale);
     }
     
-    actualizarNombreArchivo() {
+    actualizarNombreArchivo(img) {
         const input = document.getElementById('imageLoader');
         const nombreSpan = document.getElementById('nombreArchivo');
         
         if (input.files.length > 0) {
-            nombreSpan.textContent = input.files[0].name;
+            nombreSpan.textContent = input.files[0].name + " ("+img.width+"x"+img.height+")";
         }else{
             nombreSpan.textContent = '';
         }
@@ -484,7 +513,7 @@ class lineas {
             img.onload = () => {
                 this.imagen = img;
              
-                this.actualizarNombreArchivo();
+                this.actualizarNombreArchivo(img);
             
                 // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
                 this.originalCanvas.width = this.imagen.width;
@@ -494,7 +523,7 @@ class lineas {
                 this.originalCtx.drawImage(img, 0, 0);     
 
                 // Procesar imagen y detectar contornos
-                this.obtener_lineas();    
+                this.obtener_lineas(true);    
             }
             img.src = event.target.result;
         }
