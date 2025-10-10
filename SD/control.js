@@ -944,13 +944,12 @@ Doble click: mueve la gondola`;
 Pausela o elimine las tareas para importar una nueva cola.`);
             return;
         };
-
-         
+       
 
         if (captura.dibujo.lineas_elegidas == 0 && captura.dibujo.vertices_elegidos == 0){
-            // marco el modo_seleccion para que elija vertices
-            captura.modo_seleccion = 1;
 
+            // marco el modo_seleccion para que elija vertices
+            document.getElementById('modo_vertices').click();
           
             //calculo el box de la hoja donde voy a seleccionar
             const box = {
@@ -970,7 +969,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             //alert('Debe seleccionar algun elemento!');
            // return;
         }
-        eco(captura.dibujo.lineas_elegidas + ' '+ captura.dibujo.vertices_elegidos);
+        //eco(captura.dibujo.lineas_elegidas + ' '+ captura.dibujo.vertices_elegidos);
 
        // eco('FALTA OPTIMIZAR RECORRIDO DE LA GONDOLA');
         

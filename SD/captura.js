@@ -227,12 +227,13 @@ class Captura {
                 Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
                 Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
                 
-                <select id="modo_seleccion">
-                    <option value='0'>seleccionar lineas</option>
-                    <option value='1'>seleccionar vertices</option>
-                </select>
-
+                
+                
+                Modo Seleccion:<br>
+                <input type="radio" id="modo_vertices" name="modo_seleccion" value="1" checked>         <label for="vertices">Vertices</label>
+                <input type="radio" id="modo_lineas" name="modo_seleccion" value="0" >  <label for="lineas">Lineas</label>
                 <hr>
+            
                 <div id="estadisticas">Lineas:<br>Vertices:</div>`);            
     }
    
@@ -265,7 +266,8 @@ class Captura {
     }
 
     cambio_modo_seleccion(evento){
-        this.modo_seleccion = $("#modo_seleccion").val();
+
+        this.modo_seleccion = document.querySelector('input[name="modo_seleccion"]:checked').value;
 
         //borro la seleccion del modo no elegido
         if (this.modo_seleccion == 0 ){
@@ -273,17 +275,16 @@ class Captura {
             if (this.mostrar_vertices){
                 document.getElementById('mostrar_vertices').click();
             }
-            this.dibujo.limpiarSeleccionElementos(1);
         }else{
             // fuerzo mostrar vertices
             if (!this.mostrar_vertices){
                 document.getElementById('mostrar_vertices').click();
             }
-            this.dibujo.limpiarSeleccionElementos(0);
         }
 
         // redibujo 
-        if (this.dibujo !== false){          
+        if (this.dibujo !== false){   
+            this.dibujo.limpiarSeleccionElementos(1 - this.modo_seleccion);       
             this.dibujar_captura();
         }
     }
@@ -326,7 +327,11 @@ class Captura {
         document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
-        document.getElementById('modo_seleccion').addEventListener('change', this.cambio_modo_seleccion.bind(this), false);                        
+     
+        const modos_seleccion = document.getElementsByName('modo_seleccion');
+        for (let opcion of modos_seleccion) {
+            opcion.addEventListener('change',  this.cambio_modo_seleccion.bind(this));
+        }           
     
         // seteo el title al canvas
         this.lineCanvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
