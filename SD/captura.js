@@ -32,6 +32,7 @@ class Captura {
         this.detalle_lineas = false;
         this.mostrar_vertices = false;
 
+        this.nombre_archivo_imagen = '';
         this.imagen = false;
         this.dibujo = false;
 

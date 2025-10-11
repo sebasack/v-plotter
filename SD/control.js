@@ -200,7 +200,33 @@ class Control {
     }
 
     descargar_gcode(event){
-        alert('descargar_gcode no implementado');
+    //    alert('descargar_gcode no implementado');
+            let contenido = $("#tareas").val();
+
+            let nombreArchivo = string_aleatorio(8) + '.txt';
+            if (captura.nombre_archivo_imagen != ''){
+                nombreArchivo = captura.nombre_archivo_imagen.replace(/\.[^/.]+$/, "")  + '.txt';
+            }
+
+            // Crear un Blob (objeto binario) con el contenido :cite[2]:cite[5]:cite[9]
+            const blob = new Blob([contenido], { type: 'text/plain' });
+            
+            // Crear una URL temporal para el Blob :cite[2]:cite[3]
+            const url = window.URL.createObjectURL(blob);
+            
+            // Crear un elemento <a> invisible :cite[2]:cite[3]
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nombreArchivo; // Atributo que fuerza la descarga :cite[1]:cite[7]
+            link.style.display = 'none';
+            
+            // Añadir el enlace al documento, hacer clic y limpiar :cite[2]:cite[6]
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Liberar la URL del objeto Blob :cite[2]
+            window.URL.revokeObjectURL(url);
     }
 
     init(){        
@@ -986,6 +1012,7 @@ Doble click: mueve la gondola`;
             }
         });
    
+        // ajusto los valores del home al marco de referncia de las lineas importadas
         let ultimo_ver = this.ajustarOffsetEscalaInverso(this.home);
 
         //ultimo_ver.id='ultimo';

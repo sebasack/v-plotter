@@ -3,6 +3,7 @@ class lineas {
         this.originalCanvas = document.createElement('canvas');
         this.originalCtx = this.originalCanvas.getContext('2d');
 
+        this.nombre_archivo_imagen = '';
         this.imagen = false;
         this.umbral_value = 50;
         this.grosor_value = 2;
@@ -488,6 +489,7 @@ class lineas {
         // entrego a captura el dibujo y la imagen que lo genero
         captura.dibujo = this.dibujo;
         captura.imagen = this.imagen;
+        captura.nombre_archivo_imagen = this.nombre_archivo_imagen;
         captura.dibujar_captura(ajuste_inicial_offset_scale);
     }
     
@@ -496,6 +498,7 @@ class lineas {
         const nombreSpan = document.getElementById('nombreArchivo');
         
         if (input.files.length > 0) {
+            this.nombre_archivo_imagen = input.files[0].name;
             nombreSpan.textContent = input.files[0].name + " ("+img.width+"x"+img.height+")";
         }else{
             nombreSpan.textContent = '';
