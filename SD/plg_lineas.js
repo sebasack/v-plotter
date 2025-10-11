@@ -391,7 +391,7 @@ class lineas {
             }
         }
 
-        //  mostrar_matriz_debug('debug2',grayMatrix);
+        //  mostrar_matriz_debug('debug2',grayMatrix);        
         
         // Aplicar detección de bordes simple (operador Sobel simplificado)
         for (let y = 1; y < this.originalCanvas.height - 1; y++) {

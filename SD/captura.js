@@ -31,7 +31,6 @@ class Captura {
         this.mostrar_imagen = true;
         this.detalle_lineas = false;
         this.mostrar_vertices = false;
-        this.modo_seleccion = 0;
 
         this.imagen = false;
         this.dibujo = false;
@@ -145,16 +144,9 @@ class Captura {
 
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
         if (ajuste_inicial_offset_scale){
-            //if (this.imagen){
-            //    this.ajustarImagenEnPantalla() ;      
-            //}else{
-                this.ajustarDibujoEnPantalla() ;      
-            //}
+            this.ajustarDibujoEnPantalla() ;      
         }
-
-     //   eco("x:" +this.offsetX+ " y:" + this.offsetY+ " escala:" +this.scale+ " escala_pagina:"+ this.scale_pagina+ " offsetX_pagina:"+ this.offsetX_pagina+ " offsetY_pagina:"+ this.offsetY_pagina);
-        //eco ('x:'+(this.offsetX-this.offsetX_pagina) + ' y:' + (this.offsetY-this.offsetY_pagina));
-
+  
         // Aplicar transformaciones de vista
         this.lineCtx.translate(this.offsetX, this.offsetY);
         this.lineCtx.scale(this.scale, this.scale);
@@ -173,42 +165,34 @@ class Captura {
 
         // dibujo las lineas generadas
         this.dibujo.lineas.forEach((linea) => {
-
-            if (linea.elegida){ // la linea esta seleccionada
-               this.lineCtx.strokeStyle = '#ff0000';
+        
+            if (this.detalle_lineas){  
+                this.lineCtx.strokeStyle = linea.color;
             }else{
-                if (this.detalle_lineas){  
-                    this.lineCtx.strokeStyle = linea.color;
-                }else{
-                    this.lineCtx.strokeStyle = '#000000';
-                }
+                this.lineCtx.strokeStyle = '#000000';
             }
-
-            this.lineCtx.beginPath();           
-            
-            // Dibujar líneas
-            this.lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);                       
-            for (let i=1;i< linea.vertices.length;i++){                    
+                      
+            this.lineCtx.beginPath();        
+            this.lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);          
+           
+            for (let i=1;i< linea.vertices.length;i++){                           
                 this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
-                this.lineCtx.stroke();                                 
+                this.lineCtx.stroke();                                                  
             }        
         });
 
-
-        if (this.mostrar_vertices){
-             //dibujo vertices 
-            this.dibujo.lineas.forEach((linea) => {                                           
-                for (let i = 1; i < linea.vertices.length; i++){   
-                    if (linea.vertices[i].elegido){
-                        this.lineCtx.strokeStyle ='#ff0000';    
-                    }else{
-                        this.lineCtx.strokeStyle ='#00ff00';     
-                    }
-                    // dibujo un rectangulo chiquito                                       
-                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.5, 0.5);
-                }        
-            });
-        }        
+        //dibujo vertices 
+        this.dibujo.lineas.forEach((linea) => {                                           
+            for (let i = 0; i < linea.vertices.length; i++){   
+                if (linea.vertices[i].elegido){
+                    this.lineCtx.strokeStyle ='#ff0000';                         
+                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.1, 0.1); 
+                }else if (this.mostrar_vertices){
+                    this.lineCtx.strokeStyle ='#00ff00';     
+                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.1, 0.1); 
+                }                                 
+            }        
+        });            
 
         this.lineCtx.restore();
     }  
@@ -226,12 +210,7 @@ class Captura {
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
                 Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
                 Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
-                
-                
-                
-                Modo Seleccion:<br>
-                <input type="radio" id="modo_vertices" name="modo_seleccion" value="1" checked>         <label for="vertices">Vertices</label>
-                <input type="radio" id="modo_lineas" name="modo_seleccion" value="0" >  <label for="lineas">Lineas</label>
+                               
                 <hr>
             
                 <div id="estadisticas">Lineas:<br>Vertices:</div>`);            
@@ -261,30 +240,6 @@ class Captura {
         this.mostrar_vertices = $("#mostrar_vertices").prop("checked") ;        
         // redibujo       
         if (this.dibujo !== false){          
-            this.dibujar_captura();
-        }
-    }
-
-    cambio_modo_seleccion(evento){
-
-        this.modo_seleccion = document.querySelector('input[name="modo_seleccion"]:checked').value;
-
-        //borro la seleccion del modo no elegido
-        if (this.modo_seleccion == 0 ){
-            // quito mostrar vertices
-            if (this.mostrar_vertices){
-                document.getElementById('mostrar_vertices').click();
-            }
-        }else{
-            // fuerzo mostrar vertices
-            if (!this.mostrar_vertices){
-                document.getElementById('mostrar_vertices').click();
-            }
-        }
-
-        // redibujo 
-        if (this.dibujo !== false){   
-            this.dibujo.limpiarSeleccionElementos(1 - this.modo_seleccion);       
             this.dibujar_captura();
         }
     }
@@ -328,11 +283,7 @@ class Captura {
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
      
-        const modos_seleccion = document.getElementsByName('modo_seleccion');
-        for (let opcion of modos_seleccion) {
-            opcion.addEventListener('change',  this.cambio_modo_seleccion.bind(this));
-        }           
-    
+        
         // seteo el title al canvas
         this.lineCanvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
 Arrastrar con click derecho: Mueve la vista
@@ -482,7 +433,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCtx.restore();
     }
 
-/*
+    /*
     drawSelectionBox_TEST( box,color = 3) {
         
         this.lineCtx.save();
@@ -503,9 +454,9 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCtx.setLineDash([]);
 
         this.lineCtx.restore();
-    }
+    }*/
 
-*/
+
 
 
     selectLinesInBox() {
@@ -522,7 +473,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             height: Math.abs(this.currentY - this.startY)
         };
        
-        this.dibujo.seleccionarElementos(box,this.modo_seleccion,!this.ControlLeftPressed,this.ControlRightPressed);
+        this.dibujo.seleccionarElementos(box,!this.ControlLeftPressed,this.ControlRightPressed);
 
         this.lineCanvas.style.cursor = 'default';
     }

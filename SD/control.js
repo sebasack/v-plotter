@@ -543,11 +543,15 @@ Doble click: mueve la gondola`;
         this.ctx.strokeStyle ="#aaa";
         this.ctx.beginPath();
 
+        let ant = {x:0,y: 0};
+        // proceso cada tarea de la lista de tareas
         for (const tarea of lista) {
+            
+     
             let gcode = tarea.nombre.split(',');
-            if (gcode[0]=='C14'){ // pen up
+            if (gcode[0] == 'C14'){ // es un pen up
                 this.pen_is_down = false;
-            }else  if (gcode[0]=='C13'){ // pen down
+            }else  if (gcode[0] == 'C13'){ // es un pen down
                 this.pen_is_down = true;
             }
 
@@ -559,9 +563,17 @@ Doble click: mueve la gondola`;
             //  circle(x,y,2);
 
             if (this.pen_is_down) {
-                this.ctx.lineTo(x,y);
+                this.ctx.lineTo(x,y);  
+                ant ={x:x,y:y};   // guardo ultima posicion que se dibujo     
             } else {
-                this.ctx.moveTo(x,y);
+                // dibujo el trazado de la gondola mientras no esta dibujando
+                this.ctx.stroke();
+                this.linedash(ant.x,ant.y, x, y,1,1,  colores[0]);
+                this.ctx.strokeStyle ="#aaa";
+                this.ctx.beginPath();                  
+                
+                // si no dibuja las lineas punteadas muevo directametne al proximo punto
+                //this.ctx.moveTo(x,y);
             }
 
             //  console.log(tarea.nombre);
@@ -732,7 +744,7 @@ Doble click: mueve la gondola`;
         try {
 
             // SE EJECUTA SI ESTA EN DESARROLLO
-            if (location.href.includes('file://')){
+            if (location.href.includes('file://') || location.href.includes('http://127.0.0.1') ){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
                 let data= {'result_ok':false};
                 if (parametros=='getPosition'){
@@ -932,6 +944,104 @@ Doble click: mueve la gondola`;
     }
 
 
+    ajustarOffsetEscalaInverso(vertice) {
+        let verticeInverso = new Vertice(vertice.x,vertice.y);
+        
+        // Revertir en orden inverso a la transformación original
+        verticeInverso.x -= this.page.page_pos_x;
+        verticeInverso.y -= this.page.page_pos_y;
+        
+        verticeInverso.x -= (captura.offsetX - captura.offsetX_pagina) / captura.scale_pagina;
+        verticeInverso.y -= (captura.offsetY - captura.offsetY_pagina) / captura.scale_pagina;
+        
+        const factorEscala = captura.scale / captura.scale_pagina;
+         
+        verticeInverso.x = Math.round(verticeInverso.x / factorEscala);
+        verticeInverso.y = Math.round(verticeInverso.y /factorEscala);        
+        
+        return verticeInverso;
+    }
+
+    optimizarRecorrido(){
+
+        // separo las lineas que fueron cortadas en la seleccion en lineas individuales para poder optimizar el recorrido
+        let lineas = [];
+        captura.dibujo.lineas.forEach(function(linea) {         
+            let nueva_linea =  new Linea();
+            linea.vertices.forEach(function(vertice) {   
+                if (vertice.elegido){    
+                    let v = nueva_linea.agregarVertice(vertice.x, vertice.y);                    
+                    v.elegido = true;
+                }else{ 
+                    //si la linea tiene mas de un vertice la agrego
+                    if (nueva_linea.vertices.length > 1){
+                        lineas.push(nueva_linea);
+                        nueva_linea = new Linea();
+                    }
+                }              
+            });
+            // agrego la ultima linea si tiene mas de un vertice
+            if (nueva_linea.vertices.length > 1){
+                lineas.push(nueva_linea);
+            }
+        });
+   
+        let ultimo_ver = this.ajustarOffsetEscalaInverso(this.home);
+
+        //ultimo_ver.id='ultimo';
+        let lineas_ordenadas = [];
+          
+        // mientras haya lineas que procesar 
+        while (lineas.length > 0){
+            let pos_linea_mas_cercana = -1;
+            let pos_vertice_mas_cercano =-1; // es el primero
+            let menor_distancia = Infinity;
+            let distancia = Infinity;
+           
+            for (let i = 0; i < lineas.length; i++){
+                // busco que linea comienza o termina mas cerca del ultimo vertice
+                let pos_ultimo_vertice = lineas[i].vertices.length-1;
+                let primero_linea = lineas[i].vertices[0];
+                let ultimo_linea = lineas[i].vertices[pos_ultimo_vertice];
+            
+                // el primer vertice de esta linea esta mas cerca del punto inicial que el anterior
+                distancia = ultimo_ver.distanciaA(primero_linea);
+             
+                if (distancia < menor_distancia){              
+                    pos_linea_mas_cercana = i;
+                    pos_vertice_mas_cercano = 0; // es el primero
+                    menor_distancia = distancia;
+                }
+
+                // el ultimo vertice de esta linea esta mas cerca del punto inicial que el anterior
+                distancia = ultimo_ver.distanciaA(ultimo_linea);
+                if (distancia < menor_distancia){   
+                    pos_linea_mas_cercana = i;
+                    pos_vertice_mas_cercano = pos_ultimo_vertice; // es el ultimo
+                    menor_distancia = distancia;                
+                }
+          
+            };
+        
+            // copio la linea mas cercana
+            let linea_mas_cercana = captura.dibujo.copiarLinea(lineas[pos_linea_mas_cercana]);
+
+            // si tengo que empezar por el ultimo vertice invierto el arreglo
+            if (pos_vertice_mas_cercano > 0){       
+                linea_mas_cercana.vertices = linea_mas_cercana.vertices.slice().reverse();
+            }
+      
+            // redefino el ultimo_ver para que siga buscando
+            ultimo_ver = linea_mas_cercana.vertices[ linea_mas_cercana.vertices.length-1];
+
+            // agrego la linea mas cercana a lineas_ordenadas
+            lineas_ordenadas.push(linea_mas_cercana);
+          
+            // elimino la linea del arreglo original
+            lineas.splice(pos_linea_mas_cercana, 1)[0];
+        };
+        return lineas_ordenadas;
+    }   
 
     capturar_tareas(){
         if (captura.dibujo === false){
@@ -945,12 +1055,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             return;
         };
        
-
-        if (captura.dibujo.lineas_elegidas == 0 && captura.dibujo.vertices_elegidos == 0){
-
-            // marco el modo_seleccion para que elija vertices
-            document.getElementById('modo_vertices').click();
-          
+        if (captura.dibujo.vertices_elegidos == 0){          
             //calculo el box de la hoja donde voy a seleccionar
             const box = {
                     x: (captura.offsetX_pagina - captura.offsetX) / captura.scale,
@@ -958,73 +1063,38 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                     width: captura.width_pagina / captura.scale,
                     height: captura.height_pagina / captura.scale
                 };
-
             // dibujo el cuadro que indica que se seleccionara
-          //  captura.drawSelectionBox_TEST(box,4) ;     
-                                 
-
-            captura.dibujo.seleccionarElementos(box,captura.modo_seleccion );
-              
-            
-            //alert('Debe seleccionar algun elemento!');
-           // return;
+            //captura.drawSelectionBox_TEST(box,4) ;                                     
+            captura.dibujo.seleccionarElementos(box,captura.modo_seleccion );              
         }
-        //eco(captura.dibujo.lineas_elegidas + ' '+ captura.dibujo.vertices_elegidos);
 
-       // eco('FALTA OPTIMIZAR RECORRIDO DE LA GONDOLA');
+        let lineas_optimizadas = this.optimizarRecorrido();
         
         // limpio la cola de tareas 
         this.limpiar_cola();
 
         //encolo tareas de volver a home
-        this.return_to_home();
+        this.return_to_home();    
 
-        if (captura.modo_seleccion == 0){ // selecciono lineas
-            // para cada linea del dibujo
-            captura.dibujo.lineas.forEach((linea) => {         
-                // subo el pen      
-                this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
-                if (linea.elegida){
-                    let pen_is_down = false;
-                    linea.vertices.forEach((vertice) => {
-                        let ajustado = this.ajustarOffsetEscala(vertice,captura);
-                        this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
-                        if (!pen_is_down){
-                            // bajo el pen
-                            this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
-                            pen_is_down = true;
-                        }
-                    });
-                }
-            });
-        }else {                           // selecciono vertices
-            // para cada linea del dibujo
-            captura.dibujo.lineas.forEach((linea) => {         
-                // subo el pen      
-                this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
-               
-                let pen_is_down = false;
-                linea.vertices.forEach((vertice) => {
-                    if (vertice.elegido){
-                         // muevo la gondola al proximo punto
-                        // let motorA = this.calc_motorA(vertice.x + this.page.page_pos_x , vertice.y + this.page.page_pos_y );
-                        // let motorB = this.calc_motorB(vertice.x+ this.page.page_pos_x , vertice.y + this.page.page_pos_y);
-                        // this.encolar_tarea('C17,'+motorA+','+motorB+',END', this.update_pen_position.bind(this));
-                        let ajustado = this.ajustarOffsetEscala(vertice,captura);
-                        this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
-                        if (!pen_is_down){
-                            // bajo el pen
-                            this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
-                            pen_is_down = true;
-                        }
-                    }else{
-                        // subo el pen  
-                        this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
-                        pen_is_down = false;
-                    }                  
-                });            
-            });
-        }        
+    
+        // para cada linea del dibujo   
+        lineas_optimizadas.forEach((linea) => {         
+            // subo el pen      
+            this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
+            
+            let pen_is_down = false;
+            linea.vertices.forEach((vertice) => {
+                // muevo la gondola al proximo punto                       
+                let ajustado = this.ajustarOffsetEscala(vertice,captura);
+                this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
+                if (!pen_is_down){
+                    // bajo el pen
+                    this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
+                    pen_is_down = true;
+                }                   
+            });            
+        });
+              
 
         // encolo tarea de volver a home al final
         this.return_to_home();
@@ -1039,10 +1109,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         document.getElementById('tab_dibujar').click();
 
         //mustro la maquina con la captura
-        this.draw_machine();
-
-        
-        
+        this.draw_machine();                
     }    
 }
 

@@ -16,11 +16,10 @@ class Vertice {
 
 // Clase Línea
 class Linea {
-    constructor(id, color = null) {
-        this.id = id;
+    constructor(id = null, color = null) {
+        this.id = id || `l_${Math.random().toString(36).substr(2, 9)}`;
         this.color = color || this.generarColorAleatorio();
         this.vertices = [];
-        this.elegida = false;
     }    
     
     generarColorAleatorio() {
@@ -31,7 +30,7 @@ class Linea {
     }
     
     agregarVertice(x, y,previo = false) {
-        const vertice = new Vertice(x, y,this.id);
+        const vertice = new Vertice(x, y);
         if (previo){                    
             this.vertices.unshift(vertice);                    
         }else {
@@ -150,7 +149,6 @@ class Dibujo {
         this.contadorLineasOriginales = 0;
 
         // estadisticas de seleccion
-        this.lineas_elegidas = 0;
         this.vertices_elegidos = 0;
 
         // estadisticas de dibujo
@@ -166,6 +164,16 @@ class Dibujo {
         const nuevaLinea = new Linea(this.contadorLineas, color);
         this.lineas.push(nuevaLinea);
         this.contadorLineas++;                
+        return nuevaLinea;
+    }
+
+    copiarLinea(linea){
+        //creo linea nueva 
+        const nuevaLinea = new Linea(linea.id, linea.color);         
+        //copio los vertices
+        linea.vertices.forEach(ver => {
+            nuevaLinea.agregarVertice(ver.x,ver.y);
+        });
         return nuevaLinea;
     }
 
@@ -392,19 +400,15 @@ class Dibujo {
             }                  
         };
     }        
-    
-    limpiarSeleccionElementos(modo = 0){ //0=lineas 1=vertices
-         this.lineas.forEach(linea => {
-            if (modo == 0){  //0=lineas 1=vertices
-                linea.elegida = false;    
-            }       
+
+    limpiarSeleccionElementos(){ 
+         this.lineas.forEach(linea => {           
             linea.vertices.forEach( vertice => {     
-                if (modo == 1){  //0=lineas 1=vertices                         
-                    vertice.elegido=false;     
-                }                 
+                             
+                vertice.elegido=false;     
+                             
             });             
         });
-        this.lineas_elegidas = 0;
         this.vertices_elegidos = 0;
     }
 
@@ -431,37 +435,28 @@ class Dibujo {
         this.height = Math.round(maxy - miny);
     }
 
-    seleccionarElementos(box, modo = 0, limpiar_seleccion = true, quitar_encontrados = false){
-        eco(box);
+    seleccionarElementos(box, limpiar_seleccion = true, quitar_encontrados = false){
+      //  eco(box);
         let seleccionar = true;
         let sumar = 1;
         if (quitar_encontrados){
             seleccionar = false; // deseleccionando
             sumar = -1;
         }else if(limpiar_seleccion){
-            this.limpiarSeleccionElementos(modo);
+            this.limpiarSeleccionElementos();
         }
      
         this.lineas.forEach(linea => {
-            let elegir_linea = false;
             // eco('aca busco que vertices estan dentro del cuadro');
             linea.vertices.forEach( vertice => {                  
                 if (vertice.x >= box.x && vertice.x <= box.x + box.width &&
                     vertice.y >= box.y && vertice.y <= box.y + box.height){
-                    if (modo == 0){  // estoy seleccionando lineas               
-                        elegir_linea = true;
-                    }else{           // estoy seleccionando vertices
-                        vertice.elegido = seleccionar;
-                        this.vertices_elegidos += sumar;
-                    }                                      
+                    vertice.elegido = seleccionar;
+                    this.vertices_elegidos += sumar;                               
                 }
             });   
-
-            if (elegir_linea){
-                linea.elegida = seleccionar;
-                this.lineas_elegidas += sumar;
-            }          
-        });     
+        });
+        
     }    
 }
 
