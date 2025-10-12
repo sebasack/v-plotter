@@ -39,6 +39,56 @@ class Captura {
         this.init();
     }
 
+    init() {
+        this.agregar_controles_captura();
+
+        // Event listeners del mouse
+        this.lineCanvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        this.lineCanvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.lineCanvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.lineCanvas.addEventListener('wheel', this.handleWheel.bind(this));
+        this.lineCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // listeners del teclado
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        document.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+        document.getElementById("vertices_slider").addEventListener('change', this.cambio_vertices_eliminados.bind(this), false);
+        document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
+        document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
+        document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
+     
+        
+        // seteo el title al canvas
+        this.lineCanvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
+Arrastrar con click derecho: Mueve la vista
+Dibujar rectángulo con click izquierdo: Selecciona líneas
+ControlLeft + Dibujar rectángulo con click izquierdo: Agrega líneas a la seleccion
+ControlLeft + rueda del mouse: Acerca/aleja la vista lentamente
+ControlRight + Dibujar rectángulo con click izquierdo: Quita líneas de la seleccion
+Shift + click izquierdo: Zoom al área seleccionada`;
+
+    }
+
+    agregar_controles_captura(){                
+        $("#parametros_importacion").html(`
+                <legend>Posicionar e importar</legend>
+
+                <div class="slider-container">
+                    <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
+                    <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
+                </div>
+
+                <hr>
+                Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
+                Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
+                Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
+                               
+                <hr>
+            
+                <div id="estadisticas">Lineas:<br>Vertices:</div>`);            
+    }
+       
     dibujar_maquina(){
         //redimensiono el canvas
         this.lineCanvas.width = control.canvas.width;
@@ -89,6 +139,7 @@ class Captura {
         this.scale_pagina = scale;
 
     }
+    
 
     /*
     ajustarImagenEnPantalla() {
@@ -198,25 +249,6 @@ class Captura {
         this.lineCtx.restore();
     }  
 
-    agregar_controles_captura(){                
-        $("#parametros_importacion").html(`
-                <legend>Posicionar e importar</legend>
-
-                <div class="slider-container">
-                    <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
-                    <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
-                </div>
-
-                <hr>
-                Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
-                Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
-                Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
-                               
-                <hr>
-            
-                <div id="estadisticas">Lineas:<br>Vertices:</div>`);            
-    }
-   
     cambio_vertices_eliminados(event){
         this.vertices_eliminados = event.target.value;
         $('#vertices_value').html(event.target.value);
@@ -263,36 +295,6 @@ class Captura {
             this.ControlRightPressed = false;
         }
         document.body.style.cursor = 'default';
-    }
-
-    init() {
-        this.agregar_controles_captura();
-
-        // Event listeners del mouse
-        this.lineCanvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        this.lineCanvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        this.lineCanvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        this.lineCanvas.addEventListener('wheel', this.handleWheel.bind(this));
-        this.lineCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        // listeners del teclado
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
-        document.addEventListener('keyup', this.handleKeyUp.bind(this));
-
-        document.getElementById("vertices_slider").addEventListener('change', this.cambio_vertices_eliminados.bind(this), false);
-        document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
-        document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
-        document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
-     
-        
-        // seteo el title al canvas
-        this.lineCanvas.title=`Zoom con rueda del mouse: Acerca/aleja la vista
-Arrastrar con click derecho: Mueve la vista
-Dibujar rectángulo con click izquierdo: Selecciona líneas
-ControlLeft + Dibujar rectángulo con click izquierdo: Agrega líneas a la seleccion
-ControlLeft + rueda del mouse: Acerca/aleja la vista lentamente
-ControlRight + Dibujar rectángulo con click izquierdo: Quita líneas de la seleccion
-Shift + click izquierdo: Zoom al área seleccionada`;
     }
      
     handleMouseDown(e) {
@@ -483,9 +485,4 @@ Shift + click izquierdo: Zoom al área seleccionada`;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // tengo que dejar disponible el objeto de captura para poder pasarle el dibujo y la imagen original
-let captura = false;
-
-// Ejecutar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function(){
-   captura = new Captura('lineCanvas');
-});
+let captura = new Captura('lineCanvas');

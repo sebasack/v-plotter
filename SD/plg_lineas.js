@@ -12,7 +12,13 @@ class lineas {
 
         this.init();
     }
-         
+
+    init() {
+        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');             
+        //this.agregar_controles_captura();
+
+    }
+
     agregar_controles_captura(){        
 
         $("#parametros_captura").html(`
@@ -39,11 +45,6 @@ class lineas {
         document.getElementById('umbral_slider').addEventListener('change', this.update_umbral.bind(this), false);
         document.getElementById('grosor_slider').addEventListener('change', this.update_grosor.bind(this), false);      
         document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
-    }
-
-    init() {
-        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');             
-        //this.agregar_controles_captura();
     }
     
     update_umbral(event){   
@@ -536,14 +537,9 @@ class lineas {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
-let captureLines = false;
-
 function cargar_config_lines(){
     captureLines.agregar_controles_captura();
 }
 
-// Ejecutar el modulo cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function(){
-    captureLines = new lineas();   
-});
+// tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
+let captureLines = new lineas();   

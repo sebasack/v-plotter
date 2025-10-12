@@ -184,7 +184,7 @@ class Control {
 
         let comando = $("#comando_gcode").val().toUpperCase();
         //valido el gcode
-            if (this.gcode_valido(comando)){
+            if (gcode_valido(comando)){
                 $("#comando_gcode").val('');
                 this.encolar_tarea(comando, this.update_pen_position.bind(this));
             }else{
@@ -230,6 +230,7 @@ class Control {
     }
 
     init(){        
+
         // Add a click event listener to the canvas
         this.canvas.addEventListener("dblclick",  this.dobleClick_canvas.bind(this));
         this.canvas.addEventListener("wheel",  this.wheel_canvas.bind(this));
@@ -326,7 +327,8 @@ Doble click: mueve la gondola`;
         
         this.zoom_default();
         this.init_tabs();
-        this.draw_machine();       
+        this.draw_machine();    
+        
     }
 
     guardar_parametros() {
@@ -1113,7 +1115,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             linea.vertices.forEach((vertice) => {
                 // muevo la gondola al proximo punto                       
                 let ajustado = this.ajustarOffsetEscala(vertice,captura);
-                this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',END', this.update_pen_position.bind(this));
+                this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',2,END', this.update_pen_position.bind(this));
                 if (!pen_is_down){
                     // bajo el pen
                     this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
@@ -1143,13 +1145,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // tengo que dejar disponible el objeto de control para poder obtener datos de la maquina
-let control = false;
-
-// Ejecutar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function(){
-   control = new Control();
-});
-
+let control = new Control();
 
 
 

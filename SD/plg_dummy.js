@@ -82,14 +82,9 @@ class dummy {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
-let objeto_dummy = false;
-
 function cargar_config_dummy(){
     objeto_dummy.agregar_controles_dummy();
 }
 
-// Ejecutar el modulo cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function(){
-    objeto_dummy = new dummy();   
-});
+// tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
+let objeto_dummy = new dummy();   

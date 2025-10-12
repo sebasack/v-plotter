@@ -50,6 +50,7 @@ boolean manualControlInProgress = false;
   
 
 void handleRoot(){
+  Serial.println("cargando controlador web");
 
   server.setContentLength(CONTENT_LENGTH_UNKNOWN);
   server.sendHeader("Content-Type", "text/html", true);
@@ -62,55 +63,21 @@ void handleRoot(){
   sprintf(temp,"\
 <!DOCTYPE html>\
 <html>\
-  <head>\
-    <meta charset='utf-8'/>\
-    <title>Control v-plotter CDN</title>\
-    <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
-    <script> \
-      function cargarRecursos(recursos){\
-        function cargarSiguiente(i) {\
-          if (i >= recursos.length) {\
-            return;\
-          }\
-          const recurso = recursos[i];\
-          if (recurso.tipo === 'css') {\
-            $('<link>', { rel: 'stylesheet', href: recurso.archivo }).appendTo('head').on('load',function() {\
-              cargarSiguiente(i + 1);\
+    <head>\
+        <title>Control v-plotter en SD Card</title>\
+        <meta charset='utf-8' />\
+        <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>\
+        <script>\
+            const cdn = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';\
+            $(function() {\
+                $('#control-placeholder').load(`${cdn}control.html`);\
             });\
-          } else if (recurso.tipo === 'js') {\
-              $.getScript(recurso.archivo)\
-                  .done(function() {cargarSiguiente(i + 1);})\
-                  .fail(function() {\
-                      console.warn('Error cargando JS, continuando...');\
-                      cargarSiguiente(i + 1);\
-                  });");          
+        </script>\
+    </head>\
+    <body>\
+        <div id='control-placeholder'>loading html...</div>");          
   server.sendContent(temp);   
 
-  sprintf(temp,"\
-          } else if (recurso.tipo === 'html' && recurso.contenedor) {\
-              $(recurso.contenedor).load(recurso.archivo, function() { cargarSiguiente(i + 1);});\
-          } else {\
-              cargarSiguiente(i + 1);\
-          }\
-        }\
-        cargarSiguiente(0);\
-      }\
-      $(function() {\
-          cdn='https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';\
-          cargarRecursos([\
-              {tipo:'html',archivo:cdn+'control.html',contenedor:'#control-placeholder'},\
-              {tipo:'css',archivo:cdn+'styles.css'},\
-              {tipo:'js',archivo:cdn+'clases.js'},\
-              {tipo:'js',archivo:cdn+'plg_lineas.js'},\
-              {tipo:'js',archivo:cdn+'captura.js'},\
-              {tipo:'js',archivo:cdn+'control.js' }\
-          ]);\
-      });\
-    </script>\
-  </head>\
-  <body>\
-      <div id='control-placeholder'>loading html...</div>");
-  server.sendContent(temp);
 
   if (cardPresent){   
       // quitar estas lineas una vez que resuelva el link dinamico
@@ -132,7 +99,7 @@ void handleRoot(){
 
   server.sendContent(temp);
 
-
+  Serial.println("controlador web enviado.");
 }
 
 /*
