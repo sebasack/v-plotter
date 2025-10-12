@@ -45,7 +45,7 @@ class Linea {
         }
         return null;
     }
-
+/*
     reducirVerticesLinea(ciclos){
         this.lineas.forEach((linea) => {   
             let termine =false;
@@ -60,7 +60,7 @@ class Linea {
             }            
         });
     }
-    
+  */  
     obtenerSegmentos() {
         const segmentos = [];
         
@@ -264,6 +264,43 @@ class Dibujo {
         diff = diff > Math.PI ? (2 * Math.PI - diff) : diff;
         return Math.abs(diff * 180 / Math.PI); // Convertir a grados
     } 
+
+
+    rotarVertice(vertice, anguloGrados, centroX, centroY) {
+        const anguloRadianes = anguloGrados * Math.PI / 180;
+        const cos = Math.cos(anguloRadianes);
+        const sin = Math.sin(anguloRadianes);
+        
+        // Trasladar punto al sistema de coordenadas del centro de rotación
+        const xRelativo = vertice.x - centroX;
+        const yRelativo = vertice.y - centroY;
+        
+        // Aplicar rotación
+        const xRotado = xRelativo * cos - yRelativo * sin;
+        const yRotado = xRelativo * sin + yRelativo * cos;
+        
+        // Trasladar de vuelta al sistema original
+        vertice.x= Math.round((xRotado + centroX) * 10) / 10; // Redondear a 1 decimal
+        vertice.y= Math.round((yRotado + centroY) * 10) / 10;       
+    }
+
+    rotarVertices(angulo_rotacion, centroX, centroY){
+
+        // guardo una copia del dibujo por que la rotacion es destructiva
+        if (this.contadorLineasOriginales == 0){             
+            this.backupLineas();
+        }else{
+            //recupero la copia de las lineas guardadas
+            this.restoreLineas();
+        }
+
+        this.lineas.forEach((linea) => {                                           
+            for (let i = 0; i < linea.vertices.length; i++){   
+                this.rotarVertice(linea.vertices[i], angulo_rotacion, centroX, centroY);
+            };
+        });
+
+    }
 
     reducirVertices(eliminar){
 

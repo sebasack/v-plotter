@@ -42,8 +42,8 @@ class lineas {
 
         // listeners de botones y sliders
         document.getElementById('imageLoader').addEventListener('change', this.cargar_imagen.bind(this), false);
-        document.getElementById('umbral_slider').addEventListener('change', this.update_umbral.bind(this), false);
-        document.getElementById('grosor_slider').addEventListener('change', this.update_grosor.bind(this), false);      
+        document.getElementById('umbral_slider').addEventListener('input', this.update_umbral.bind(this), false);
+        document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
         document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
     }
     

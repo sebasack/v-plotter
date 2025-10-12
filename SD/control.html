@@ -116,10 +116,13 @@
     </tr>
 </table>
 
-
-<link rel="stylesheet" href="styles.css">
-<script src="clases.js"></script>
-<script src="plg_lineas.js"></script>
-<script src="plg_dummy.js"></script>
-<script src="captura.js"></script>
-<script src="control.js"></script>
+<script>
+    $(function() {
+        $('<link>', {rel: 'stylesheet', href: `${cdn}styles.css`}).appendTo('head');
+        $.getScript(`${cdn}clases.js`)
+        $.getScript(`${cdn}plg_lineas.js`);
+        $.getScript(`${cdn}plg_dummy.js`);
+        $.getScript(`${cdn}captura.js`);
+        $.getScript(`${cdn}control.js`);
+    });
+</script>

@@ -27,7 +27,8 @@ class Captura {
         this.lastX = 0;
         this.lastY = 0;
                 
-        this.vertices_eliminados = 10; // %        
+        this.vertices_eliminados = 10; // %       
+        this.angulo_rotacion = 0 ; // 
         this.mostrar_imagen = true;
         this.detalle_lineas = false;
         this.mostrar_vertices = false;
@@ -53,7 +54,8 @@ class Captura {
         document.addEventListener('keydown', this.handleKeyDown.bind(this));
         document.addEventListener('keyup', this.handleKeyUp.bind(this));
 
-        document.getElementById("vertices_slider").addEventListener('change', this.cambio_vertices_eliminados.bind(this), false);
+        document.getElementById("vertices_slider").addEventListener('input', this.cambio_vertices_eliminados.bind(this), false);
+        document.getElementById("rotacion_slider").addEventListener('input', this.cambio_angulo_rotacion.bind(this), false);
         document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
@@ -78,6 +80,13 @@ Shift + click izquierdo: Zoom al área seleccionada`;
                     <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
                     <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
                 </div>
+
+
+                <div class="slider-container">
+                    <label for="rotacion_slider">Angulo rotacion: <span id="rotacion_value">0°</span></label><br>
+                    <input type="range" id="rotacion_slider" min="0" max="359"  step="1" value="0">
+                </div>
+
 
                 <hr>
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
@@ -137,7 +146,6 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.width_pagina = scaledWidth;
         this.height_pagina = scaledHeight;
         this.scale_pagina = scale;
-
     }
     
 
@@ -200,12 +208,30 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         }
   
         // Aplicar transformaciones de vista
-        this.lineCtx.translate(this.offsetX, this.offsetY);
+        this.lineCtx.translate(this.offsetX, this.offsetY);      
         this.lineCtx.scale(this.scale, this.scale);
 
         // muestro la imagen importada
         if (this.mostrar_imagen && this.imagen){
-            this.lineCtx.drawImage(this.imagen, 0, 0);
+      //      this.lineCtx.drawImage(this.imagen, 0, 0);
+            ///////////////
+         
+            // Guardar el estado del contexto
+            this.lineCtx.save();
+            
+            // Mover el punto de origen al centro de la imagen
+            this.lineCtx.translate(this.imagen.width / 2, this.imagen.height / 2);
+            
+            const anguloRadianes = this.angulo_rotacion * Math.PI / 180;
+            // Aplicar la rotación
+            this.lineCtx.rotate(anguloRadianes);
+            
+            // Dibujar la imagen centrada en el nuevo origen
+            this.lineCtx.drawImage(this.imagen, -this.imagen.width / 2, -this.imagen.height / 2);
+            
+            // Restaurar el estado del contexto
+            this.lineCtx.restore();
+            /////////////////
         }   
         
         this.lineCtx.lineWidth = 1;
@@ -265,6 +291,20 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
         }
 
+    }
+        
+
+    cambio_angulo_rotacion(event){
+        this.angulo_rotacion = event.target.value;
+        $('#rotacion_value').html(event.target.value + '°');
+
+        // calculo el centro de la imagen
+        let centroX= this.imagen.width /2;
+        let centroY= this.imagen.height /2;
+
+        this.dibujo.rotarVertices(this.angulo_rotacion,centroX,centroY);
+
+        this.dibujar_captura();
     }
 
     cambio_mostrar_imagen_o_detalle(event){      
