@@ -220,6 +220,11 @@ Shift + click izquierdo: Zoom al área seleccionada`;
              // calculo el centro de la imagen
         let centro_rotacionX = this.dibujo.centroX;
         let centro_rotacionY = this.dibujo.centroY;
+        if (this.imagen){
+            // calculo el centro de la imagen
+            centro_rotacionX = this.imagen.width /2;
+            centro_rotacionY = this.imagen.height /2;
+        }
 
         // muestro la imagen importada
         if (this.mostrar_imagen && this.imagen){
@@ -237,11 +242,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             this.lineCtx.drawImage(this.imagen, -this.imagen.width / 2, -this.imagen.height / 2);
             
             // Restaurar el estado del contexto
-            this.lineCtx.restore();
-
-             // calculo el centro de la imagen
-            centro_rotacionX = this.imagen.width /2;
-            centro_rotacionY = this.imagen.height /2;
+            this.lineCtx.restore();         
         }   
 
        
