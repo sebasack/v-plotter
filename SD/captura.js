@@ -202,6 +202,10 @@ Shift + click izquierdo: Zoom al área seleccionada`;
       
         this.dibujar_maquina();
 
+                if (!this.dibujo){
+                    return;
+                }
+
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
         if (ajuste_inicial_offset_scale){
             this.ajustarDibujoEnPantalla() ;      
@@ -211,11 +215,13 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCtx.translate(this.offsetX, this.offsetY);      
         this.lineCtx.scale(this.scale, this.scale);
 
+
+             // calculo el centro de la imagen
+        let centro_rotacionX = this.dibujo.centroX;
+        let centro_rotacionY = this.dibujo.centroY;
+
         // muestro la imagen importada
         if (this.mostrar_imagen && this.imagen){
-      //      this.lineCtx.drawImage(this.imagen, 0, 0);
-            ///////////////
-         
             // Guardar el estado del contexto
             this.lineCtx.save();
             
@@ -231,8 +237,18 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             
             // Restaurar el estado del contexto
             this.lineCtx.restore();
-            /////////////////
+
+             // calculo el centro de la imagen
+            centro_rotacionX = this.imagen.width /2;
+            centro_rotacionY = this.imagen.height /2;
         }   
+
+
+        // reduzco cantidad de vertices    
+        this.dibujo.reducirVertices(this.vertices_eliminados);
+
+        // roto la imagen y la captura
+        this.dibujo.rotarVertices(this.angulo_rotacion, centro_rotacionX, centro_rotacionY);             
         
         this.lineCtx.lineWidth = 1;
 
@@ -278,19 +294,14 @@ Shift + click izquierdo: Zoom al área seleccionada`;
     cambio_vertices_eliminados(event){
         this.vertices_eliminados = event.target.value;
         $('#vertices_value').html(event.target.value);
-
-        // reduzco cantidad de vertices
-        if (this.dibujo !== false){            
-            this.dibujo.reducirVertices(this.vertices_eliminados);
-            this.dibujar_captura();
-        }
+       
 
         //si se importo alguna imagen muestro estadisticas
         if (this.dibujo){        
             // muestro las estadisticas de la imagen luego de modificar la cantidad de vertices
             $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
+            this.dibujar_captura();
         }
-
     }
         
 
@@ -298,13 +309,9 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.angulo_rotacion = event.target.value;
         $('#rotacion_value').html(event.target.value + '°');
 
-        // calculo el centro de la imagen
-        let centroX= this.imagen.width /2;
-        let centroY= this.imagen.height /2;
-
-        this.dibujo.rotarVertices(this.angulo_rotacion,centroX,centroY);
-
-        this.dibujar_captura();
+        if (this.dibujo){        
+            this.dibujar_captura();
+        }
     }
 
     cambio_mostrar_imagen_o_detalle(event){      

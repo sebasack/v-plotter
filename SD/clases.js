@@ -158,6 +158,9 @@ class Dibujo {
         this.max_y = 0;
         this.width = 0;
         this.height = 0;
+
+        this.centroX = 0;
+        this.centroY = 0;
     }
 
     crearLinea(color = null) {
@@ -284,24 +287,6 @@ class Dibujo {
         vertice.y= Math.round((yRotado + centroY) * 10) / 10;       
     }
 
-    rotarVertices(angulo_rotacion, centroX, centroY){
-
-        // guardo una copia del dibujo por que la rotacion es destructiva
-        if (this.contadorLineasOriginales == 0){             
-            this.backupLineas();
-        }else{
-            //recupero la copia de las lineas guardadas
-            this.restoreLineas();
-        }
-
-        this.lineas.forEach((linea) => {                                           
-            for (let i = 0; i < linea.vertices.length; i++){   
-                this.rotarVertice(linea.vertices[i], angulo_rotacion, centroX, centroY);
-            };
-        });
-
-    }
-
     reducirVertices(eliminar){
 
          // guardo una copia del dibujo por que la reduccion es destructiva
@@ -341,6 +326,14 @@ class Dibujo {
             }        
         });
     }   
+
+    rotarVertices(angulo_rotacion, centroX, centroY){
+        this.lineas.forEach((linea) => {                                           
+            for (let i = 0; i < linea.vertices.length; i++){   
+                this.rotarVertice(linea.vertices[i], angulo_rotacion, centroX, centroY);
+            };
+        });
+    }
     
     unificarLineas(cercaniaMinima = 5){ 
         // busco cercania entre los vertices de iniciales y finales de una linea y los de otra,
@@ -470,6 +463,9 @@ class Dibujo {
         this.max_y = Math.round(maxy);
         this.width = Math.round(maxx - minx);
         this.height = Math.round(maxy - miny);
+
+        this.centroX = this.width / 2;
+        this.centroY = this.height / 2;
     }
 
     seleccionarElementos(box, limpiar_seleccion = true, quitar_encontrados = false){
