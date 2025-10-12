@@ -246,10 +246,12 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         }   
 
        
-        // roto la imagen y la captura
-        this.dibujo.rotarVertices(this.angulo_rotacion_nuevo, centro_rotacionX, centro_rotacionY);   
+        // roto el dibujo
+        if (this.angulo_rotacion_nuevo != 0){
+            this.dibujo.rotarVertices(this.angulo_rotacion_nuevo, centro_rotacionX, centro_rotacionY);   
+            this.angulo_rotacion_nuevo = 0;
+        }
 
-        this.angulo_rotacion_nuevo = 0;
 
         this.lineCtx.lineWidth = 1;
 
