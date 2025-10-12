@@ -224,7 +224,7 @@ class Dibujo {
         return cant;
     }
 
-    backupLineas(){
+    backupLineas(){       
         this.lineas_originales = [];
         this.contadorLineasOriginales = 0;
         this.lineas.forEach(linea => {
@@ -239,7 +239,7 @@ class Dibujo {
         });
     };
 
-    restoreLineas(){
+    restoreLineas(){       
         this.lineas = [];
         this.contadorLineas = 0;
         this.lineas_originales.forEach(linea => {
@@ -268,24 +268,6 @@ class Dibujo {
         return Math.abs(diff * 180 / Math.PI); // Convertir a grados
     } 
 
-
-    rotarVertice(vertice, anguloGrados, centroX, centroY) {
-        const anguloRadianes = anguloGrados * Math.PI / 180;
-        const cos = Math.cos(anguloRadianes);
-        const sin = Math.sin(anguloRadianes);
-        
-        // Trasladar punto al sistema de coordenadas del centro de rotación
-        const xRelativo = vertice.x - centroX;
-        const yRelativo = vertice.y - centroY;
-        
-        // Aplicar rotación
-        const xRotado = xRelativo * cos - yRelativo * sin;
-        const yRotado = xRelativo * sin + yRelativo * cos;
-        
-        // Trasladar de vuelta al sistema original
-        vertice.x= Math.round((xRotado + centroX) * 10) / 10; // Redondear a 1 decimal
-        vertice.y= Math.round((yRotado + centroY) * 10) / 10;       
-    }
 
     reducirVertices(eliminar){
 
@@ -327,7 +309,31 @@ class Dibujo {
         });
     }   
 
+    rotarVertice(vertice, anguloGrados, centroX, centroY) {
+        const anguloRadianes = anguloGrados * Math.PI / 180;
+        const cos = Math.cos(anguloRadianes);
+        const sin = Math.sin(anguloRadianes);
+        
+        // Trasladar punto al sistema de coordenadas del centro de rotación
+        const xRelativo = vertice.x - centroX;
+        const yRelativo = vertice.y - centroY;
+        
+        // Aplicar rotación
+        const xRotado = xRelativo * cos - yRelativo * sin;
+        const yRotado = xRelativo * sin + yRelativo * cos;
+        
+        // Trasladar de vuelta al sistema original
+        vertice.x= Math.round((xRotado + centroX) * 10) / 10; // Redondear a 1 decimal
+        vertice.y= Math.round((yRotado + centroY) * 10) / 10;       
+    }
+
     rotarVertices(angulo_rotacion, centroX, centroY){
+
+        //backupeo si no estaba hecho el backup
+        if (this.contadorLineasOriginales == 0){             
+            this.backupLineas();
+        }
+
         this.lineas.forEach((linea) => {                                           
             for (let i = 0; i < linea.vertices.length; i++){   
                 this.rotarVertice(linea.vertices[i], angulo_rotacion, centroX, centroY);

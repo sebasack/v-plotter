@@ -28,7 +28,8 @@ class Captura {
         this.lastY = 0;
                 
         this.vertices_eliminados = 10; // %       
-        this.angulo_rotacion = 0 ; // 
+        this.angulo_rotacion = 0 ; //    
+        this.angulo_rotacion_nuevo = 0 ; // 
         this.mostrar_imagen = true;
         this.detalle_lineas = false;
         this.mostrar_vertices = false;
@@ -202,9 +203,9 @@ Shift + click izquierdo: Zoom al área seleccionada`;
       
         this.dibujar_maquina();
 
-                if (!this.dibujo){
-                    return;
-                }
+        if (!this.dibujo){
+            return;
+        }
 
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
         if (ajuste_inicial_offset_scale){
@@ -243,13 +244,12 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             centro_rotacionY = this.imagen.height /2;
         }   
 
-
-        // reduzco cantidad de vertices    
-        this.dibujo.reducirVertices(this.vertices_eliminados);
-
+       
         // roto la imagen y la captura
-        this.dibujo.rotarVertices(this.angulo_rotacion, centro_rotacionX, centro_rotacionY);             
-        
+        this.dibujo.rotarVertices(this.angulo_rotacion_nuevo, centro_rotacionX, centro_rotacionY);   
+
+        this.angulo_rotacion_nuevo = 0;
+
         this.lineCtx.lineWidth = 1;
 
         // si no esta activado el mostrado de detalle de  lineas lo dibujo en negro
@@ -300,28 +300,40 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         if (this.dibujo){        
             // muestro las estadisticas de la imagen luego de modificar la cantidad de vertices
             $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
+
+            // reduzco cantidad de vertices    
+            this.dibujo.reducirVertices(this.vertices_eliminados);
+        
+            // mando a girar el dibujo nuevamente por que los vertices fueron guardados sin girar
+            this.angulo_rotacion_nuevo = this.angulo_rotacion;
             this.dibujar_captura();
+
         }
     }
         
 
     cambio_angulo_rotacion(event){
-        this.angulo_rotacion = event.target.value;
-        $('#rotacion_value').html(event.target.value + '°');
+        // guardo el angulo anterior
+        let angulo_anterior = this.angulo_rotacion;
 
-        if (this.dibujo){        
-            this.dibujar_captura();
-        }
+        // guardo el nuevo angulo
+        this.angulo_rotacion = event.target.value;
+
+        // calculo cuanto lo tengo que rotar
+        this.angulo_rotacion_nuevo = this.angulo_rotacion -angulo_anterior;
+
+        $('#rotacion_value').html(event.target.value + '°');
+                  
+        this.dibujar_captura();
     }
 
     cambio_mostrar_imagen_o_detalle(event){      
         this.mostrar_imagen = $("#mostrar_imagen").prop("checked") ;
         this.detalle_lineas = $("#detalle_lineas").prop("checked") ;
         this.mostrar_vertices = $("#mostrar_vertices").prop("checked") ;        
-        // redibujo       
-        if (this.dibujo !== false){          
-            this.dibujar_captura();
-        }
+        
+        this.dibujar_captura();
+
     }
         
     // Función para manejar el evento keydown
