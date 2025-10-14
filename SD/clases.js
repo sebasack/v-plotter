@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////// CLASES DIBUJO ////////////////////////////////////////////////
 
 // Clase Vértice
@@ -22,11 +23,9 @@ class Linea {
         this.vertices = [];
     }    
     
-    generarColorAleatorio() {
-        const colores = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', 
-                        '#ff7700', '#7700ff', '#00ff77', '#ff0077', '#77ff00', '#0077ff'];
-        
-        return colores[Math.floor(Math.random() * colores.length)];
+    generarColorAleatorio() {        
+        //no uso los dos primeros
+        return colores[Math.floor(Math.random() * colores.length - 2) + 2];
     }
     
     agregarVertice(x, y,previo = false) {

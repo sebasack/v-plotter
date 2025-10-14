@@ -1,4 +1,261 @@
-class lineas {
+
+class CannyEdgeDetector {
+    constructor() {
+        this.gaussianKernel = this.createGaussianKernel(5, 1.4);
+    }
+
+    detectEdges(imageData, width, height, lowThreshold = 20, highThreshold = 50) {
+        //console.log("Iniciando detección de bordes...");
+        
+        // 1. Convertir a escala de grises
+        //console.log("Convirtiendo a escala de grises...");
+        const grayData = this.convertToGrayscale(imageData, width, height);
+        
+        // 2. Aplicar filtro Gaussiano
+        //console.log("Aplicando filtro Gaussiano...");
+        const smoothed = this.applyGaussianBlur(grayData, width, height);
+        
+        // 3. Calcular gradientes
+        //console.log("Calculando gradientes...");
+        const { magnitude, direction } = this.computeGradients(smoothed, width, height);
+        
+        // 4. Supresión de no máximos
+        //console.log("Aplicando supresión de no máximos...");
+        const suppressed = this.nonMaximumSuppression(magnitude, direction, width, height);
+        
+        // 5. Umbralización con histéresis
+        //console.log("Aplicando umbralización con histéresis...");
+        const edges = this.hysteresisThresholding(suppressed, width, height, lowThreshold, highThreshold);
+        
+        //console.log("Detección de bordes completada");
+        return edges;
+    }
+
+    convertToGrayscale(imageData, width, height) {
+        const gray = new Array(height);
+        for (let y = 0; y < height; y++) {
+            gray[y] = new Array(width);
+            for (let x = 0; x < width; x++) {
+                const idx = (y * width + x) * 4;
+                const r = imageData[idx];
+                const g = imageData[idx + 1];
+                const b = imageData[idx + 2];
+                gray[y][x] = 0.299 * r + 0.587 * g + 0.114 * b;
+            }
+        }
+        return gray;
+    }
+
+    createGaussianKernel(size, sigma) {
+        const kernel = [];
+        const center = Math.floor(size / 2);
+        let sum = 0;
+
+        for (let y = 0; y < size; y++) {
+            kernel[y] = [];
+            for (let x = 0; x < size; x++) {
+                const dx = x - center;
+                const dy = y - center;
+                const value = Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+                kernel[y][x] = value;
+                sum += value;
+            }
+        }
+
+        // Normalizar el kernel
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                kernel[y][x] /= sum;
+            }
+        }
+
+        return kernel;
+    }
+
+    applyGaussianBlur(data, width, height) {
+        const kernelSize = this.gaussianKernel.length;
+        const radius = Math.floor(kernelSize / 2);
+        const blurred = new Array(height);
+        
+        for (let y = 0; y < height; y++) {
+            blurred[y] = new Array(width);
+            for (let x = 0; x < width; x++) {
+                let sum = 0;
+                
+                for (let ky = 0; ky < kernelSize; ky++) {
+                    for (let kx = 0; kx < kernelSize; kx++) {
+                        const ny = y + ky - radius;
+                        const nx = x + kx - radius;
+                        
+                        // Manejar bordes con reflejo
+                        const reflectY = Math.max(0, Math.min(height - 1, Math.abs(ny < 0 ? -ny : (ny >= height ? 2 * height - 1 - ny : ny))));
+                        const reflectX = Math.max(0, Math.min(width - 1, Math.abs(nx < 0 ? -nx : (nx >= width ? 2 * width - 1 - nx : nx))));
+                        
+                        sum += data[reflectY][reflectX] * this.gaussianKernel[ky][kx];
+                    }
+                }
+                
+                blurred[y][x] = sum;
+            }
+        }
+        
+        return blurred;
+    }
+
+    computeGradients(data, width, height) {
+        // Kernels de Sobel
+        const sobelX = [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ];
+        
+        const sobelY = [
+            [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1]
+        ];
+
+        const magnitude = new Array(height);
+        const direction = new Array(height);
+        
+        // Inicializar matrices
+        for (let y = 0; y < height; y++) {
+            magnitude[y] = new Array(width).fill(0);
+            direction[y] = new Array(width).fill(0);
+        }
+        
+        // Calcular gradientes para píxeles internos
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                let gx = 0;
+                let gy = 0;
+                
+                // Aplicar kernels de Sobel
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const pixel = data[y + ky][x + kx];
+                        gx += pixel * sobelX[ky + 1][kx + 1];
+                        gy += pixel * sobelY[ky + 1][kx + 1];
+                    }
+                }
+                
+                // Calcular magnitud y dirección
+                magnitude[y][x] = Math.sqrt(gx * gx + gy * gy);
+                direction[y][x] = Math.atan2(gy, gx);
+            }
+        }
+        
+        return { magnitude, direction };
+    }
+
+    nonMaximumSuppression(magnitude, direction, width, height) {
+        const suppressed = new Array(height);
+        
+        // Inicializar matriz de salida
+        for (let y = 0; y < height; y++) {
+            suppressed[y] = new Array(width).fill(0);
+        }
+        
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const angle = direction[y][x] * (180 / Math.PI);
+                const mag = magnitude[y][x];
+                
+                // Normalizar ángulo a 0, 45, 90, 135 grados
+                let q = 255;
+                let r = 255;
+                
+                // Ángulo 0° (horizontal)
+                if ((angle < 22.5 && angle >= -22.5) || angle >= 157.5 || angle < -157.5) {
+                    q = magnitude[y][x + 1];
+                    r = magnitude[y][x - 1];
+                }
+                // Ángulo 45° (diagonal \)
+                else if ((angle >= 22.5 && angle < 67.5) || (angle >= -157.5 && angle < -112.5)) {
+                    q = magnitude[y + 1][x + 1];
+                    r = magnitude[y - 1][x - 1];
+                }
+                // Ángulo 90° (vertical)
+                else if ((angle >= 67.5 && angle < 112.5) || (angle >= -112.5 && angle < -67.5)) {
+                    q = magnitude[y + 1][x];
+                    r = magnitude[y - 1][x];
+                }
+                // Ángulo 135° (diagonal /)
+                else if ((angle >= 112.5 && angle < 157.5) || (angle >= -67.5 && angle < -22.5)) {
+                    q = magnitude[y + 1][x - 1];
+                    r = magnitude[y - 1][x + 1];
+                }
+                
+                // Mantener solo si es máximo local
+                if (mag >= q && mag >= r) {
+                    suppressed[y][x] = mag;
+                }
+            }
+        }
+        
+        return suppressed;
+    }
+
+    hysteresisThresholding(data, width, height, lowThreshold, highThreshold) {
+        const edgeMatrix = new Array(height);
+        
+        // Inicializar matriz de bordes
+        for (let y = 0; y < height; y++) {
+            edgeMatrix[y] = new Array(width).fill(0);
+        }
+        
+        // Primera pasada: identificar bordes fuertes y débiles
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const value = data[y][x];
+                if (value >= highThreshold) {
+                    edgeMatrix[y][x] = 2; // Borde fuerte
+                } else if (value >= lowThreshold) {
+                    edgeMatrix[y][x] = 1; // Borde débil
+                }
+            }
+        }
+        
+        // Segunda pasada: conectar bordes débiles a fuertes
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                if (edgeMatrix[y][x] === 1) { // Borde débil
+                    // Verificar si está conectado a un borde fuerte
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (edgeMatrix[y + dy][x + dx] === 2) {
+                                edgeMatrix[y][x] = 2; // Convertir a fuerte
+                                break;
+                            }
+                        }
+                        if (edgeMatrix[y][x] === 2) break;
+                    }
+                    
+                    // Si no está conectado, eliminar
+                    if (edgeMatrix[y][x] === 1) {
+                        edgeMatrix[y][x] = 0;
+                    }
+                }
+            }
+        }
+        
+        // Convertir a matriz binaria (1 = borde, 0 = no borde)
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                edgeMatrix[y][x] = edgeMatrix[y][x] === 2 ? 1 : 0;
+            }
+        }
+        
+        return edgeMatrix;
+    }
+}
+
+
+//////////////////////////////////////////////// CLASE CANNY ////////////////////////////////////////////////
+
+
+class canny {
     constructor() {
         this.originalCanvas = document.createElement('canvas');
         this.originalCtx = this.originalCanvas.getContext('2d');
@@ -7,8 +264,11 @@ class lineas {
 
         this.nombre_archivo_imagen = '';
         this.imagen = false;
-        this.umbral_value = 50;
+        this.lowThreshold = 20;
+        this.highThreshold = 50;
         this.grosor_value = 2;
+
+
         
         this.unificar_adyacentes = false;
 
@@ -16,7 +276,7 @@ class lineas {
     }
 
     init() {
-        $("#select_capturar").append('<option value="cargar_config_lines">Contornos</option>');             
+        $("#select_capturar").append('<option value="cargar_config_canny">Canny</option>');             
         //this.agregar_controles_captura();
 
     }
@@ -29,35 +289,69 @@ class lineas {
             <input type="file" id="imageLoader"  style="display: none;" accept="image/*"  />
             <button type="button" class="boton-archivo" onclick="document.getElementById('imageLoader').click()">Examinar</button>
 
+      
             <span id="nombreArchivo" class="nombre-archivo"></span>
+            
             <div class="slider-container">
-                <label for="umbral_slider">Umbral de detección: <span id="umbral_value">50</span></label><br>
-                <input type="range" id="umbral_slider" min="10" max="500" value="50">
-            </div>                                     
+                <label for="lowThreshold">Umbral Bajo:</label>
+                <input type="range" id="lowThreshold" min="1" max="100" value="20">
+                <span id="lowValue" class="value">20</span>
+            </div>
+            
+            <div class="slider-container">
+                <label for="highThreshold">Umbral Alto:</label>
+                <input type="range" id="highThreshold" min="1" max="100" value="50">
+                <span id="highValue" class="value">50</span>
+            </div>
+
             <div class="slider-container">
                 <label for="grosor_slider">Grosor lineas: <span id="grosor_value">2</span></label><br>
                 <input type="range" id="grosor_slider" min="1" max="6"  step="1" value="2">
             </div>
+            
 
             Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" title="Unifica lineas adyacentes"/><br>      
             `);
 
         // listeners de botones y sliders
         document.getElementById('imageLoader').addEventListener('change', this.cargar_imagen.bind(this), false);
-        document.getElementById('umbral_slider').addEventListener('input', this.update_umbral.bind(this), false);
+        document.getElementById('lowThreshold').addEventListener('input', this.update_lowThreshold.bind(this), false);
+        document.getElementById('highThreshold').addEventListener('input', this.update_highThreshold.bind(this), false);      
         document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
         document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
     }
     
-    update_umbral(event){   
-        this.umbral_value = event.target.value;
-        $('#umbral_value').html(event.target.value);
-        this.obtener_lineas();
-    }
-
     update_grosor(event){   
         this.grosor_value = event.target.value;
         $('#grosor_value').html(event.target.value);
+        this.obtener_lineas();
+    }    
+
+
+    update_lowThreshold(event){   
+        this.lowThreshold = event.target.value;
+
+        $('#lowValue').html(this.lowThreshold);
+        if (parseInt(this.lowThreshold) >= parseInt(this.highThreshold)) {
+            this.highThreshold = parseInt(this.lowThreshold ) + 1;
+            $('#highValue').html(this.highThreshold );
+            $('#highThreshold').val(this.highThreshold );
+        }
+     
+        this.obtener_lineas();
+    }
+
+    update_highThreshold(event){   
+        this.highValue = event.target.value;
+
+        $('#highValue').html(this.highValue);
+
+        if (parseInt(this.highValue) <= parseInt(this.lowThreshold)) {
+            this.lowThreshold = parseInt(this.highValue) - 1;
+            $('#lowValue').html(this.lowThreshold);
+            $('#lowThreshold').val(this.lowThreshold );
+        }
+       
         this.obtener_lineas();
     }
 
@@ -383,6 +677,7 @@ class lineas {
         }
     };
 
+
     //funcion que procesa la imagen poniendola en escala de grises, aplicando filtros sobel y pasandola a blanco y negro, para despues seguir las lineas
     procesar_imagen(){
 
@@ -391,66 +686,27 @@ class lineas {
         
         // Obtener datos de la imagen
         let imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
-        let data = imageData.data;
         
-        // Crear matriz de grises y detectar bordes
-        let grayMatrix = [];
-        let edgeMatrix = [];
+      
+        const detector = new CannyEdgeDetector();
+        // Obtener datos de la imagen
+        const width = this.originalCanvas.width;
+        const height = this.originalCanvas.height;
+        // const imageData = originalCtx.getImageData(0, 0, width, height);
         
-        // Convertir a escala de grises
-        for (let y = 0; y < this.originalCanvas.height; y++) {
-            grayMatrix[y] = [];
-            for (let x = 0; x < this.originalCanvas.width; x++) {
-                let idx = (y * this.originalCanvas.width + x) * 4;
-                let r = data[idx];
-                let g = data[idx + 1];
-                let b = data[idx + 2];
-                // Fórmula para convertir RGB a escala de grises
-                grayMatrix[y][x] = 0.3 * r + 0.59 * g + 0.11 * b;
-            }
-        }
-
-        //  mostrar_matriz_debug(grayMatrix);        
-        
-        // Aplicar detección de bordes simple (operador Sobel simplificado)
-        for (let y = 1; y < this.originalCanvas.height - 1; y++) {
-            edgeMatrix[y] = [];
-            for (let x = 1; x < this.originalCanvas.width - 1; x++) {
-                // Aplicar kernel horizontal
-                let gx =   -grayMatrix[y-1][x-1] +  grayMatrix[y-1][x+1] + -2 * grayMatrix[y][x-1] + 
-                        2 * grayMatrix[y][x+1]   + -grayMatrix[y+1][x-1] +      grayMatrix[y+1][x+1];
-                
-                // Aplicar kernel vertical
-                let gy = -grayMatrix[y-1][x-1] - 2 * grayMatrix[y-1][x] - grayMatrix[y-1][x+1] +
-                          grayMatrix[y+1][x-1] + 2 * grayMatrix[y+1][x] + grayMatrix[y+1][x+1];
-                
-                // Calcular magnitud del gradiente
-                edgeMatrix[y][x] = Math.sqrt(gx * gx + gy * gy);
-            }
-        }
-        
-        //   mostrar_matriz_debug(edgeMatrix);
-
-        // Umbralizar para obtener bordes binarios
-        let binaryEdges = [];
-        
-        for (let y = 0; y < this.originalCanvas.height; y++) {
-            binaryEdges[y] = [];
-            for (let x = 0; x < this.originalCanvas.width; x++) {
-                if (y === 0 || y === this.originalCanvas.height-1 || x === 0 || x === this.originalCanvas.width-1) {
-                    binaryEdges[y][x] = 0; // Borde de la imagen
-                } else {
-                    binaryEdges[y][x] = edgeMatrix[y][x] > this.umbral_value ? 1 : 0;
-                }
-            }
-        }
-
-
-        //this.mostrar_matriz_debug(binaryEdges);
-                        
+        // Detectar bordes
+        const binaryEdges = detector.detectEdges(
+            imageData.data, 
+            width, 
+            height, 
+            parseInt(this.lowThreshold), 
+            parseInt(this.highThreshold)
+        );                     
+      
+      //  this.mostrar_matriz_debug(binaryEdges);                        
 
         // busco la primera linea blanca que encuentre y sigo el rastro
-        let color_linea =2;           
+        let color_linea = 2;           
 
         // elimino el dibujo anterior si existia
         this.dibujo.limpiar();
@@ -557,9 +813,9 @@ class lineas {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function cargar_config_lines(){
-    captureLines.agregar_controles_captura();
+function cargar_config_canny(){
+    captureCanny.agregar_controles_captura();
 }
 
 // tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
-let captureLines = new lineas();   
+let captureCanny = new canny();   

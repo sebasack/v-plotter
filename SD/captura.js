@@ -24,16 +24,22 @@ class Captura {
         this.height_pagina = 0;
         this.scale_pagina = 0;
 
+        // manejo seleccion
         this.lastX = 0;
         this.lastY = 0;
-                
+
+
+        //parametros de captura        
         this.vertices_eliminados = 10; // %       
-        this.angulo_rotacion = 0 ; //    
-        this.angulo_rotacion_nuevo = 0 ; // 
+        this.angulo_rotacion = 0 ; // °   
+        this.angulo_rotacion_nuevo = 0 ; // °
+
+        // parametros de visualizacion
         this.mostrar_imagen = true;
         this.detalle_lineas = false;
         this.mostrar_vertices = false;
 
+        // objetos de imagen capturada
         this.nombre_archivo_imagen = '';
         this.imagen = false;
         this.dibujo = false;
@@ -199,6 +205,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
     }
 
 
+
     dibujar_captura(ajuste_inicial_offset_scale = false){
       
         this.dibujar_maquina();
@@ -209,7 +216,14 @@ Shift + click izquierdo: Zoom al área seleccionada`;
 
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
         if (ajuste_inicial_offset_scale){
-            this.ajustarDibujoEnPantalla() ;      
+            this.ajustarDibujoEnPantalla();
+
+            // reseteo valores de rotacion
+            $('#rotacion_slider').val(0);
+            this.angulo_rotacion = 0;
+            this.angulo_rotacion_nuevo = 0;
+            $('#rotacion_value').html(this.angulo_rotacion + '°');
+            
         }
   
         // Aplicar transformaciones de vista
@@ -244,8 +258,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             // Restaurar el estado del contexto
             this.lineCtx.restore();         
         }   
-
-       
+              
         // roto el dibujo
         if (this.angulo_rotacion_nuevo != 0){
             this.dibujo.rotarVertices(this.angulo_rotacion_nuevo, centro_rotacionX, centro_rotacionY);   
@@ -323,7 +336,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.angulo_rotacion = event.target.value;
 
         // calculo cuanto lo tengo que rotar
-        this.angulo_rotacion_nuevo = this.angulo_rotacion -angulo_anterior;
+        this.angulo_rotacion_nuevo = this.angulo_rotacion - angulo_anterior;
 
         $('#rotacion_value').html(event.target.value + '°');
                   

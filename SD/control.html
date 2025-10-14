@@ -88,7 +88,7 @@
         </td>
 
         <td align="right"  valign="top">
-            <div class="canvas-container">
+            <div class="canvas-container" id ="id_contenedor_canvas">
                 <canvas id="machine"></canvas>
                 <canvas id="lineCanvas"  width="0%" height="0%" ></canvas>
             </div>
@@ -117,12 +117,21 @@
 </table>
 
 <script>
-    $(function() {
-        $('<link>', {rel: 'stylesheet', href: `${cdn}styles.css`}).appendTo('head');
-        $.getScript(`${cdn}clases.js`)
-        $.getScript(`${cdn}plg_lineas.js`);
-        $.getScript(`${cdn}captura.js`);
-        $.getScript(`${cdn}control.js`);
-        $.getScript(`${cdn}plg_dummy.js`);
+    $(function() {       
+        async function cargarScriptsEnOrden() {
+            try {
+                await $('<link>', {rel: 'stylesheet', href: `${cdn}styles.css`}).appendTo('head');
+                await $.getScript(`${cdn}clases.js`);                
+                await $.getScript(`${cdn}plg_lineas.js`);                
+                await $.getScript(`${cdn}plg_dummy.js`);                 
+                await $.getScript(`${cdn}plg_canny.js`);                
+                await $.getScript(`${cdn}captura.js`);                
+                await $.getScript(`${cdn}control.js`);              
+            } catch (error) {
+                console.error('Error cargando scripts:', error);
+            }
+        }
+        // Ejecutar
+        cargarScriptsEnOrden();
     });
 </script>

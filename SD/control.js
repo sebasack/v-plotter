@@ -61,27 +61,22 @@ class Control {
 
                         this.tareas.limpiar();
                         this.tareas_completadas = [];
-
-                        this.tareas.pausar();
-                        $("#estado_cola").text(
-                            this.tareas.obtenerEstado().estado + " (IMPORTANDO)"
-                        );
-
+                        this.tareas.pausar();                     
+                        
                         setTimeout(() => {
                             for (const tarea of cola) {
                                 if (tarea.startsWith("C") && tarea.includes(",END")) {
-                                    this.encolar_tarea(tarea, this.update_pen_position.bind(this));
+                                    this.encolar_tarea(tarea, this.update_pen_position.bind(this),false);
                                 } else {
-                                    console.log(" LA TAREA " + tarea + " NO PARECE SER GCODE!!");
+                                    console.warn(" LA TAREA '" + tarea + "' NO PARECE SER GCODE!!");
                                 }
                             }
-                            $("#estado_cola").text(
-                                this.tareas.obtenerEstado().estado
-                            );
+                            
                             this.draw_machine();
-                        }, 100);
+                            $("#tareas").val(this.tareas.mostrar());
 
-                        //  console.log( cola);
+                        }, 100);
+                        
                     };
                     arrayBufferReader.readAsArrayBuffer(selectedFile);
                 }
@@ -851,9 +846,11 @@ Doble click: mueve la gondola`;
         $("#log").val('');    
     }
 
-    encolar_tarea(tarea, funcionExito) {
+    encolar_tarea(tarea, funcionExito, actualizarPantalla = true) {
         this.tareas.agregarTarea(() => this.ejecutar_comando(tarea, funcionExito), tarea);
-        $("#tareas").val(this.tareas.mostrar());
+        if (actualizarPantalla){
+            $("#tareas").val(this.tareas.mostrar());
+        }
     }
 
     cambiar_estado_cola() {
@@ -1097,39 +1094,16 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             captura.dibujo.seleccionarElementos(box,captura.modo_seleccion );              
         }
 
-        let lineas_optimizadas = this.optimizarRecorrido();
+        let recorrido_optimizado = this.optimizarRecorrido();
         
         // limpio la cola de tareas 
         this.limpiar_cola();
 
         //encolo tareas de volver a home
         this.return_to_home();    
-
-    
-        // para cada linea del dibujo   
-        lineas_optimizadas.forEach((linea) => {         
-            // subo el pen      
-            this.encolar_tarea("C14,END", this.update_pen_position.bind(this)); 
-            
-            let pen_is_down = false;
-            linea.vertices.forEach((vertice) => {
-                // muevo la gondola al proximo punto                       
-                let ajustado = this.ajustarOffsetEscala(vertice,captura);
-                this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',2,END', this.update_pen_position.bind(this));
-                if (!pen_is_down){
-                    // bajo el pen
-                    this.encolar_tarea("C13,END", this.update_pen_position.bind(this));   
-                    pen_is_down = true;
-                }                   
-            });            
-        });
-              
-
-        // encolo tarea de volver a home al final
-        this.return_to_home();
-
+     
         //limpio las tareas ejecutadas
-        this.limpiar_ejecutadas();        
+        this.limpiar_ejecutadas();                
         
         //pauso la cola para que no arranque inmediatamente
         this.tareas.pausar();
@@ -1137,8 +1111,29 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //voy a la solapa de dibujado
         document.getElementById('tab_dibujar').click();
 
-        //mustro la maquina con la captura
-        this.draw_machine();                
+        // cargo las tareas    
+        recorrido_optimizado.forEach((linea) => {         
+            // subo el pen      
+            this.encolar_tarea("C14,END", this.update_pen_position.bind(this),false); 
+            
+            let pen_is_down = false;
+            linea.vertices.forEach((vertice) => {
+                // muevo la gondola al proximo punto                       
+                let ajustado = this.ajustarOffsetEscala(vertice,captura);
+                this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',2,END', this.update_pen_position.bind(this),false);
+                if (!pen_is_down){
+                    // bajo el pen
+                    this.encolar_tarea("C13,END", this.update_pen_position.bind(this),false);   
+                    pen_is_down = true;
+                }                   
+            });            
+        });
+              
+        // encolo tarea de volver a home al final
+        this.return_to_home();
+        
+        this.draw_machine();     
+         
     }    
 }
 

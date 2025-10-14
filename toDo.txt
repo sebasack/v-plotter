@@ -4,19 +4,24 @@
 
 control:
     gestiona la maquina
+    genera gcode
+    optimiza recorrido
+    gestiona la cola de impresion
 
-    capture_lines:
-        elije plugin de captura
-        importa el objeto tipo dibujo que genera el plugin de captura 
+    Captura:
+        elije plugin de captura y generacion de dibujo       
         acomoda el objeto en la posicion y con el zoom necesario
-        genera gcode y lo entrega a control
 
         plugins de captura:
             agrega controles necesarios en control
             gestiona parametros 
-            genera el objeto tipo dibujo y lo entrega a capture_lines
-
-
+            abre archivo de origen
+            genera el mapa de bits en blanco y negro y lo entrega a generacion de dibujo
+        
+        plugins de generacion de dibujo
+            agrega controles necesarios en control
+            gestiona parametros 
+            genera el objeto tipo dibujo y lo entrega a Captura
 
 
 

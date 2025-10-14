@@ -55,7 +55,7 @@ vertical plotter esp32 + wifi polargraph
       18. presionar nuevamente [return to home] para que la gondola vuelva en su sitio inicial.
       19. activar la cola
 
-    Creaci�n de una imagen cl�sica (foto, dibujo, etc.)
+    Creaci�n de una imagen clasica (foto, dibujo, etc.)
     ---------------------------------------------------
 
        1. poner la gondola en posicion de dibujado (penDown)
@@ -76,7 +76,7 @@ vertical plotter esp32 + wifi polargraph
 
             Aparece una tabla con las diferentes opciones disponibles en cuanto a patrones, inicio y otras opciones:
 
-            Deber�s elegir desde qu� punto comenzar� el dibujo:
+            Deber�s elegir desde que punto comenzara el dibujo:
                   parte superior derecha
                   abajo a la derecha
                   abajo a la izquierda
@@ -85,7 +85,7 @@ vertical plotter esp32 + wifi polargraph
             Hay 6 matrices de renderizado disponibles y deber�s elegir una para dibujar:
                   onda cuadrada de frecuencia variable
                   onda cuadrada de tama�o variable
-                  onda cuadrada s�lida
+                  onda cuadrada salida
                   garabatear
                   espirales
                   Diente de sierra
