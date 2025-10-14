@@ -1,3 +1,668 @@
+//////////////////////////////////////////////// CLASE DETECCION DE BORDES IA ////////////////////////////////////////////////
+
+// recibe una matriz binaria de lineas blancas sobre negro y retorna un dibujo con las lineas vectorizadas
+class ImprovedLineExtractor {
+    constructor() {
+        // 8 direcciones de vecindad
+        this.directions = [
+            [0, 1],   // Abajo
+            [1, 1],   // Abajo-derecha
+            [1, 0],   // Derecha
+            [1, -1],  // Arriba-derecha
+            [0, -1],  // Arriba
+            [-1, -1], // Arriba-izquierda
+            [-1, 0],  // Izquierda
+            [-1, 1]   // Abajo-izquierda
+        ];
+    }
+
+    // Método principal mejorado para extraer líneas
+    extractLines(edgeMatrix, minLineLength = 10, maxGap = 2) {
+        const height = edgeMatrix.length;
+        const width = edgeMatrix[0].length;
+        
+        // Crear matriz de visitados
+        const visited = Array(height).fill().map(() => Array(width).fill(false));
+        const lines = [];
+        
+        // Recorrer todos los píxeles
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                // Si es un borde y no ha sido visitado
+                if (edgeMatrix[y][x] === 1 && !visited[y][x]) {
+                    // Seguir el contorno desde este punto
+                    const contour = this.traceContour(edgeMatrix, visited, x, y, maxGap);
+                    
+                    if (contour.length >= minLineLength) {
+                        // Simplificar el contorno para obtener una línea más limpia
+                        const simplifiedLine = this.simplifyContour(contour, 1.0);
+                        lines.push(simplifiedLine);
+                    }
+                }
+            }
+        }
+        
+        return lines;
+    }
+
+    // Algoritmo mejorado para seguir contornos
+    traceContour(edgeMatrix, visited, startX, startY, maxGap) {
+        const contour = [];
+        let x = startX;
+        let y = startY;
+        
+        // Dirección inicial (empezamos buscando en todas direcciones)
+        let dir = 0;
+        
+        // Seguir el contorno hasta volver al inicio o hasta que no haya más bordes
+        do {
+            // Marcar como visitado y añadir al contorno
+            visited[y][x] = true;
+            contour.push([x, y]);
+            
+            // Buscar siguiente punto en el contorno
+            const next = this.findNextPoint(edgeMatrix, visited, x, y, dir, maxGap);
+            
+            if (next) {
+                // Actualizar posición y dirección
+                x = next.x;
+                y = next.y;
+                dir = next.dir;
+            } else {
+                // No se encontró siguiente punto, terminar
+                break;
+            }
+            
+            // Prevenir bucles infinitos
+            if (contour.length > 10000) break;
+            
+        } while (!(x === startX && y === startY) && contour.length < 10000);
+        
+        return contour;
+    }
+
+    // Encuentra el siguiente punto en el contorno
+    findNextPoint(edgeMatrix, visited, x, y, startDir, maxGap) {
+        const height = edgeMatrix.length;
+        const width = edgeMatrix[0].length;
+        
+        // Buscar en las 8 direcciones empezando desde startDir
+        for (let i = 0; i < 8; i++) {
+            const dir = (startDir + i) % 8;
+            const [dx, dy] = this.directions[dir];
+            
+            // Verificar el punto adyacente
+            const nx = x + dx;
+            const ny = y + dy;
+            
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                if (edgeMatrix[ny][nx] === 1 && !visited[ny][nx]) {
+                    return { x: nx, y: ny, dir: (dir + 5) % 8 }; // +5 para dar la vuelta
+                }
+            }
+        }
+        
+        // Si no se encontró punto adyacente, buscar con brechas
+        if (maxGap > 0) {
+            for (let gap = 1; gap <= maxGap; gap++) {
+                for (let i = 0; i < 8; i++) {
+                    const dir = (startDir + i) % 8;
+                    const [dx, dy] = this.directions[dir];
+                    
+                    // Verificar el punto con brecha
+                    const nx = x + dx * gap;
+                    const ny = y + dy * gap;
+                    
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        if (edgeMatrix[ny][nx] === 1 && !visited[ny][nx]) {
+                            return { x: nx, y: ny, dir: (dir + 5) % 8 };
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    // Simplifica un contorno usando el algoritmo de Douglas-Peucker
+    simplifyContour(points, epsilon) {
+        if (points.length <= 2) return points;
+        
+        // Encontrar el punto más lejano
+        let maxDistance = 0;
+        let maxIndex = 0;
+        const start = points[0];
+        const end = points[points.length - 1];
+        
+        for (let i = 1; i < points.length - 1; i++) {
+            const dist = this.pointToLineDistance(points[i], start, end);
+            if (dist > maxDistance) {
+                maxDistance = dist;
+                maxIndex = i;
+            }
+        }
+        
+        // Si la distancia máxima es mayor que epsilon, simplificar recursivamente
+        if (maxDistance > epsilon) {
+            const left = this.simplifyContour(points.slice(0, maxIndex + 1), epsilon);
+            const right = this.simplifyContour(points.slice(maxIndex), epsilon);
+            
+            // Combinar resultados, evitando duplicar el punto en maxIndex
+            return left.slice(0, -1).concat(right);
+        } else {
+            // Todos los puntos están cerca, devolver solo los extremos
+            return [start, end];
+        }
+    }
+
+    // Calcula la distancia de un punto a una línea
+    pointToLineDistance(point, lineStart, lineEnd) {
+        const x = point[0], y = point[1];
+        const x1 = lineStart[0], y1 = lineStart[1];
+        const x2 = lineEnd[0], y2 = lineEnd[1];
+        
+        const A = x - x1;
+        const B = y - y1;
+        const C = x2 - x1;
+        const D = y2 - y1;
+        
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        
+        if (lenSq !== 0) {
+            param = dot / lenSq;
+        }
+        
+        let xx, yy;
+        
+        if (param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+        
+        const dx = x - xx;
+        const dy = y - yy;
+        
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Método alternativo: extracción por componentes conectados con brechas
+    extractLinesWithGaps(edgeMatrix, minLineLength = 10, maxGap = 2) {
+        const height = edgeMatrix.length;
+        const width = edgeMatrix[0].length;
+
+        // creo el objeto dibujo
+        let dibujo = new Dibujo();
+        
+        // Crear matriz de visitados
+        const visited = Array(height).fill().map(() => Array(width).fill(false));
+        
+        // Recorrer todos los píxeles
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                // Si es un borde y no ha sido visitado
+                if (edgeMatrix[y][x] === 1 && !visited[y][x]) {
+                    // Encontrar todos los puntos conectados (incluyendo brechas)
+                    const component = this.findConnectedComponentWithGaps(edgeMatrix, visited, x, y, maxGap);
+                    
+                    if (component.length >= minLineLength) {
+                        // Ordenar los puntos para formar una línea continua
+                        const orderedLine = this.orderPointsToLine(component);                                                           
+                        
+                        let color = 2;                                
+                        let linea = dibujo.crearLinea(colores[color]);
+                        for (let i = 0; i < orderedLine.length; i++){        
+                            // si el vertices esta separado por mas de maxGap pixels es otra linea, la separo                   
+                            if (i > 0 && this.distance(orderedLine[i-1],orderedLine[i]) > maxGap ){                                       
+                                if (linea.vertices.length < 2){
+                                    // si la linea tiene menos de dos vertices la elimino
+                                    dibujo.eliminarLinea(linea.id);
+                                }      
+                                linea = dibujo.crearLinea(colores[color]);
+                            }    
+                            linea.agregarVertice(orderedLine[i][0], orderedLine[i][1]);     
+                            color++;
+                            if (color > colores.length){
+                                color = 2;
+                            }                      
+                        }
+                        if (linea.vertices.length < 2){
+                            // si la linea tiene menos de dos vertices la elimino
+                            dibujo.eliminarLinea(linea.id);
+                        }                            
+                    }
+                }
+            }
+        }
+        
+        return dibujo;
+    }
+
+    // Encuentra componentes conectados permitiendo brechas
+    findConnectedComponentWithGaps(edgeMatrix, visited, startX, startY, maxGap) {
+        const component = [];
+        const queue = [[startX, startY]];
+        visited[startY][startX] = true;
+        
+        while (queue.length > 0) {
+            const [x, y] = queue.shift();
+            component.push([x, y]);
+            
+            // Revisar los 8 vecinos, permitiendo brechas
+            for (let gap = 1; gap <= maxGap + 1; gap++) {
+                for (const [dx, dy] of this.directions) {
+                    const nx = x + dx * gap;
+                    const ny = y + dy * gap;
+                    
+                    // Verificar límites y si es un borde no visitado
+                    if (nx >= 0 && nx < edgeMatrix[0].length && 
+                        ny >= 0 && ny < edgeMatrix.length &&
+                        edgeMatrix[ny][nx] === 1 && !visited[ny][nx]) {
+                        
+                        visited[ny][nx] = true;
+                        queue.push([nx, ny]);
+                    }
+                }
+            }
+        }
+        
+        return component;
+    }
+
+    // Ordena puntos para formar una línea continua
+    orderPointsToLine(points) {
+        if (points.length <= 1) return points;
+        
+        // Encontrar el punto más extremo (el que tiene la menor coordenada x)
+        let startPoint = points[0];
+        for (const point of points) {
+            if (point[0] < startPoint[0] || (point[0] === startPoint[0] && point[1] < startPoint[1])) {
+                startPoint = point;
+            }
+        }
+        
+        const ordered = [startPoint];
+        const remaining = [...points];
+        
+        // Eliminar el punto de inicio de los restantes
+        const startIndex = remaining.findIndex(p => p[0] === startPoint[0] && p[1] === startPoint[1]);
+        if (startIndex !== -1) remaining.splice(startIndex, 1);
+        
+        let currentPoint = startPoint;
+        
+        // Ordenar puntos por proximidad
+        while (remaining.length > 0) {
+            let closestIndex = -1;
+            let minDistance = Infinity;
+            
+            for (let i = 0; i < remaining.length; i++) {
+                const dist = this.distance(currentPoint, remaining[i]);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestIndex = i;
+                }
+            }
+            
+            if (closestIndex !== -1) {
+                currentPoint = remaining[closestIndex];
+                ordered.push(currentPoint);
+                remaining.splice(closestIndex, 1);
+            } else {
+                break;
+            }
+        }
+        
+        return ordered;
+    }
+
+    distance(p1, p2) {
+        return Math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2);
+    }
+}
+
+
+
+//////////////////////////////////////////////// CLASE DETECCION DE BORDES MIA ////////////////////////////////////////////////
+
+
+// recibe una matriz binaria de lineas blancas sobre negro y retorna un dibujo con las lineas vectorizadas
+class deteccionBordes{
+    constructor() {
+        this.width = 0;
+        this.height = 0;
+        this.grosor_value = 2;
+        this.unificar_adyacentes = true;
+    }
+
+    // funcion que dado un punto negro parte del borde y un punto blanco adyacente sigue el borde y agrega los puntos a la linea
+    seguir_linea(linea,binaryEdges,radio_pen,y,x,borde_y,borde_x,color=10,sentido_antihorario=true,unificar_adyacentes=true){      
+
+        let i_borde=1;
+        while (i_borde > -1){
+            i_borde =-1;
+            let i_nuevo_centro = -1;
+
+            // genero los puntos del circulo del pen
+            let circlePoints = this.getCirclePoints(binaryEdges,x, y, radio_pen,borde_x,borde_y,sentido_antihorario) ;
+        
+            let p = circlePoints.contorno;
+
+            // busco el siguiente pixel blanco mas cercano al actual                                     
+            for (let i = 0; i < p.length-1; i++) {                                                  
+                if ((binaryEdges[p[i][1]][p[i][0]] === 0 || binaryEdges[p[i][1]][p[i][0]] === color) &&   // el borde es negro o del color buscado
+                    // binaryEdges[p[i][1]][p[i][0]] != 0 && // el borde es de cualquier color
+                    binaryEdges[p[i+1][1]][p[i+1][0]] === 1){ // el siguiente punto es blanco
+                    // encontre el borde!!!
+                    i_borde = i;
+                    i_nuevo_centro = i+1;
+
+                    // agrego el punto encontrado a la linea
+                    linea.agregarVertice(p[i+1][0], p[i+1][1],!sentido_antihorario);
+
+                    this.marcar_nodo(binaryEdges,circlePoints,unificar_adyacentes,p[i+1][1],p[i+1][0],color);  
+                    /*
+                    // MUESTRO EL CENTRO Y BORDE ORIGINALES...
+                    binaryEdges[y][x] =2;
+                    binaryEdges[borde_y][ borde_x] =3;
+                    //MUESTRO EL PUNTO INICIAL DE BUSQUEDA Y EL PUNTO ESPERADO DE AVANCE
+                    binaryEdges[p[0][1]][p[0][0]]=2;
+                    binaryEdges[p[radio_pen][1]][p[radio_pen][0]]=20;
+                    */
+                    x=p[i_nuevo_centro][0];
+                    y=p[i_nuevo_centro][1];
+                    borde_x=p[i_borde][0];
+                    borde_y=p[i_borde][1];
+
+                    // encontre el pixel blanco, salgo del for
+                    break;
+                }
+            };
+        }
+    }
+
+    // Función para calcular la distancia entre dos puntos
+    distance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
+    // funcion que pinta del color elegido los puntos blancos dentro del circulo que respresenta el marcador
+    marcar_nodo(binaryEdges,circlePoints,unificar_adyacentes,y,x,color){ 
+        
+        binaryEdges[y][x] = color;   // marco el primer punto, es la semilla si no voy a marcar lineas adyacentes
+
+        circlePoints.relleno.forEach(function(punto) {                               
+            let marcar = true;
+            if (!unificar_adyacentes){ // no unificar!                            
+                marcar = false;
+
+                // veo que el punto en cuestion este al lado de otro punto del color elegido     
+                if (binaryEdges[punto[1]  ][punto[0]-1] === color ||  
+                    binaryEdges[punto[1]+1][punto[0]-1] === color ||
+                    binaryEdges[punto[1]+1][punto[0]  ] === color ||
+                    binaryEdges[punto[1]+1][punto[0]+1] === color ||
+                    binaryEdges[punto[1]  ][punto[0]+1] === color ||
+                    binaryEdges[punto[1]-1][punto[0]+1] === color ||
+                    binaryEdges[punto[1]-1][punto[0]  ] === color ||
+                    binaryEdges[punto[1]-1][punto[0]-1] === color ){
+                        marcar = true;
+                }                      
+            }
+
+            if (marcar){                        
+                binaryEdges[punto[1]][punto[0]] = color;                       
+            }
+
+        });                 
+    }
+
+    // funcion que genera la circunsferencia y el relleno del marcador 
+    getCirclePoints(binaryEdges,centerX, centerY, radius, borderX=0, borderY=0, sentido_antihorario=true) {
+
+        const tipos = [];
+                                
+                /*|  1 |  2 | 3 | 4 | 5 |  6 | 7  | 8 */
+        tipos[1] = [-1,0,-1,1,0,1,1,1,1,0,1,-1,0,-1,-1,-1]; 
+        /* 8 7 6                                                                     
+        *  1 . 5                                                                     
+        *  2 3 4
+        */                                                       
+
+                /*|  1 |  2 |  3 | 4 | 5 | 6 | 7 |  8 | 9  | 10 |  11 |  12 */
+        tipos[2] = [-2,0,-2,1,-1,2,0,2,1,2,2,1,2,0,2,-1,1,-2,0,-2,-1,-2,-2,-1];
+        /*  111009                           
+        * 12      08
+        * 01   .  07
+        * 02      06 
+        *   030405
+        */        
+
+                    /*  1    2    3    4   5   6   7   8   9   10   11   12   13    14    15    16 */              
+        tipos[3] = [-3,0,-3,1,-2,2,-1,3,0,3,1,3,2,2,3,1,3,0,3,-1,2,-2,1,-3,0,-3,-1,-3,-2,-2,-3,-1]; 
+        /*   141312
+        *  15      11
+        *16          10
+        *01     .    09 
+        *02          08
+        *  03      07
+        *    040506
+        */
+        
+                    /*| 1 |  2 |  3 |  4 |  5 | 6 | 7 | 8 | 9 | 10| 11| 12 | 13 | 14 | 15 | 16 |  17 |  18 |  19 |  20 */              
+        //  tipos[4] = [-4,0,-4,1,-3,2,-2,3,-1,4,0,4,1,4,2,3,3,2,4,1,4,0,4,-1,3,-2,2,-3,1,-4,0,-4,-1,-4,-2,-3,-3,-2,-4,-1];
+        /*     171615
+        *    18      14
+        *  19          13
+        *20              12
+        *01      .       11
+        *02              10
+        *  03          09
+        *    04      08
+        *      050607
+        */               
+
+
+                /* 1 |  2 |  3 |  4 |  5 | 6  | 7 | 8 | 9 | 10| 11| 12| 13| 14 | 15 | 16 | 17 | 18 | 19 |  20 |  21 |  22 |  23 |  24*/              
+        tipos[4] = [-4,0,-4,1,-3,2,-3,3,-2,3,-1,4,0,4,1,4,2,3,3,3,3,2,4,1,4,0,4,-1,3,-2,3,-3,2,-3,1,-4,0,-4,-1,-4,-2,-3,-3,-3,-3,-2,-4,-1];
+        /*     201918
+        *  2221      1716
+        *  23          15
+        *24              14
+        *01       .      13
+        *02              12
+        *  03          11
+        *  0405      0910
+        *      060708
+        */               
+                       
+
+                    /* | 1 | 2  |  3 |  4 |  5 |  6 |  7 | 8 | 9 | 10| 11| 12| 13| 14| 15| 16 | 17 | 18 | 19 | 20 | 21 | 22 |  23 |  24 |  25 |  26 |  27 | 28  */    
+        tipos[5] = [-5,0,-5,1,-4,2,-4,3,-3,4,-2,4,-1,5,0,5,1,5,2,4,3,4,4,3,4,2,5,1,5,0,5,-1,4,-2,3,-4,4,-3,2,-4,1,-5,0,-5,-1,-5,-2,-4,-3,-4,-4,-3,-4,-2,-5,-1];
+        /*       232221
+        *    2524      2019
+        *  26              18
+        *  27              17
+        *28                  16
+        *01         .        15
+        *02                  14
+        *  03              13
+        *  04              12
+        *    0506      1011
+        *        070809                
+        */
+
+                /* | 1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 | 9 | 10| 11| 12| 13| 14| 15| 16| 17| 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 |  26 |  27 |  28 |  29 |  30 |  31 |  32  */    
+        tipos[6] = [-6,0,-6,1,-5,2,-5,3,-4,4,-3,5,-2,5,-1,6,0,6,1,6,2,5,3,5,4,4,5,3,5,2,6,1,6,0,6,-1,5,-2,5,-3,4,-4,3,-5,2,-5,1,-6,0,-6,-1,-6,-2,-5,-3,-5,-4,-4,-5,-3,-5,-2,-6,-1];           
+        /*         262524
+        *      2817      2322
+        *    29              21
+        *  30                  20
+        *  31                  19
+        *32                      18 
+        *01           .          17
+        *02                      16
+        *  03                  15
+        *  04                  14
+        *    05              13
+        *      0607      1112
+        *          080910
+        */
+                    
+        const points = [];
+        let fill =[];                                 
+        let closestIndex = 0;
+
+        //agrego el centro a los puntos de relleno (fue movido a marcar_nodo para ser usado como semilla en la buzqueda de adyacentes)
+        //fill.push([centerX, centerY]);
+
+        let a1=[]; // anillo 1 del relleno
+        let a2=[]; // anillo 2 del relleno
+        let a3=[]; // anillo 3 del relleno
+        let a4=[]; // anillo 4 del relleno
+        let a5=[]; // anillo 5 del relleno
+
+        // busco el pixel con menos distancia al borde inicial
+        let minDistance = this.distance(tipos[radius][0] + centerX, tipos[radius][1] + centerY, borderX, borderY);
+
+        for (let i = 0; i < tipos[radius].length; i+=2) {                                                             
+            
+            // me aseguro de que quede dentro del canvas   
+            if (tipos[radius][i] + centerX >= 0 && 
+                tipos[radius][i+1] + centerY >= 0 &&
+                tipos[radius][i] + centerX <this.width && 
+                tipos[radius][i+1] + centerY <this.height ){ 
+                
+                points.push([tipos[radius][i] + centerX, tipos[radius][i+1] + centerY]);
+                
+                // lleno los distintos anillos para luego armar el rellono
+                if (radius >= 2 && i < tipos[1].length &&
+                    tipos[1][i] + centerX >= 0 && 
+                    tipos[1][i+1] + centerY >= 0 &&
+                    tipos[1][i] + centerX <this.width && 
+                    tipos[1][i+1] + centerY <this.height &&
+                    binaryEdges[tipos[1][i+1]+ centerY][tipos[1][i]+ centerX] === 1 ){ // solo elijo puntos blancos
+                        a1.push([tipos[1][i] + centerX, tipos[1][i+1] + centerY]);                                                                                 
+                }
+                if (radius >= 3 && i < tipos[2].length &&
+                    tipos[2][i] + centerX >= 0 && 
+                    tipos[2][i+1] + centerY >= 0 &&
+                    tipos[2][i] + centerX <this.width && 
+                    tipos[2][i+1] + centerY <this.height  &&
+                    binaryEdges[tipos[2][i+1]+ centerY][tipos[2][i]+ centerX] === 1 ){ // solo elijo puntos blancos
+                        a2.push([tipos[2][i] + centerX, tipos[2][i+1] + centerY]);                                                                          
+                }
+                if (radius >= 4 && i < tipos[3].length &&
+                    tipos[3][i] + centerX >= 0 && 
+                    tipos[3][i+1] + centerY >= 0 &&
+                    tipos[3][i] + centerX <this.width && 
+                    tipos[3][i+1] + centerY <this.height &&
+                    binaryEdges[tipos[3][i+1]+ centerY][tipos[3][i]+ centerX] === 1 ){ // solo elijo puntos blancos                           
+                        a3.push([tipos[3][i] + centerX, tipos[3][i+1] + centerY]);                                                                                
+                }
+                if (radius >= 5 && i < tipos[4].length &&
+                    tipos[4][i] + centerX >= 0 && 
+                    tipos[4][i+1] + centerY >= 0 &&
+                    tipos[4][i] + centerX <this.width && 
+                    tipos[4][i+1] + centerY <this.height &&
+                    binaryEdges[tipos[4][i+1]+ centerY][tipos[4][i]+ centerX] === 1 ){ // solo elijo puntos blancos
+                        a4.push([tipos[4][i] + centerX, tipos[4][i+1] + centerY]);                                                                          
+                }
+                if (radius >= 6 && i < tipos[5].length &&
+                    tipos[5][i] + centerX >= 0 && 
+                    tipos[5][i+1] + centerY >= 0 &&
+                    tipos[5][i] + centerX <this.width && 
+                    tipos[5][i+1] + centerY <this.height &&
+                    binaryEdges[tipos[5][i+1]+ centerY][tipos[5][i]+ centerX] === 1){ // solo elijo puntos blancos
+                        a5.push([tipos[5][i] + centerX, tipos[5][i+1] + centerY]);                                                                                 
+                }                      
+
+                // Encontrar el punto más cercano a la referencia
+                const d = this.distance( tipos[radius][i] + centerX, tipos[radius][i+1] + centerY, borderX, borderY);
+                if (d < minDistance) {
+                    minDistance = d;
+                    closestIndex = i;
+                }
+            }                                           
+        }
+
+        // agrego los anillos necesarios al relleno
+        fill = [].concat(fill, a1, a2,a3,a4,a5);
+
+        // Reordenar el contorno del marcador comenzando desde el punto más cercano
+        points.slice(closestIndex).concat(points.slice(0, closestIndex));
+
+        // si el sentido es horario invierto el arreglo de puntos
+        if (!sentido_antihorario){
+            points.reverse();
+        }
+
+        return {contorno :points,
+            relleno : fill
+        };
+    }
+               
+    detectarBordes (binaryEdges, width, height, grosor_linea = 2, unificar_adyacentes = true){
+        
+        this.width = width;
+        this.height = height;
+        this.grosor_value = grosor_linea;
+        this.unificar_adyacentes = unificar_adyacentes;
+
+        // creo el objeto dibujo
+        this.dibujo = new Dibujo();
+
+        // busco la primera linea blanca que encuentre y sigo el rastro
+        let color_linea =2;           
+
+        // elimino el dibujo anterior si existia
+        this.dibujo.limpiar();
+
+        let linea = this.dibujo.crearLinea(colores[color_linea]);
+
+        for (let y = 0; y < height; y++) {            
+            for (let x = 0; x < width; x++) {                    
+                if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco
+                    
+                    this.seguir_linea(linea,binaryEdges, this.grosor_value, y, x+1, y, x, color_linea, true, this.unificar_adyacentes);     
+                    // si se encontro solo un punto descarto la linea
+                    if (linea.vertices.length === 1) {
+                        this.dibujo.eliminarLinea(linea.id);
+                        linea =this.dibujo.crearLinea( colores[color_linea]);
+                    }
+
+                    //sigo la linea hacia el otro lado
+                    this.seguir_linea(linea,binaryEdges, this.grosor_value, y, x+1, y, x, color_linea, false, this.unificar_adyacentes);   
+                    // si se encontro solo un punto descarto la linea
+                    if (linea.vertices.length === 1) {
+                        this.dibujo.eliminarLinea(linea.id);
+                        linea =this.dibujo.crearLinea(colores[color_linea]);
+                    }
+
+                    if (linea.vertices.length >1){
+                        linea =this.dibujo.crearLinea(colores[color_linea]);
+                        color_linea ++;                               
+                    }                                             
+                }
+                
+                if (color_linea == 16){
+                    color_linea = 2;
+                }                
+            }             
+        }
+
+        // la ultima linea creada nunca se va a llenar
+        this.dibujo.eliminarLinea(linea.id);    
+    
+        return this.dibujo;    
+    }    
+}
 
 //////////////////////////////////////////////// CLASES DIBUJO ////////////////////////////////////////////////
 

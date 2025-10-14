@@ -236,8 +236,8 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         let centro_rotacionY = this.dibujo.centroY;
         if (this.imagen){
             // calculo el centro de la imagen
-            centro_rotacionX = this.imagen.width /2;
-            centro_rotacionY = this.imagen.height /2;
+            centro_rotacionX = this.imagen.width / 2;
+            centro_rotacionY = this.imagen.height / 2;
         }
 
         // muestro la imagen importada
