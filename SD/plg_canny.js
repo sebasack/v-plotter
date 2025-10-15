@@ -268,21 +268,25 @@ class canny {
         this.nombre_archivo_imagen = '';
         this.imagen = false;
         this.lowThreshold = 20;
-        this.highThreshold = 50;
+        this.highThreshold = 50;     
 
-        this.minLineLength = 10;
-        this.gapSize = 2 ;
+        this.binaryEdges = false;
+
+        this.clase_captura_bordes = false;    
+        this.clase_captura_lineas = false;     
+        this.clase_captura_elegida = false;
 
         this.init();
+     
     }
 
-    init() {
-        $("#select_capturar").append('<option value="cargar_config_canny">Canny</option>');             
-        //this.agregar_controles_captura();
-
+    init(){
+        $("#select_capturar").append('<option value="cargar_config_canny">Canny</option>');         
+        this.agregar_controles_captura();
     }
+  
 
-    agregar_controles_captura(){        
+    agregar_controles_captura(imagen_precargada = false){            
 
         $("#parametros_captura").html(`
             <legend>Canny</legend>
@@ -303,20 +307,20 @@ class canny {
                 <input type="range" id="highThreshold" min="1" max="100" value="50">
                 <span id="highValue" class="value">50</span>
             </div>
+        
+            <select id = "select_metodo_captura" class="select-fijo">     
+                <option value="lineas">capturar Lineas</option>
+                <option value="bordes">capturar Bordes</option>
+            </select>
 
-            <hr>
-
-            <div class="slider-container">
-                <label for="minLineLength">Long. Mín. Línea:</label>
-                <input type="range" id="minLineLength" min="5" max="100" value="10">
-                <span id="minLineValue" class="value">10</span>
+            <div id="parametros_metodo_captura_lineas">
+                parametros_metodo_captura_lineas
             </div>
+            <div id="parametros_metodo_captura_bordes">
+                parametros_metodo_captura_bordes
+            </div>
+
             
-            <div class="slider-container">
-                <label for="gapSize">Tamaño Brecha:</label>
-                <input type="range" id="gapSize" min="0" max="10" value="2">
-                <span id="gapValue" class="value">2</span>
-            </div>
             `);
 
         // listeners de botones y sliders
@@ -324,22 +328,46 @@ class canny {
         document.getElementById('lowThreshold').addEventListener('input', this.update_lowThreshold.bind(this), false);
         document.getElementById('highThreshold').addEventListener('input', this.update_highThreshold.bind(this), false);
 
-        document.getElementById('minLineLength').addEventListener('input', this.update_minLineLength.bind(this), false);
-        document.getElementById('gapSize').addEventListener('input', this.update_gapSize.bind(this), false);
+
+        // captura   
+        this.clase_captura_bordes = new deteccionBordes("#parametros_metodo_captura_bordes",this.actualizar_dibujo);    
+        this.clase_captura_lineas = new ImprovedLineExtractor("#parametros_metodo_captura_lineas",this.actualizar_dibujo);     
+
+        // listener para elegir con que plugin se va a capturar la imagen
+        document.getElementById("select_metodo_captura").addEventListener('change', this.cambio_metodo_captura.bind(this));
+       
+        // cargo los parametros del elemento elegido
+        this.cambio_metodo_captura();
+
+       
+        if (imagen_precargada){
+            this.cambioArchivoImagen(imagen_precargada);
+        }
+
     }
     
     
+    cambio_metodo_captura(event){
+        const select = document.getElementById("select_metodo_captura")
+        // busco el nombre del plugin seleccionado
+        var seleccionado = $(select).val();   
+    
+        // muestro o oculto las configuraciones segun que halla elegido
+        if (seleccionado == 'lineas'){
+            this.clase_captura_elegida = this.clase_captura_lineas;   
+            $("#parametros_metodo_captura_lineas").show();
+            $("#parametros_metodo_captura_bordes").hide();
+        }else{  // bordes
+            this.clase_captura_elegida = this.clase_captura_bordes;      
+            $("#parametros_metodo_captura_lineas").hide();
+            $("#parametros_metodo_captura_bordes").show();     
+        }
 
-    update_gapSize(event){   
-        this.gapValue = event.target.value;
-        $('#gapValue').html(this.gapValue);      
-        this.obtener_lineas();
-    }
-
-    update_minLineLength(event){   
-        this.minLineLength = event.target.value;
-        $('#minLineValue').html(this.minLineLength);      
-        this.obtener_lineas();
+        // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
+        if (this.binaryEdges){
+            this.clase_captura_elegida.generar_dibujo(this.binaryEdges.map(innerArray => [...innerArray]));
+        }
+        
     }
 
     update_lowThreshold(event){   
@@ -419,7 +447,7 @@ class canny {
             }
         }
     };
-
+/*
       // Visualizar líneas en el canvas
     visualizeLines(lines, width, height) {
 
@@ -479,48 +507,35 @@ class canny {
             });
         });
     }
-
+*/
 
     //funcion que procesa la imagen poniendola en escala de grises, aplicando filtros sobel y pasandola a blanco y negro, para despues seguir las lineas
     procesar_imagen(){
-
          
         // Obtener datos de la imagen
         let imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
-        
-      
+              
         const detector = new CannyEdgeDetector();
-
-        const lineExtractor = new ImprovedLineExtractor();
 
         // Obtener datos de la imagen
         const width = this.originalCanvas.width;
         const height = this.originalCanvas.height;
-        // const imageData = originalCtx.getImageData(0, 0, width, height);
-        
+                
         // Detectar bordes
-        const binaryEdges = detector.detectEdges(
+        return detector.detectEdges(
             imageData.data, 
             width, 
             height, 
             parseInt(this.lowThreshold), 
             parseInt(this.highThreshold)
         );                     
-      
-      //  this.mostrar_matriz_debug(binaryEdges);
-        
-       // alert ('aca va la captura de lineas');
-        // Extraer líneas (usando el método con brechas)
-        this.dibujo = lineExtractor.extractLinesWithGaps(
-            binaryEdges, 
-            this.minLineLength,
-            this.gapSize
-        );
-                    
-                    // Visualizar líneas
-      //  this.visualizeLines(lines, width, height);                   
+            
+    }
 
-
+    // a esta funcion la llama la clase que captura el dibujo
+    actualizar_dibujo(dibujo, ajuste_inicial_offset_scale = false){
+        captura.dibujo = dibujo;
+        captura.dibujar_captura(ajuste_inicial_offset_scale,true);
     }
 
     obtener_lineas(ajuste_inicial_offset_scale = false){
@@ -530,16 +545,17 @@ class canny {
         }
 
         // capturo las lineas de la imagen con los parametros seleccionados
-        this.procesar_imagen();
-      
-        // muestro las estadisticas de la imagen
-        $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
+        const binaryEdges = this.procesar_imagen();
 
-        // entrego a captura el dibujo y la imagen que lo genero
-        captura.dibujo = this.dibujo;
+        // guardo el arreglo capturado de la imagen por si cambia de metodo de captura
+        this.binaryEdges = binaryEdges;
+
         captura.imagen = this.imagen;
         captura.nombre_archivo_imagen = this.nombre_archivo_imagen;
-        captura.dibujar_captura(ajuste_inicial_offset_scale);
+
+        // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
+        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);      
+
     }
     
     actualizarNombreArchivo(img) {
@@ -554,6 +570,24 @@ class canny {
         }
     }
 
+    cambioArchivoImagen(imagen){
+
+        this.imagen = imagen;
+
+        this.actualizarNombreArchivo(imagen);
+    
+        // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
+        this.originalCanvas.width = this.imagen.width;
+        this.originalCanvas.height = this.imagen.height;
+        
+        // Dibujar imagen en el canvas original
+        this.originalCtx.drawImage(imagen, 0, 0);     
+
+        // Procesar imagen y detectar contornos
+        this.obtener_lineas(true);    
+
+    }
+
     // carga la imagen desde un archivo y la manda a procesar
     cargar_imagen(e){
 
@@ -563,19 +597,7 @@ class canny {
             let img = new Image();
             //img.onload = function() {
             img.onload = () => {
-                this.imagen = img;
-             
-                this.actualizarNombreArchivo(img);
-            
-                // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
-                this.originalCanvas.width = this.imagen.width;
-                this.originalCanvas.height = this.imagen.height;
-                
-                // Dibujar imagen en el canvas original
-                this.originalCtx.drawImage(img, 0, 0);     
-
-                // Procesar imagen y detectar contornos
-                this.obtener_lineas(true);    
+                this.cambioArchivoImagen(img);
             }
             img.src = event.target.result;
         }
@@ -585,8 +607,8 @@ class canny {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function cargar_config_canny(){
-    captureCanny.agregar_controles_captura();
+function cargar_config_canny(imagen_precargada){
+    captureCanny.agregar_controles_captura(imagen_precargada);
 }
 
 // tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html

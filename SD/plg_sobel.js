@@ -13,20 +13,23 @@ class sobel {
         this.imagen = false;
         this.umbral_value = 50;
 
-        this.grosor_value = 2;        
-        this.unificar_adyacentes = false;
+        this.binaryEdges = false;
 
+        this.clase_captura_bordes = false;    
+        this.clase_captura_lineas = false;     
+        this.clase_captura_elegida = false;
+  
         this.init();
     }
 
-    init() {
-        $("#select_capturar").append('<option value="cargar_config_sobel">Sobel</option>');             
-        //this.agregar_controles_captura();
-
+    init(){
+         $("#select_capturar").append('<option value="cargar_config_sobel">Sobel</option>');                  
+        this.agregar_controles_captura();
     }
-
-    agregar_controles_captura(){        
-
+  
+   
+    agregar_controles_captura(imagen_precargada = false){
+          
         $("#parametros_captura").html(`
             <legend>Sobel</legend>
 
@@ -38,40 +41,78 @@ class sobel {
                 <label for="umbral_slider">Umbral de detección: <span id="umbral_value">50</span></label><br>
                 <input type="range" id="umbral_slider" min="10" max="500" value="50">
             </div>            
-            <hr>                         
-            <div class="slider-container">
-                <label for="grosor_slider">Grosor lineas: <span id="grosor_value">2</span></label><br>
-                <input type="range" id="grosor_slider" min="1" max="6"  step="1" value="2">
+                      
+            <select id = "select_metodo_captura" class="select-fijo">     
+                <option value="bordes">capturar Bordes</option>
+                <option value="lineas">capturar Lineas</option>
+            </select>
+
+            <div id="parametros_metodo_captura_lineas">
+                parametros_metodo_captura_lineas
+            </div>
+            <div id="parametros_metodo_captura_bordes">
+                parametros_metodo_captura_bordes
             </div>
 
-            Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" title="Unifica lineas adyacentes"/><br>      
             `);
 
         // listeners de botones y sliders
         document.getElementById('imageLoader').addEventListener('change', this.cargar_imagen.bind(this), false);
         document.getElementById('umbral_slider').addEventListener('input', this.update_umbral.bind(this), false);
-        document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
-        document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
+    //    document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
+     //   document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);      
+        
+       
+        // captura
+        this.clase_captura_lineas = new ImprovedLineExtractor("#parametros_metodo_captura_lineas",this.actualizar_dibujo);        
+        this.clase_captura_bordes = new deteccionBordes("#parametros_metodo_captura_bordes",this.actualizar_dibujo);    
+
+        // listener para elegir con que plugin se va a capturar la imagen
+        document.getElementById("select_metodo_captura").addEventListener('change', this.cambio_metodo_captura.bind(this));
+       
+
+        // cargo los parametros del elemento elegido
+        this.cambio_metodo_captura();
+
+        if (imagen_precargada){
+            this.cambioArchivoImagen(imagen_precargada);
+        }
+
     }
+
+
+     
+    cambio_metodo_captura(event){
+        const select = document.getElementById("select_metodo_captura")
+        // busco el nombre del plugin seleccionado
+        var seleccionado = $(select).val();   
+    
+        // muestro o oculto las configuraciones segun que halla elegido
+        if (seleccionado == 'lineas'){
+            this.clase_captura_elegida = this.clase_captura_lineas;   
+            $("#parametros_metodo_captura_lineas").show();
+            $("#parametros_metodo_captura_bordes").hide();
+        }else{  // bordes
+            this.clase_captura_elegida = this.clase_captura_bordes;      
+            $("#parametros_metodo_captura_lineas").hide();
+            $("#parametros_metodo_captura_bordes").show();     
+        }
+
+        
+        // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
+        if (this.binaryEdges){
+            this.clase_captura_elegida.generar_dibujo(this.binaryEdges.map(innerArray => [...innerArray]));
+        }
+        
+    }
+
     
     update_umbral(event){   
         this.umbral_value = event.target.value;
         $('#umbral_value').html(event.target.value);
         this.obtener_lineas();
     }
-
-    update_grosor(event){   
-        this.grosor_value = event.target.value;
-        $('#grosor_value').html(event.target.value);
-        this.obtener_lineas();
-    }
-
-    update_adyacentes(event){        
-        this.unificar_adyacentes = $("#unificar_lineas_adyacentes").prop("checked") ;
-        $('#grosor_value').html(event.target.value);
-        this.obtener_lineas();
-    }
-
+    
     // funcion que muestra la matriz donde se procesan los graficos
     mostrar_matriz_debug(matriz){
       
@@ -180,6 +221,8 @@ class sobel {
             }
         }
 
+        return binaryEdges;
+/*
 
         //this.mostrar_matriz_debug(binaryEdges);
 
@@ -191,9 +234,18 @@ class sobel {
         const height = this.originalCanvas.height;
 
         this.dibujo = lineExtractor.detectarBordes(binaryEdges, width, height, this.grosor_value, this.unificar_adyacentes);
-             
+             */
     }
 
+
+    // esta funcion la llama la clase que captura el dibujo
+    actualizar_dibujo(dibujo, ajuste_inicial_offset_scale = false){
+        // hago unificacion de lineas
+        dibujo.unificarLineas(6);
+
+        captura.dibujo = dibujo;
+        captura.dibujar_captura(ajuste_inicial_offset_scale,true);
+    }
 
 
     obtener_lineas(ajuste_inicial_offset_scale = false){
@@ -203,19 +255,17 @@ class sobel {
         }
 
         // capturo las lineas de la imagen con los parametros seleccionados
-        this.procesar_imagen();
+        const binaryEdges = this.procesar_imagen();
 
-        // hago unificacion de lineas
-        this.dibujo.unificarLineas(6);
-      
-        // muestro las estadisticas de la imagen
-        $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
+          // guardo el arreglo capturado de la imagen por si cambia de metodo de captura
+        this.binaryEdges = binaryEdges;
 
-        // entrego a captura el dibujo y la imagen que lo genero
-        captura.dibujo = this.dibujo;
         captura.imagen = this.imagen;
         captura.nombre_archivo_imagen = this.nombre_archivo_imagen;
-        captura.dibujar_captura(ajuste_inicial_offset_scale);
+
+        // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
+        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);
+        
     }
 
 
@@ -232,6 +282,25 @@ class sobel {
         }
     }
 
+
+    cambioArchivoImagen(imagen){
+
+        this.imagen = imagen;
+
+        this.actualizarNombreArchivo(imagen);
+    
+        // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
+        this.originalCanvas.width = this.imagen.width;
+        this.originalCanvas.height = this.imagen.height;
+        
+        // Dibujar imagen en el canvas original
+        this.originalCtx.drawImage(imagen, 0, 0);     
+
+        // Procesar imagen y detectar contornos
+        this.obtener_lineas(true);    
+
+    }
+
     // carga la imagen desde un archivo y la manda a procesar
     cargar_imagen(e){
 
@@ -241,19 +310,7 @@ class sobel {
             let img = new Image();
             //img.onload = function() {
             img.onload = () => {
-                this.imagen = img;
-             
-                this.actualizarNombreArchivo(img);
-            
-                // Ajustar tamaño del canvas donde proceso la imagen al de la imagen
-                this.originalCanvas.width = this.imagen.width;
-                this.originalCanvas.height = this.imagen.height;
-                
-                // Dibujar imagen en el canvas original
-                this.originalCtx.drawImage(img, 0, 0);     
-
-                // Procesar imagen y detectar contornos
-                this.obtener_lineas(true);    
+                this.cambioArchivoImagen(img);
             }
             img.src = event.target.result;
         }
@@ -263,8 +320,8 @@ class sobel {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function cargar_config_sobel(){
-    captureLines.agregar_controles_captura();
+function cargar_config_sobel(imagen_precargada){
+    captureLines.agregar_controles_captura(imagen_precargada);
 }
 
 // tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html

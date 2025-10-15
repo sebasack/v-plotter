@@ -4,27 +4,25 @@ class dummy {
         this.originalCtx = this.originalCanvas.getContext('2d');
 
         this.imagen = false;
+        this.nombre_archivo_imagen = '';
 
         this.init();
     }
+    
+    init(){
+        $("#select_capturar").append('<option value="cargar_config_dummy">dummy</option>');       
+        this.agregar_controles_dummy();
+    }
          
-    agregar_controles_dummy(){        
+    agregar_controles_dummy(){             
 
         $("#parametros_captura").html(`
-            <legend>dummy</legend>
-
-          
+            <legend>dummy</legend>          
             <button type="button" id="cargar_dummy" class="boton-archivo">Cargar dummy</button>
-
             `);
 
          document.getElementById("cargar_dummy").addEventListener('click', () => {this.cargar_imagen_dummy(this)}, false);             
     }
-
-    init() {         
-          $("#select_capturar").append('<option value="cargar_config_dummy">dummy</option>');                              
-    }   
-
 
 
     obtener_lineas_dummy(){
@@ -55,9 +53,7 @@ class dummy {
         linea.agregarVertice(0,297*2);
         linea.agregarVertice(210*2,0);
                    
-        // muestro las estadisticas de la imagen
-        $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
-
+     
         // entrego a captura el dibujo y la imagen que lo genero
         captura.dibujo = this.dibujo;
       //  captura.imagen = this.imagen;

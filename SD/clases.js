@@ -1,8 +1,9 @@
+
 //////////////////////////////////////////////// CLASE DETECCION DE BORDES IA ////////////////////////////////////////////////
 
 // recibe una matriz binaria de lineas blancas sobre negro y retorna un dibujo con las lineas vectorizadas
 class ImprovedLineExtractor {
-    constructor() {
+    constructor(placeholder, funcion_retorno) {
         // 8 direcciones de vecindad
         this.directions = [
             [0, 1],   // Abajo
@@ -14,6 +15,65 @@ class ImprovedLineExtractor {
             [-1, 0],  // Izquierda
             [-1, 1]   // Abajo-izquierda
         ];
+
+        this.gapValue = 2;
+        this.minLineLength = 10;
+
+        this.binaryEdges = false;
+        this.funcion_retorno = funcion_retorno;
+
+        this.agregar_controles_captura(placeholder);
+    }
+
+    agregar_controles_captura(placeholder){
+        $(placeholder).html(`       
+            <div class="slider-container">
+                <label for="minLineLength">Long. Mín. Línea:</label>
+                <input type="range" id="minLineLength" min="5" max="100" value="10">
+                <span id="minLineValue" class="value">10</span>
+            </div>
+            
+            <div class="slider-container">
+                <label for="gapSize">Tamaño Brecha:</label>
+                <input type="range" id="gapSize" min="0" max="10" value="2">
+                <span id="gapValue" class="value">2</span>
+            </div>
+            `);
+
+        // listeners de botones y sliders
+        document.getElementById('minLineLength').addEventListener('input', this.update_minLineLength.bind(this), false);
+        document.getElementById('gapSize').addEventListener('input', this.update_gapSize.bind(this), false);
+    }
+
+    generar_dibujo(binaryEdges = false, ajuste_inicial_offset_scale = false){
+                
+        // si envio el arreglo con la imagen procesada lo reemplazo en memoria
+        if (binaryEdges){
+            this.binaryEdges = binaryEdges.map(innerArray => [...innerArray]);           
+        }else if (!this.binaryEdges){
+            // si tengo copia en memoria no puedo hacer nada  
+            return;            
+        }        
+
+        // llamo a la funcion de retorno para entregarle el digujo generado
+        this.funcion_retorno(
+              // envio una copia por que podria modifica el arreglo   
+             this.extractLinesWithGaps(this.binaryEdges.map(innerArray => [...innerArray]), this.minLineLength, this.gapValue),
+             ajuste_inicial_offset_scale
+        );
+    }
+
+
+    update_gapSize(event){   
+        this.gapValue = event.target.value;
+        $('#gapValue').html(this.gapValue);            
+        this.generar_dibujo();    
+    }
+
+    update_minLineLength(event){   
+        this.minLineLength = event.target.value;
+        $('#minLineValue').html(this.minLineLength);             
+        this.generar_dibujo(); 
     }
 
     // Método principal mejorado para extraer líneas
@@ -335,11 +395,67 @@ class ImprovedLineExtractor {
 
 // recibe una matriz binaria de lineas blancas sobre negro y retorna un dibujo con las lineas vectorizadas
 class deteccionBordes{
-    constructor() {
+    constructor(placeholder,funcion_retorno) {
         this.width = 0;
         this.height = 0;
         this.grosor_value = 2;
         this.unificar_adyacentes = true;
+
+        this.binaryEdges = false;
+        this.funcion_retorno = funcion_retorno;
+
+        this.agregar_controles_captura(placeholder);
+    }
+
+
+    agregar_controles_captura(placeholder){        
+
+        $(placeholder).html(`
+            <div class="slider-container">
+                <label for="grosor_slider">Grosor lineas: <span id="grosor_value">2</span></label><br>
+                <input type="range" id="grosor_slider" min="1" max="6"  step="1" value="2">
+            </div>
+
+            Unificar adyacentes:<input type="checkbox" id="unificar_lineas_adyacentes" checked="checked" title="Unifica lineas adyacentes"/><br>      
+            `);
+
+        // listeners de botones y sliders
+        document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
+        document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
+    }
+
+
+    generar_dibujo(binaryEdges = false,ajuste_inicial_offset_scale = false){          
+       
+        // si envio el arreglo con la imagen procesada lo reemplazo en memoria
+        if (binaryEdges){
+            this.binaryEdges = binaryEdges.map(innerArray => [...innerArray]);           
+        }else if (!this.binaryEdges){
+            // no lo mando ni lo tengo en memoria,no puedo hacer nada
+            return;            
+        }        
+
+        // llamo a la funcion de retorno para entregarle el digujo generado
+        this.funcion_retorno(         
+            // envio una copia a detectar bordes por que modifica el arreglo   
+            this.detectarBordes(this.binaryEdges.map(innerArray => [...innerArray])),
+            ajuste_inicial_offset_scale
+        );       
+        
+    }
+
+
+    
+    update_grosor(event){   
+        this.grosor_value = event.target.value;
+        $('#grosor_value').html(event.target.value);
+        this.generar_dibujo();
+    }
+
+    update_adyacentes(event){        
+        this.unificar_adyacentes = $("#unificar_lineas_adyacentes").prop("checked") ;
+        $('#grosor_value').html(event.target.value);
+        this.generar_dibujo();
     }
 
     // funcion que dado un punto negro parte del borde y un punto blanco adyacente sigue el borde y agrega los puntos a la linea
@@ -608,45 +724,43 @@ class deteccionBordes{
         };
     }
                
-    detectarBordes (binaryEdges, width, height, grosor_linea = 2, unificar_adyacentes = true){
-        
-        this.width = width;
-        this.height = height;
-        this.grosor_value = grosor_linea;
-        this.unificar_adyacentes = unificar_adyacentes;
+    detectarBordes (binaryEdges){
+
+        this.height = binaryEdges.length;
+        this.width = binaryEdges[0].length;       
 
         // creo el objeto dibujo
-        this.dibujo = new Dibujo();
+        const dibujo = new Dibujo();
 
         // busco la primera linea blanca que encuentre y sigo el rastro
         let color_linea =2;           
 
         // elimino el dibujo anterior si existia
-        this.dibujo.limpiar();
+        dibujo.limpiar();
 
-        let linea = this.dibujo.crearLinea(colores[color_linea]);
+        let linea = dibujo.crearLinea(colores[color_linea]);
 
-        for (let y = 0; y < height; y++) {            
-            for (let x = 0; x < width; x++) {                    
+        for (let y = 0; y < this.height; y++) {            
+            for (let x = 0; x < this.width; x++) {                    
                 if (binaryEdges[y][x+1] === 1) { // econtre el primer punto blanco
                     
                     this.seguir_linea(linea,binaryEdges, this.grosor_value, y, x+1, y, x, color_linea, true, this.unificar_adyacentes);     
                     // si se encontro solo un punto descarto la linea
                     if (linea.vertices.length === 1) {
-                        this.dibujo.eliminarLinea(linea.id);
-                        linea =this.dibujo.crearLinea( colores[color_linea]);
+                        dibujo.eliminarLinea(linea.id);
+                        linea = dibujo.crearLinea( colores[color_linea]);
                     }
 
                     //sigo la linea hacia el otro lado
                     this.seguir_linea(linea,binaryEdges, this.grosor_value, y, x+1, y, x, color_linea, false, this.unificar_adyacentes);   
                     // si se encontro solo un punto descarto la linea
                     if (linea.vertices.length === 1) {
-                        this.dibujo.eliminarLinea(linea.id);
-                        linea =this.dibujo.crearLinea(colores[color_linea]);
+                        dibujo.eliminarLinea(linea.id);
+                        linea = dibujo.crearLinea(colores[color_linea]);
                     }
 
                     if (linea.vertices.length >1){
-                        linea =this.dibujo.crearLinea(colores[color_linea]);
+                        linea = dibujo.crearLinea(colores[color_linea]);
                         color_linea ++;                               
                     }                                             
                 }
@@ -658,9 +772,9 @@ class deteccionBordes{
         }
 
         // la ultima linea creada nunca se va a llenar
-        this.dibujo.eliminarLinea(linea.id);    
+        dibujo.eliminarLinea(linea.id);    
     
-        return this.dibujo;    
+        return dibujo;    
     }    
 }
 

@@ -88,12 +88,10 @@ Shift + click izquierdo: Zoom al área seleccionada`;
                     <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
                 </div>
 
-
                 <div class="slider-container">
                     <label for="rotacion_slider">Angulo rotacion: <span id="rotacion_value">0°</span></label><br>
                     <input type="range" id="rotacion_slider" min="0" max="359"  step="1" value="0">
                 </div>
-
 
                 <hr>
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
@@ -179,7 +177,6 @@ Shift + click izquierdo: Zoom al área seleccionada`;
     }
     */
 
-
     ajustarDibujoEnPantalla() {
         // calculo bordes, ancho y alto del dibujo capturado
         this.dibujo.calcularBordes();
@@ -204,14 +201,19 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.scale = scale;      
     }
 
-
-
-    dibujar_captura(ajuste_inicial_offset_scale = false){
-      
+    dibujar_captura(ajuste_inicial_offset_scale = false, forzar_rotado_dibujo = false){
+    
         this.dibujar_maquina();
 
         if (!this.dibujo){
             return;
+        }
+
+        // muestro las estadisticas de la imagen
+        $("#estadisticas").html("Lineas:" + captura.dibujo.cantidadLineas() + "<br/>Vertices:" + captura.dibujo.cantidadVertices());
+      
+        if (forzar_rotado_dibujo){
+            this.angulo_rotacion_nuevo = this.angulo_rotacion ;
         }
 
         //solo ajusta el offset y scale la primera vez que se dibuja, llamado por el plugin de captura
@@ -222,8 +224,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             $('#rotacion_slider').val(0);
             this.angulo_rotacion = 0;
             this.angulo_rotacion_nuevo = 0;
-            $('#rotacion_value').html(this.angulo_rotacion + '°');
-            
+            $('#rotacion_value').html(this.angulo_rotacion + '°');            
         }
   
         // Aplicar transformaciones de vista
@@ -314,9 +315,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
 
         //si se importo alguna imagen muestro estadisticas
         if (this.dibujo){        
-            // muestro las estadisticas de la imagen luego de modificar la cantidad de vertices
-            $("#estadisticas").html("Lineas:" + this.dibujo.cantidadLineas() + "<br/>Vertices:" + this.dibujo.cantidadVertices());
-
+         
             // reduzco cantidad de vertices    
             this.dibujo.reducirVertices(this.vertices_eliminados);
         

@@ -121,12 +121,12 @@
         async function cargarScriptsEnOrden() {
             try {
                 await $('<link>', {rel: 'stylesheet', href: `${cdn}styles.css`}).appendTo('head');
-                await $.getScript(`${cdn}clases.js`);                  
-                await $.getScript(`${cdn}plg_canny.js`);                 
-                await $.getScript(`${cdn}plg_sobel.js`);                
-                await $.getScript(`${cdn}plg_dummy.js`);              
-                await $.getScript(`${cdn}captura.js`);                
-                await $.getScript(`${cdn}control.js`);              
+                await $.getScript(`${cdn}clases.js`);
+                await $.getScript(`${cdn}plg_canny.js`);
+                await $.getScript(`${cdn}plg_sobel.js`);
+                await $.getScript(`${cdn}plg_dummy.js`);
+                await $.getScript(`${cdn}captura.js`);
+                await $.getScript(`${cdn}control.js`);
             } catch (error) {
                 console.error('Error cargando scripts:', error);
             }

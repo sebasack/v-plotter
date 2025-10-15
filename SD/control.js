@@ -21,7 +21,7 @@ class Control {
         this.tareas = new ColaTareas();
         this.tareas_completadas = [];
      
-        this.init();
+        this.init(); 
     }
 
 
@@ -29,9 +29,9 @@ class Control {
         const select = document.getElementById("select_capturar")
         // busco el nombre del plugin seleccionado
         var seleccionado = $(select).val();   
-        
+      
         // llamo a la funcion que carga las configuraciones de captura
-        window[seleccionado]();
+        window[seleccionado](captura.imagen);
     }
 
     cargar_archivo_gcode(event){
