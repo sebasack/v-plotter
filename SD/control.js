@@ -20,6 +20,8 @@ class Control {
         // creo la cola de tareas
         this.tareas = new ColaTareas();
         this.tareas_completadas = [];
+
+        this.distancia_dibujado = 0;
      
         this.init(); 
     }
@@ -74,6 +76,8 @@ class Control {
                             
                             this.draw_machine();
                             $("#tareas").val(this.tareas.mostrar());
+
+                            this.calcularDistanciaDibujado(this.tareas);
 
                         }, 100);
                         
@@ -196,7 +200,11 @@ class Control {
 
     descargar_gcode(event){
     //    alert('descargar_gcode no implementado');
-            let contenido = $("#tareas").val();
+            let contenido = '';
+            this.tareas.tareas.forEach((tarea) => {
+                contenido += tarea.nombre + "\n";
+            })
+           
 
             let nombreArchivo = string_aleatorio(8) + '.txt';
             if (captura.nombre_archivo_imagen != ''){
@@ -325,6 +333,7 @@ Doble click: mueve la gondola`;
         this.draw_machine();    
         
     }
+
 
     guardar_parametros() {
         const machine_specs_tmp = {
@@ -659,7 +668,7 @@ Doble click: mueve la gondola`;
             this.linedash(this.home.x,0,this.home.x,this.machine_specs.machineSizeMm_y,5,5,"#777");
 
             // dibujo la gondola y el marcador
-            this.rectangle(this.pen.x - 10, this.pen.y - 10, 20, 30, "#000000", "#ccc");
+            this.rectangle(this.pen.x - 10, this.pen.y - 10, 20, 30, "#000000");
             this.circle(this.pen.x, this.pen.y, 3, "#000000", "#000000");
             if (!this.pen_down){ // el pen esta up, lo dibujo levantado           
                 this.circle(this.pen.x, this.pen.y-10, 3, "#000000", "#000000");
@@ -678,8 +687,60 @@ Doble click: mueve la gondola`;
     }
 
 
+    guardar_tiempo_trabajo(milimetros = 0){
+
+        //localStorage.removeItem('estadisticas');
+
+        if (this.guardar_estadisticas){
+            let act = new Date();
+            const milisegundos = act - this.ultimo_update;
+        
+            // recupero los valores anteriores
+            let estadisticas_guardadas = {milisegundos:0,milimetros:0};
+            let estadisticas_storeage = localStorage.getItem("estadisticas");
+
+            if (estadisticas_storeage !== null){
+                estadisticas_guardadas = JSON.parse(estadisticas_storeage);
+            }
+            
+            // si no trae valor en milimetros lo pongo en 0 para que no me blanquee las estadisticas
+            if (isNaN(milimetros)){
+                milimetros = 0;
+            }
+
+            const estadisticas = {           
+                milisegundos : milisegundos + estadisticas_guardadas.milisegundos,
+                milimetros : milimetros + estadisticas_guardadas.milimetros 
+            };         
+
+            if (!this.ciclo || this.ciclo == 500){
+                this.actualizarEstadisticasEnPantalla(estadisticas);
+                this.ciclo =0;
+            }
+            this.ciclo++;
+
+            localStorage.setItem("estadisticas", JSON.stringify(estadisticas));
+        };
+        this.guardar_estadisticas = false;
+    }
+    
+    actualizarEstadisticasEnPantalla(estadisticas){       
+        //  eco('actualizo tiempo estimado '+ string_aleatorio(2));
+        eco(formatTime(new Date()));
+          eco(estadisticas);
+        this.calcularDistanciaDibujado(this.tareas);
+
+        const cm_seg = Math.round( (estadisticas.milimetros / 10) / (estadisticas.milisegundos / 1000) * 10) / 10;
+        const minutos_estimados = Math.round(this.distancia_dibujado / (cm_seg * 10));
+        eco((this.distancia_dibujado/10) + ' cm');
+        $("#estadisticas_velocidad").html("Velocidad (cm/seg):" + cm_seg + "<br>Tiempo estimado: "+minutos_estimados+" min");                   
+    }
+
     update_pen_position(pen_position) { 
         if (pen_position.result_ok) {
+            const ultimo_x = this.pen.x;
+            const ultimo_y = this.pen.y;
+        
             //{"result_ok":true,"motorA":15664,"motorB":15664}
             this.pen.motorA = pen_position.motorA;
             this.pen.motorB = pen_position.motorB;
@@ -697,6 +758,10 @@ Doble click: mueve la gondola`;
             $("#pen_y").val(this.pen.y);
 
             this.guardar_parametros();
+                        
+            let distancia = Math.sqrt((this.pen.x - ultimo_x) ** 2 + (this.pen.y - ultimo_y) ** 2);
+            this.guardar_tiempo_trabajo(distancia);                   
+
         }
     }
 
@@ -706,7 +771,8 @@ Doble click: mueve la gondola`;
         }else{
             $("#cambiar_status_pen").html("Up");
         }  
-        this.draw_machine();    
+        this.draw_machine();   
+        this.guardar_tiempo_trabajo(0);           
     }
 
     cambiar_status_pen() {
@@ -756,7 +822,7 @@ Doble click: mueve la gondola`;
         this.encolar_tarea("C02," + this.pen.penWidth +",END", this.resultado_tarea_ok.bind(this));// cambio el tamaño del pen   
     }
 
-    async ejecutar_comando(parametros, funcionExito) {    
+    async ejecutar_comando(parametros, funcionExito) {
         /*parametros va en la forma
                 "getPosition"                  cuando es solo el comando sin otros parametros
                 "C06,15664,15664,END"          cuando es gcode
@@ -764,48 +830,52 @@ Doble click: mueve la gondola`;
 
         const ini = new Date();
 
+        this.ultimo_update = ini;
+   
         try {
 
             // SE EJECUTA SI ESTA EN DESARROLLO
             if (location.href.includes('file://') || location.href.includes('http://127.0.0.1') ){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
-                let data= {'result_ok':false};
-                if (parametros=='getPosition'){
+                let data = {'result_ok':false};
+                if (parametros == 'getPosition'){
                     //retorno valores random
-                    data= {"result_ok":true,"motorA":Math.floor(Math.random() *8000)+13000,"motorB":Math.floor(Math.random() *8000)+13000};       
+                    data = {"result_ok":true,"motorA":Math.floor(Math.random() *8000)+13000,"motorB":Math.floor(Math.random() *8000)+13000};       
                 }else if (parametros=='getMachineSpecs'){
-                    data=  {"result_ok":true,"machineSizeMm_x":882,"machineSizeMm_y":1100,"mmPerRev":126,"stepsPerRev":4076,"stepMultiplier":8,"downPosition":90,"upPosition":123,"currentMaxSpeed":1000,"currentAcceleration":400,"penWidth":0.5} 
+                    data =  {"result_ok":true,"machineSizeMm_x":882,"machineSizeMm_y":1100,"mmPerRev":126,"stepsPerRev":4076,"stepMultiplier":8,"downPosition":90,"upPosition":123,"currentMaxSpeed":1000,"currentAcceleration":400,"penWidth":0.5} 
                 }else if (parametros.includes(',END')){  // es gcode
                     let params = parametros.split(","); // Splits by space
-                    if (params[0]=='C13' ){ // down
-                        data= {"result_ok":true};  
+                    if (params[0] == 'C13' ){ // down
+                        data = {"result_ok":true};  
                         this.pen_down = true;
-                        funcionExito=this.actualizar_estado_pen.bind(this);    
-                    }else if ( params[0]=='C14'){ // up
-                        data= {"result_ok":true};    
+                        funcionExito = this.actualizar_estado_pen.bind(this);    
+                    }else if (params[0] == 'C14'){ // up
+                        data = {"result_ok":true};    
                         this.pen_down = false;
-                        funcionExito=this.actualizar_estado_pen.bind(this);        
+                        funcionExito = this.actualizar_estado_pen.bind(this);        
                     }else{
                         let motorA = params[1];
                         let motorB = params[2];
-                        data = { result_ok: true, motorA: motorA, motorB: motorB };
+                        data = {result_ok: true, motorA: motorA, motorB: motorB};
                     }
                     this.tareas_completadas.push(parametros);
                 }   
 
                 // logueo llamado y respuesta
-                const fin = new Date();        
+                const fin = new Date();               
+
                 $("#log").val(formatTime(ini)+ " (LOCAL) "+ parametros+ "\n" + formatTime(fin) + " (LOCAL) "+ JSON.stringify(data).replaceAll(",", ", ") +"\n" + $("#log").val());
 
                 //actualizo la lista de tareas
                 $("#tareas").val(this.tareas.mostrar());
                 $("#estado_cola").text(this.tareas.obtenerEstado().estado);
-                if (funcionExito && typeof funcionExito === "function") {               
-                    funcionExito(data);
+                if (funcionExito && typeof funcionExito === "function") {        
+                    this.guardar_estadisticas = true;
+                    funcionExito(data); 
                 }
                 return;
             }
-        } catch (error) {
+        } catch (error) {                    
             console.error("Error:", error);
             throw error;
         }
@@ -828,16 +898,19 @@ Doble click: mueve la gondola`;
                 this.tareas_completadas.push(parametros);
                 // Llama a la función de éxito si existe
                 if (funcionExito && typeof funcionExito === "function") {
+                    this.guardar_estadisticas = true;
                     funcionExito(data);
                 }
                 return data;
-            } else {
+            } else {              
                 throw new Error(`Error ${response.status}`);
             }
-        } catch (error) {
+        } catch (error) {           
             console.error("Error:", error);
             throw error;
         }
+
+       
     }    
 
     limpiar_ejecutadas(){
@@ -1111,13 +1184,21 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //voy a la solapa de dibujado
         document.getElementById('tab_dibujar').click();
 
+        this.distancia_dibujado = 0;
+
         // cargo las tareas    
+        let vertice_ant = false;
         recorrido_optimizado.forEach((linea) => {         
             // subo el pen      
             this.encolar_tarea("C14,END", this.update_pen_position.bind(this),false); 
             
             let pen_is_down = false;
             linea.vertices.forEach((vertice) => {
+
+                if (vertice_ant){
+                    this.distancia_dibujado += Math.sqrt((vertice.x - vertice_ant.x) ** 2 + (vertice.y - vertice_ant.y) ** 2);
+                }                
+
                 // muevo la gondola al proximo punto                       
                 let ajustado = this.ajustarOffsetEscala(vertice,captura);
                 this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',2,END', this.update_pen_position.bind(this),false);
@@ -1125,7 +1206,8 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                     // bajo el pen
                     this.encolar_tarea("C13,END", this.update_pen_position.bind(this),false);   
                     pen_is_down = true;
-                }                   
+                }          
+                vertice_ant = vertice;         
             });            
         });
               
@@ -1135,6 +1217,30 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         this.draw_machine();     
          
     }    
+
+    calcularDistanciaDibujado(cola){
+        let x_ant = false;
+        let y_ant = false;
+        let distancia = 0;
+        cola.tareas.forEach((tarea) => {
+            let gcode = tarea.nombre.split(',');
+            if (gcode[0] == 'C17'){
+                // calculo las coordenadas cartesianas del punto
+                let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
+                let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
+                let x = Math.round(cartesianX*mmPerStep);
+                let y = Math.round(this.getCartesianY(cartesianX,gcode[1])*mmPerStep);
+                
+                if (x_ant && y_ant){
+                    distancia += Math.sqrt((x - x_ant) ** 2 + (y - y_ant) ** 2);
+                }
+                x_ant = x;
+                y_ant = y;
+              //  eco(distancia);       
+            }                      
+        });
+        this.distancia_dibujado = distancia;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
