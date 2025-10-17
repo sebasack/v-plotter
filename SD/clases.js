@@ -7,7 +7,7 @@ class ClaseReduccionVertices {
 
     reducirVertices(porcentaje = 20){
         if (this.metodo == 0){
-            //convierto el porcentaje en una tolerencia entre 0.1 y 10
+            //convierto el porcentaje en una tolerencia entre 1 y 10
             const tolerancia = porcentaje / 10;
             return this.reducirVerticesDouglasPeucker(this.lineas, tolerancia);
         }else{
@@ -1507,16 +1507,17 @@ class ColaTareas {
     }
 
     mostrar() {
+        const maximo_tareas_mostradas = 25;
         let resultado = "";
         let cant = this.tareas.length;
-        if (cant > 20){
-            cant = 20;
+        if (cant > maximo_tareas_mostradas){
+            cant = maximo_tareas_mostradas;
         }
         for (let i = 0; i < cant; i++) {
             resultado += (this.tareas.length-i) + ". " + this.tareas[i].nombre + "\n";
         }
-        if (this.tareas.length > 20){
-            resultado += "se muestran los primeros 20..."
+        if (this.tareas.length > maximo_tareas_mostradas){
+            resultado += "se muestran las primeras "+maximo_tareas_mostradas+" tareas..."
         }
         return resultado;
     }
