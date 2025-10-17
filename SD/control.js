@@ -917,11 +917,8 @@ Doble click: mueve la gondola`;
         } catch (error) {           
             console.error("Error:", error);
             throw error;
-        }
-
-       
-    }    
-
+        }       
+    }
 
     guardarLog(texto){
         let textarea = document.getElementById('log');
@@ -1039,7 +1036,6 @@ Doble click: mueve la gondola`;
         let calcY = Math.sqrt(Math.pow(this.multiplier(motorA),2)-Math.pow(cX,2));
         return calcY;
     }
-
 
     // esta funcion ajusta los offsets y escala recibido de la captura
     ajustarOffsetEscala(vertice,captura){

@@ -1,3 +1,107 @@
+class ClaseReduccionVertices {
+
+    constructor(lineas,metodo = 0){
+        this.lineas = lineas;
+        this.metodo = metodo; // 0 = Douglas Peucher, 1 = por porcentaje
+    }
+
+    reducirVertices(porcentaje = 20){
+        if (this.metodo == 0){
+            //convierto el porcentaje en una tolerencia entre 0.1 y 10
+            const tolerancia = porcentaje / 10;
+            return this.reducirVerticesDouglasPeucker(this.lineas, tolerancia);
+        }else{
+            return this.reducirPorPorcentaje(this.lineas, porcentaje);
+        }      
+    }
+
+    // Algoritmo Douglas-Peucker
+    reducirVerticesDouglasPeucker(arregloFiguras, tolerancia = 1.0) {
+        return arregloFiguras.map(figura => {
+            return {
+                ...figura,
+                vertices: this.simplificarLinea(figura.vertices, tolerancia)
+            };
+        });
+    }
+
+    simplificarLinea(puntos, tolerancia) {
+        if (puntos.length <= 2) return puntos;
+        
+        let maxDistancia = 0;
+        let indiceMax = 0;
+        const primerPunto = puntos[0];
+        const ultimoPunto = puntos[puntos.length - 1];
+        
+        for (let i = 1; i < puntos.length - 1; i++) {
+            const distancia = this.distanciaPuntoALinea(puntos[i], primerPunto, ultimoPunto);
+            if (distancia > maxDistancia) {
+                maxDistancia = distancia;
+                indiceMax = i;
+            }
+        }
+        
+        if (maxDistancia > tolerancia) {
+            const primeraMitad = this.simplificarLinea(puntos.slice(0, indiceMax + 1), tolerancia);
+            const segundaMitad = this.simplificarLinea(puntos.slice(indiceMax), tolerancia);
+            return primeraMitad.slice(0, -1).concat(segundaMitad);
+        } else {
+            return [primerPunto, ultimoPunto];
+        }
+    }
+
+    distanciaPuntoALinea(punto, lineaInicio, lineaFin) {
+        const numerador = Math.abs(
+            (lineaFin.y - lineaInicio.y) * punto.x -
+            (lineaFin.x - lineaInicio.x) * punto.y +
+            lineaFin.x * lineaInicio.y -
+            lineaFin.y * lineaInicio.x
+        );
+        
+        const denominador = Math.sqrt(
+            Math.pow(lineaFin.y - lineaInicio.y, 2) +
+            Math.pow(lineaFin.x - lineaInicio.x, 2)
+        );
+        
+        return denominador === 0 ? 0 : numerador / denominador;
+    }
+
+    ////////////////////////////////  POR PORCENTAJE ////////////////////////////////
+    
+    // Algoritmo de reducción por porcentaje
+     reducirPorPorcentaje(arregloFiguras, porcentajeReduccion = 50) {
+        return arregloFiguras.map(figura => {
+            const verticesOriginales = figura.vertices;
+            const cantidadFinal = Math.max(
+                2,
+                Math.floor(verticesOriginales.length * (1 - porcentajeReduccion / 100))
+            );
+            
+            return {
+                ...figura,
+                vertices: this.muestrearPuntos(verticesOriginales, cantidadFinal)
+            };
+        });
+    }
+
+    muestrearPuntos(puntos, cantidadDeseada) {
+        if (puntos.length <= cantidadDeseada) return puntos;
+        
+        const resultado = [];
+        const paso = (puntos.length - 1) / (cantidadDeseada - 1);
+        
+        for (let i = 0; i < cantidadDeseada; i++) {
+            const indice = Math.min(Math.floor(i * paso), puntos.length - 1);
+            resultado.push(puntos[indice]);
+        }
+        
+        return resultado;
+    }
+
+
+}
+
+
 
 //////////////////////////////////////////////// CLASE DETECCION DE BORDES IA ////////////////////////////////////////////////
 
@@ -1046,46 +1150,21 @@ class Dibujo {
         return Math.abs(diff * 180 / Math.PI); // Convertir a grados
     } 
 
+    reducirVertices( eliminar) {
 
-    reducirVertices(eliminar){
-
-         // guardo una copia del dibujo por que la reduccion es destructiva
+        // guardo una copia del dibujo por que la reduccion es destructiva
         if (this.contadorLineasOriginales == 0){             
             this.backupLineas();
         }else{
             //recupero la copia de las lineas guardadas
             this.restoreLineas();
-        }
-               
-        this.lineas.forEach((linea) => {   
-            let diferencias=[];
-            let angulo_ant = this.calculateAngle(linea.vertices[0],linea.vertices[1]);
-            for (let i=1;i<linea.vertices.length-1; i++){
+        }           
 
-                // para cada par de vertices calculo el angulo
-                let angulo = this.calculateAngle(linea.vertices[i],linea.vertices[i+1]);
+        let clase_reduccion = new ClaseReduccionVertices(this.lineas);        
+        this.lineas = clase_reduccion.reducirVertices(eliminar);
+       
+    }
 
-                let diff = this.angleDifference(angulo_ant, angulo);
-                //guardo el angulo en un arreglo
-                diferencias.push({indice:i, angulo: diff});
-                angulo_ant=angulo;
-            }                            
-
-            // ordeno los vertices por angulos en Orden ascendente
-            diferencias.sort((a, b) => a.angulo - b.angulo);
-
-            //calculo que cantidad de vertices voy a borrar
-            let cantidad = 0;
-            if ( linea.vertices.length > 2){
-                cantidad = eliminar * diferencias.length/100;
-            }
-
-            // elimino los vertices que tiene menor angulo, si la linea tiene menos de 10 vertices no elimino nada                   
-            for (let i=0;i<cantidad;i++){
-                linea.eliminarVertice(diferencias[i].indice);                        
-            }        
-        });
-    }   
 
     rotarVertice(vertice, anguloGrados, centroX, centroY) {
         const anguloRadianes = anguloGrados * Math.PI / 180;

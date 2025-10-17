@@ -199,6 +199,11 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             return;
         }
 
+        if (ajuste_inicial_offset_scale){
+            // aplico el eliminado inicial de vertices
+            this.dibujo.reducirVertices(this.vertices_eliminados);    
+        }
+
         // muestro las estadisticas de la imagen
         $("#estadisticas").html("Lineas:" + captura.dibujo.cantidadLineas() + "<br/>Vertices:" + captura.dibujo.cantidadVertices());
       
@@ -301,18 +306,15 @@ Shift + click izquierdo: Zoom al área seleccionada`;
     cambio_vertices_eliminados(event){
         this.vertices_eliminados = event.target.value;
         $('#vertices_value').html(event.target.value);
-       
 
         //si se importo alguna imagen muestro estadisticas
-        if (this.dibujo){        
-         
+        if (this.dibujo){
             // reduzco cantidad de vertices    
             this.dibujo.reducirVertices(this.vertices_eliminados);
-        
+
             // mando a girar el dibujo nuevamente por que los vertices fueron guardados sin girar
             this.angulo_rotacion_nuevo = this.angulo_rotacion;
             this.dibujar_captura();
-
         }
     }
         
