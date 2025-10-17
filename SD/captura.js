@@ -28,7 +28,6 @@ class Captura {
         this.lastX = 0;
         this.lastY = 0;
 
-
         //parametros de captura        
         this.vertices_eliminados = 10; // %       
         this.angulo_rotacion = 0 ; // °   
@@ -62,7 +61,7 @@ class Captura {
         document.addEventListener('keyup', this.handleKeyUp.bind(this));
 
         document.getElementById("vertices_slider").addEventListener('input', this.cambio_vertices_eliminados.bind(this), false);
-        document.getElementById("rotacion_slider").addEventListener('input', this.cambio_angulo_rotacion.bind(this), false);
+        document.getElementById("angulo_rotarion").addEventListener('input', this.cambio_angulo_rotacion.bind(this), false);       
         document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
@@ -76,30 +75,21 @@ ControlLeft + Dibujar rectángulo con click izquierdo: Agrega líneas a la selec
 ControlLeft + rueda del mouse: Acerca/aleja la vista lentamente
 ControlRight + Dibujar rectángulo con click izquierdo: Quita líneas de la seleccion
 Shift + click izquierdo: Zoom al área seleccionada`;
-
     }
 
     agregar_controles_captura(){                
         $("#parametros_importacion").html(`
                 <legend>Posicionar e importar</legend>
-
                 <div class="slider-container">
                     <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
                     <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
                 </div>
-
-                <div class="slider-container">
-                    <label for="rotacion_slider">Angulo rotacion: <span id="rotacion_value">0°</span></label><br>
-                    <input type="range" id="rotacion_slider" min="0" max="359"  step="1" value="0">
-                </div>
-
+                Angulo:<input type="number" id="angulo_rotarion" min="0" max="359"  step="1" value="0">°
                 <hr>
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
-                Detalle lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
-                Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />                                                
-                               
+                Colores lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
+                Mostrar Vertices:<input type="checkbox" id="mostrar_vertices" checked_ />
                 <hr>
-            
                 <div id="estadisticas">Lineas:<br>Vertices:</div>`);            
     }
        
@@ -328,6 +318,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         
 
     cambio_angulo_rotacion(event){
+
         // guardo el angulo anterior
         let angulo_anterior = this.angulo_rotacion;
 
@@ -336,9 +327,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
 
         // calculo cuanto lo tengo que rotar
         this.angulo_rotacion_nuevo = this.angulo_rotacion - angulo_anterior;
-
-        $('#rotacion_value').html(event.target.value + '°');
-                  
+               
         this.dibujar_captura();
     }
 

@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Refresh" content="0; url='/SD/index.html'" />
-</head>
-<body>
-    <p>Si no eres redirigido, <a href="/SD/index.html">haz clic aquí</a>.</p>
-</body>
+    <head>
+        <title>Control v-plotter en SD Card</title>
+        <meta charset='utf-8'/>
+        <script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
+        <script>        
+            const cdn = 'https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/';           
+            $(function() {
+                $('#control-placeholder').load(`${cdn}control.html`);
+            });
+        </script>
+    </head>
+    <body>
+        <div id='control-placeholder'>loading html...</div>
+        <a href='/' target='_self'>Cargar controlador desde CDN</a><br /><br />
+        <div id='sdcard_present'></div>
+    </body>
 </html>

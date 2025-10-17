@@ -16,12 +16,8 @@ class Control {
         this.offsetY = 0;
         this.scale = 1;
         this.pen_down = true; // down
-
-        // creo la cola de tareas
-        this.tareas = new ColaTareas();
-        this.tareas_completadas = [];
-
-        this.distancia_dibujado = 0;
+      
+      //  this.distancia_dibujado = 0;
      
         this.init(); 
     }
@@ -61,8 +57,12 @@ class Control {
 
                         let cola = fileData.content.split("\n");
 
-                        this.tareas.limpiar();
-                        this.tareas_completadas = [];
+                        // limpio la cola de tareas
+                        this.limpiar_cola();
+
+                        //limpio las tareas ejecutadas
+                        this.limpiar_ejecutadas();   
+
                         this.tareas.pausar();                     
                         
                         setTimeout(() => {
@@ -73,11 +73,12 @@ class Control {
                                     console.warn(" LA TAREA '" + tarea + "' NO PARECE SER GCODE!!");
                                 }
                             }
-                            
+                         
+                            // calculo la distancia inicial del dibujo
+                            this.tareas.calcularDistanciaRestante(true);
+
                             this.draw_machine();
                             $("#tareas").val(this.tareas.mostrar());
-
-                            this.calcularDistanciaDibujado(this.tareas);
 
                         }, 100);
                         
@@ -314,13 +315,20 @@ Doble click: mueve la gondola`;
 
         // mostrarCamara();
 
-        // inicio con la cola pausada
-        this.cambiar_estado_cola();
 
-        $("#estado_cola").text(this.tareas.obtenerEstado().estado);
 
         // busco los parametros de la maquina y llamo a la funcion de mostrar maquina
         this.recuperar_parametros();
+
+        // creo la cola de tareas
+        const mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
+        this.tareas = new ColaTareas(this.actualizarEstadisticasEnPantalla,mmPerStep);
+        this.tareas_completadas = [];
+
+        // inicio con la cola pausada
+        this.cambiar_estado_cola();
+        
+        $("#estado_cola").text(this.tareas.obtenerEstado().estado);
 
         // precargo las tareas de inicio
         this.encolar_tarea("C14,END", this.update_pen_position.bind(this));   // subo el pen
@@ -330,7 +338,7 @@ Doble click: mueve la gondola`;
         
         this.zoom_default();
         this.init_tabs();
-        this.draw_machine();    
+        this.actualizar_estado_pen();
         
     }
 
@@ -456,8 +464,6 @@ Doble click: mueve la gondola`;
         $("#mostrar_mapa_tension").prop("checked", this.config.mostrar_mapa_tension);
         $("#mover_gondola").prop("checked", this.config.mover_gondola);
 
-        this.actualizar_estado_pen();
-        //console.log("parametros recuperados de localStore");
     }
 
     aplicar_offset_scale(){
@@ -686,7 +692,7 @@ Doble click: mueve la gondola`;
         }
     }
 
-
+/*
     guardar_tiempo_trabajo(milimetros = 0){
 
         //localStorage.removeItem('estadisticas');
@@ -722,18 +728,20 @@ Doble click: mueve la gondola`;
             localStorage.setItem("estadisticas", JSON.stringify(estadisticas));
         };
         this.guardar_estadisticas = false;
-    }
+    }*/
     
     actualizarEstadisticasEnPantalla(estadisticas){       
         //  eco('actualizo tiempo estimado '+ string_aleatorio(2));
-        eco(formatTime(new Date()));
-          eco(estadisticas);
-        this.calcularDistanciaDibujado(this.tareas);
+      //  console.log(formatTime(new Date()),estadisticas);
+      //  this.calcularDistanciaDibujado(this.tareas);
 
-        const cm_seg = Math.round( (estadisticas.milimetros / 10) / (estadisticas.milisegundos / 1000) * 10) / 10;
-        const minutos_estimados = Math.round(this.distancia_dibujado / (cm_seg * 10));
-        eco((this.distancia_dibujado/10) + ' cm');
-        $("#estadisticas_velocidad").html("Velocidad (cm/seg):" + cm_seg + "<br>Tiempo estimado: "+minutos_estimados+" min");                   
+     
+        $("#estadisticas_velocidad").html("<legend>Estadisticas</legend>\
+            Centimetros: "+ estadisticas.cm+ "<br>\
+            Estimado: "+ estadisticas.tiempo_estimado+ "<br>\
+            Velocidad (cm/seg): " + estadisticas.velocidad + "<br>\
+            Transcurrido: "+estadisticas.tiempo_transcurrido+"<br>\
+            Restante: "+ estadisticas.tiempo_restante);                   
     }
 
     update_pen_position(pen_position) { 
@@ -760,7 +768,7 @@ Doble click: mueve la gondola`;
             this.guardar_parametros();
                         
             let distancia = Math.sqrt((this.pen.x - ultimo_x) ** 2 + (this.pen.y - ultimo_y) ** 2);
-            this.guardar_tiempo_trabajo(distancia);                   
+         //   this.guardar_tiempo_trabajo(distancia);                   
 
         }
     }
@@ -772,7 +780,7 @@ Doble click: mueve la gondola`;
             $("#cambiar_status_pen").html("Up");
         }  
         this.draw_machine();   
-        this.guardar_tiempo_trabajo(0);           
+      //  this.guardar_tiempo_trabajo(0);           
     }
 
     cambiar_status_pen() {
@@ -864,13 +872,13 @@ Doble click: mueve la gondola`;
                 // logueo llamado y respuesta
                 const fin = new Date();               
 
-                $("#log").val(formatTime(ini)+ " (LOCAL) "+ parametros+ "\n" + formatTime(fin) + " (LOCAL) "+ JSON.stringify(data).replaceAll(",", ", ") +"\n" + $("#log").val());
+                this.guardarLog(formatTime(ini)+ " (LOCAL) "+ parametros+ "\n" + formatTime(fin) + " (LOCAL) "+ JSON.stringify(data).replaceAll(",", ", ") );
 
                 //actualizo la lista de tareas
                 $("#tareas").val(this.tareas.mostrar());
                 $("#estado_cola").text(this.tareas.obtenerEstado().estado);
                 if (funcionExito && typeof funcionExito === "function") {        
-                    this.guardar_estadisticas = true;
+                   // this.guardar_estadisticas = true;
                     funcionExito(data); 
                 }
                 return;
@@ -890,7 +898,8 @@ Doble click: mueve la gondola`;
 
                 // logueo llamado y respuesta
                 const fin = new Date();
-                $("#log").val( formatTime(ini)+ " "+parametros +"\n" +formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", ") +"\n" +$("#log").val());
+            
+                this.guardarLog(formatTime(ini)+ " "+parametros +"\n" +formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", "));
 
                 //actualizo la lista de tareas
                 $("#tareas").val(this.tareas.mostrar());
@@ -898,7 +907,7 @@ Doble click: mueve la gondola`;
                 this.tareas_completadas.push(parametros);
                 // Llama a la función de éxito si existe
                 if (funcionExito && typeof funcionExito === "function") {
-                    this.guardar_estadisticas = true;
+                //    this.guardar_estadisticas = true;
                     funcionExito(data);
                 }
                 return data;
@@ -912,6 +921,19 @@ Doble click: mueve la gondola`;
 
        
     }    
+
+
+    guardarLog(texto){
+        let textarea = document.getElementById('log');
+        const lineas = textarea.value.split('\n');
+
+        // limito el log a las ultimas 20 lineas
+        if (lineas.length > 20) {
+            textarea.value = texto + "\n" + lineas.slice(0, 20).join('\n');
+        }else{
+             textarea.value = texto + "\n" + textarea.value;
+        }
+    }
 
     limpiar_ejecutadas(){
         this.tareas_completadas = [];
@@ -1184,10 +1206,10 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //voy a la solapa de dibujado
         document.getElementById('tab_dibujar').click();
 
-        this.distancia_dibujado = 0;
+        //this.distancia_dibujado = 0;
 
         // cargo las tareas    
-        let vertice_ant = false;
+       // let vertice_ant = false;
         recorrido_optimizado.forEach((linea) => {         
             // subo el pen      
             this.encolar_tarea("C14,END", this.update_pen_position.bind(this),false); 
@@ -1195,9 +1217,9 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             let pen_is_down = false;
             linea.vertices.forEach((vertice) => {
 
-                if (vertice_ant){
-                    this.distancia_dibujado += Math.sqrt((vertice.x - vertice_ant.x) ** 2 + (vertice.y - vertice_ant.y) ** 2);
-                }                
+                //if (vertice_ant){
+                //    this.distancia_dibujado += Math.sqrt((vertice.x - vertice_ant.x) ** 2 + (vertice.y - vertice_ant.y) ** 2);
+                //}                
 
                 // muevo la gondola al proximo punto                       
                 let ajustado = this.ajustarOffsetEscala(vertice,captura);
@@ -1207,7 +1229,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                     this.encolar_tarea("C13,END", this.update_pen_position.bind(this),false);   
                     pen_is_down = true;
                 }          
-                vertice_ant = vertice;         
+               // vertice_ant = vertice;         
             });            
         });
               
@@ -1217,7 +1239,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         this.draw_machine();     
          
     }    
-
+/*
     calcularDistanciaDibujado(cola){
         let x_ant = false;
         let y_ant = false;
@@ -1240,7 +1262,7 @@ Pausela o elimine las tareas para importar una nueva cola.`);
             }                      
         });
         this.distancia_dibujado = distancia;
-    }
+    }*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

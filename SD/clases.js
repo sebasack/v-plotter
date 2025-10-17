@@ -1280,10 +1280,22 @@ class Dibujo {
 //////////////////////////////////////////////// CLASE COLA TAREAS ////////////////////////////////////////////////
 
 class ColaTareas {
-    constructor() {
+    constructor(funcion_actualizar_estadisticas = false, mmPerStep = false) {
         this.tareas = [];
         this.procesando = false;
         this.pausado = false;
+        
+
+        // variables usadas para calcular estadisticas
+        this.mmPerStep = mmPerStep;
+        this.funcion_actualizar_estadisticas = funcion_actualizar_estadisticas;
+        
+        this.inicio_procesado = 0;
+
+        this.distancia_inicial = 0;
+        this.velocidad = 0;
+
+
     }
 
     agregarTarea(tareaAsync, nombre = "tarea") {
@@ -1315,6 +1327,12 @@ class ColaTareas {
     async procesarSiguiente() {
         //muestro el estado de la cola
         $("#estado_cola").text(this.obtenerEstado().estado); 
+
+        // si no hay mas tareas que procesar guardo estadisticas
+        if (this.tareas.length === 0){
+            this.mostrarEstadisticas(true);
+        }
+
         if (this.pausado || this.procesando || this.tareas.length === 0) return;
 
         this.procesando = true;
@@ -1323,7 +1341,7 @@ class ColaTareas {
         try {
             $("#estado_cola").text(`🚀 Ejecutando: ${nombre}`);
             const resultado = await tarea();         
-            $("#estado_cola").text(`✅ Completado: ${nombre}`);
+            $("#estado_cola").text(`✅ Completado: ${nombre}`);          
         } catch (error) {
             $("#estado_cola").text(`❌ Error en: ${nombre}`);
         } finally {
@@ -1340,6 +1358,11 @@ class ColaTareas {
     pausar() {
         if (!this.pausado) {
             this.pausado = true;
+
+            //detengo estadisticas de procesado
+            this.mostrarEstadisticas(true);
+          //  this.inicio_procesado = 0;
+
             //$("#estado_cola").text(`⏸️  COLA PAUSADA. Tareas en espera: ${this.tareas.length}`);
             if (this.procesando) {
                 $("#estado_cola").text(`ℹ️  La tarea actual terminará, pero no se procesarán nuevas`);
@@ -1354,6 +1377,11 @@ class ColaTareas {
     reanudar() {
         if (this.pausado) {
             this.pausado = false;
+
+            //seteo el inicio de procesado
+            this.inicio_procesado = new Date();
+            this.mostrarEstadisticas(true);
+
             //$("#estado_cola").text(`▶️  COLA REANUDADA. Tareas pendientes: ${this.tareas.length}`);
             
             // Reiniciar el procesamiento si hay tareas y no se está procesando
@@ -1401,11 +1429,151 @@ class ColaTareas {
 
     mostrar() {
         let resultado = "";
-        for (let i =0; i <  this.tareas.length; i++) {
-            resultado += (  this.tareas.length-i) + ". "+ this.tareas[i].nombre + (i < this.tareas.length - 1 ? "\n" : "");
+        let cant = this.tareas.length;
+        if (cant > 20){
+            cant = 20;
+        }
+        for (let i = 0; i < cant; i++) {
+            resultado += (this.tareas.length-i) + ". " + this.tareas[i].nombre + "\n";
+        }
+        if (this.tareas.length > 20){
+            resultado += "se muestran los primeros 20..."
         }
         return resultado;
     }
+
+
+    ///////////////////////////////////////////// FUNCIONES ESTADISTICAS DEL TRABAJO /////////////////////////////////////////////
+  
+    calcularDistanciaRestante(guardar_inicial = false){
+       
+        let x_ant = false;
+        let y_ant = false;
+        let distancia = 0;
+
+  //      eco('tareas: '+this.tareas.length);
+
+        this.tareas.forEach((tarea) => {
+            let gcode = tarea.nombre.split(',');
+            if (gcode[0] == 'C17'){
+                // calculo las coordenadas cartesianas del punto
+               
+                let cartesianX = control.getCartesianX(gcode[1],gcode[2]);
+                let x = Math.round(cartesianX * this.mmPerStep);
+                let y = Math.round(control.getCartesianY(cartesianX,gcode[1]) * this.mmPerStep);
+                
+                if (x_ant && y_ant){
+                    distancia += Math.sqrt((x - x_ant) ** 2 + (y - y_ant) ** 2);
+                }
+                x_ant = x;
+                y_ant = y;
+              //  eco(distancia);       
+            }                      
+        });
+
+        //eco('distancia restante: ' + ( distancia  / 10));
+        if (guardar_inicial){
+            //eco('guardo inicial...');
+            this.distancia_inicial = distancia / 10;
+            this.mostrarEstadisticas();
+        }
+
+        return (distancia / 10);
+    }
+
+    cargarEstadisticas(){
+
+        //localStorage.clear();
+
+         // recupero los valores anteriores
+        let estadisticas_guardadas = {segundos:1, centimetros:1};
+        let estadisticas_storeage = localStorage.getItem("estadisticas");
+
+        if (estadisticas_storeage !== null){
+            estadisticas_guardadas = JSON.parse(estadisticas_storeage);
+        }
+        //console.log('cargar estadisticas',estadisticas_guardadas);
+
+        this.velocidad = estadisticas_guardadas.centimetros / estadisticas_guardadas.segundos; 
+      
+    }
+
+
+    GuardarEstadisticas(){
+        // si todavia no inicio el procesamiento de tareas no hago nada
+        if (!this.inicio_procesado || this.inicio_procesado == 0){
+            return;
+        }
+
+        const distancia_restante = this.calcularDistanciaRestante();
+        const distancia_recorrida = this.distancia_inicial - distancia_restante;
+      
+        let hora_actual = new Date();
+        const tiempo_transcurrido = (hora_actual - this.inicio_procesado) / 1000;
+
+        if (tiempo_transcurrido < 10){ // con menos de 10 segundos tengo muy poco tiempo apra hacer calculos
+            return;
+        }
+
+        const estadisticas = {
+            segundos : tiempo_transcurrido,
+            centimetros : distancia_recorrida
+        };
+
+        this.velocidad = distancia_recorrida / tiempo_transcurrido; 
+
+        if (this.velocidad < 0.01){
+            this.velocidad = 0.01;
+        }
+
+       //console.log('guardo estadisticas',estadisticas);
+
+        localStorage.setItem("estadisticas", JSON.stringify(estadisticas));
+    
+    }
+
+
+    mostrarEstadisticas(recalcular = false){
+       
+        const actual = new Date();
+        let inicio = '00:00:00';
+        let tiempo_transcurrido = 0;
+        
+        if (this.inicio_procesado == 0){
+            this.cargarEstadisticas();    
+        }else{
+            inicio = formatTime(this.inicio_procesado, false);
+            tiempo_transcurrido = Math.round((actual - this.inicio_procesado) / 1000); 
+        }
+
+        // cada un minuto recalculo estadisticas
+        if (recalcular || tiempo_transcurrido % 60 == 0){
+            this.GuardarEstadisticas();
+        }
+     
+        let tiempo_estimado = (this.distancia_inicial / this.velocidad) ;
+
+        let estadisticas = {
+            inicio: inicio,
+            tiempo_transcurrido: FormateartiempoTranscurrido(tiempo_transcurrido),
+            velocidad: (this.velocidad>99) ? this.velocidad.toFixed(0) : (this.velocidad>9) ? this.velocidad.toFixed(1) : this.velocidad.toFixed(2),
+            tiempo_estimado : FormateartiempoTranscurrido(tiempo_estimado),
+            tiempo_restante:  FormateartiempoTranscurrido(tiempo_estimado- tiempo_transcurrido),
+            cm: this.distancia_inicial.toFixed(0)
+        };
+  
+        // llamo a la funcion de retorno para actualizar las estadisticas en pantalla
+        this.funcion_actualizar_estadisticas(         
+           estadisticas
+        );    
+        
+        // mostrar nuevamente las estadisticas cada un segundo mientras la cola esta activa y tenga cosas que procesar
+        if (!this.pausado &&  this.tareas.length > 0 ) {
+            setTimeout(() => this.mostrarEstadisticas(), 1000);
+        }
+   
+    }
+   
 };
 
 //////////////////////////////////////////////// FUNCIONES VARIAS ////////////////////////////////////////////////
@@ -1417,12 +1585,48 @@ function eco(obj){
     console.log(obj);
 };
 
-function formatTime(date) {
+function FormateartiempoTranscurrido(seg){
+
+    if (isNaN(seg) || seg == 0){
+        return '00:00:00';
+    }
+
+     // Convertir milisegundos a segundos totales
+    let segundosTotales = Math.floor(Math.abs(seg));
+    
+    // Calcular horas, minutos y segundos
+    let horas = Math.floor(segundosTotales / 3600);
+    let minutos = Math.floor((segundosTotales % 3600) / 60);
+    let segundos = segundosTotales % 60; 
+    let signo = '';
+
+    if (seg<-1){
+        signo ='+';
+    }
+
+    if (horas < 10){
+        horas = '0' + horas;
+    }
+    if (minutos < 10){
+        minutos = '0' + minutos;
+    }
+    if (segundos < 10){
+        segundos = '0' + segundos;
+    }
+    
+    return `${signo}${horas}:${minutos}:${segundos}`;
+
+}
+
+function formatTime(date, milisegundos = true) {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const seconds = date.getSeconds().toString().padStart(2, '0');
-    const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
-    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+    let milliseconds = '';
+    if (milisegundos){
+        milliseconds += '.'+date.getMilliseconds().toString().padStart(3, '0')
+    };
+    return `${hours}:${minutes}:${seconds}${milliseconds}`;
 }
 
 function gcode_valido(gcode){   

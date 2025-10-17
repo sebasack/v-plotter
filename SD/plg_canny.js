@@ -309,8 +309,8 @@ class canny {
             </div>
         
             <select id = "select_metodo_captura" class="select-fijo">     
-                <option value="lineas">capturar Lineas</option>
-                <option value="bordes">capturar Bordes</option>
+                <option value="lineas">Lineas finas</option>
+                <option value="bordes">Bordes gruesos</option>
             </select>
 
             <div id="parametros_metodo_captura_lineas">
