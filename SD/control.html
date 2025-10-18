@@ -13,19 +13,16 @@
                     <div class="tab-content active" id="dibujar">
                         <fieldset>
                             <legend>Interface</legend>
-                            Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension" />    
-                            <button type="button" id="recargar_config_default" >Recargar Config default</button><br/>        
                             <button type="button" id="reset_zoom" >Reset zoom</button><br/>   
                         </fieldset>                                                                
                         <fieldset>
                             <legend>Marcador</legend>
                             <table>                    
                                 <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441"/></td><td width="60px" id="pen_motorA"></td></tr>                
-                                <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" /></td><td id="pen_motorB"></td></tr>                   
-                                <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" /></td><td rowspan="2">
-                                    <button id="cambiar_status_pen" type="button"  title="Click para cambiar el estado" >Down</button></td></tr>
-                                <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90"/></td></tr>       
-                                <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" /></td></tr>                                                       
+                                <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" /></td><td id="pen_motorB"></td></tr>     
+                                <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" /></td></tr>               
+                                <tr><td colspan="3" align="center"><button id="cambiar_status_pen" type="button"  title="Click para cambiar el estado" >Subir Pen</button></td></tr>                                 
+                                                                                      
                             </table>
                             <button type="button" id="return_to_home" >Return to Home</button><br/>                              
                             <button type="button" id="posicion_actual">Posicion actual</button><br/>
@@ -60,11 +57,19 @@
                                 <tr><td align="right">Pasos x Rev.:</td><td><input id="stepsPerRev" size="4" value="4076"/></td></tr>
                                 <tr><td align="right">Vel. maxima:</td><td><input id="currentMaxSpeed" size="4" value="1000" /></td></tr>
                                 <tr><td align="right">Aceleracion:</td><td><input id="currentAcceleration" size="4" value="400"/></td></tr>
+                                <tr><td align="right">Up pos:</td><td><input id="upPosition" size="4" value="123" /></td></tr>
+                                <tr><td align="right">Down pos:</td><td><input id="downPosition" size="4" value="90"/></td></tr>  
                             </table>
                             <button type="button" id="getMachineSpecs" >Cargar conf de la maquina</button><br/>
                             <button type="button" id="send_machine_specs">Enviar conf a la maquina</button><br/>
                             <button type="button" id="releaseMotors" >Desenergizar motores</button> <br/>     
                             <button type="button" id="restart" >Restart ESP32</button> <br/>
+                            
+                        </fieldset>
+                         <fieldset>
+                            <legend>Interface</legend>
+                            Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension" />    
+                            <button type="button" id="recargar_config_default" >Recargar Config default</button><br/>        
                         </fieldset>
                         <fieldset>
                             <legend>Pagina</legend>

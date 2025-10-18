@@ -775,9 +775,9 @@ Doble click: mueve la gondola`;
 
     actualizar_estado_pen(){
         if (this.pen_down){
-            $("#cambiar_status_pen").html("Down");
+            $("#cambiar_status_pen").html("Subir marcador");
         }else{
-            $("#cambiar_status_pen").html("Up");
+            $("#cambiar_status_pen").html("Bajar marcador");
         }  
         this.draw_machine();   
       //  this.guardar_tiempo_trabajo(0);           

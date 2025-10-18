@@ -180,184 +180,6 @@ class ImprovedLineExtractor {
         this.generar_dibujo(); 
     }
 
-    // Método principal mejorado para extraer líneas
-    extractLines(edgeMatrix, minLineLength = 10, maxGap = 2) {
-        const height = edgeMatrix.length;
-        const width = edgeMatrix[0].length;
-        
-        // Crear matriz de visitados
-        const visited = Array(height).fill().map(() => Array(width).fill(false));
-        const lines = [];
-        
-        // Recorrer todos los píxeles
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                // Si es un borde y no ha sido visitado
-                if (edgeMatrix[y][x] === 1 && !visited[y][x]) {
-                    // Seguir el contorno desde este punto
-                    const contour = this.traceContour(edgeMatrix, visited, x, y, maxGap);
-                    
-                    if (contour.length >= minLineLength) {
-                        // Simplificar el contorno para obtener una línea más limpia
-                        const simplifiedLine = this.simplifyContour(contour, 1.0);
-                        lines.push(simplifiedLine);
-                    }
-                }
-            }
-        }
-        
-        return lines;
-    }
-
-    // Algoritmo mejorado para seguir contornos
-    traceContour(edgeMatrix, visited, startX, startY, maxGap) {
-        const contour = [];
-        let x = startX;
-        let y = startY;
-        
-        // Dirección inicial (empezamos buscando en todas direcciones)
-        let dir = 0;
-        
-        // Seguir el contorno hasta volver al inicio o hasta que no haya más bordes
-        do {
-            // Marcar como visitado y añadir al contorno
-            visited[y][x] = true;
-            contour.push([x, y]);
-            
-            // Buscar siguiente punto en el contorno
-            const next = this.findNextPoint(edgeMatrix, visited, x, y, dir, maxGap);
-            
-            if (next) {
-                // Actualizar posición y dirección
-                x = next.x;
-                y = next.y;
-                dir = next.dir;
-            } else {
-                // No se encontró siguiente punto, terminar
-                break;
-            }
-            
-            // Prevenir bucles infinitos
-            if (contour.length > 10000) break;
-            
-        } while (!(x === startX && y === startY) && contour.length < 10000);
-        
-        return contour;
-    }
-
-    // Encuentra el siguiente punto en el contorno
-    findNextPoint(edgeMatrix, visited, x, y, startDir, maxGap) {
-        const height = edgeMatrix.length;
-        const width = edgeMatrix[0].length;
-        
-        // Buscar en las 8 direcciones empezando desde startDir
-        for (let i = 0; i < 8; i++) {
-            const dir = (startDir + i) % 8;
-            const [dx, dy] = this.directions[dir];
-            
-            // Verificar el punto adyacente
-            const nx = x + dx;
-            const ny = y + dy;
-            
-            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                if (edgeMatrix[ny][nx] === 1 && !visited[ny][nx]) {
-                    return { x: nx, y: ny, dir: (dir + 5) % 8 }; // +5 para dar la vuelta
-                }
-            }
-        }
-        
-        // Si no se encontró punto adyacente, buscar con brechas
-        if (maxGap > 0) {
-            for (let gap = 1; gap <= maxGap; gap++) {
-                for (let i = 0; i < 8; i++) {
-                    const dir = (startDir + i) % 8;
-                    const [dx, dy] = this.directions[dir];
-                    
-                    // Verificar el punto con brecha
-                    const nx = x + dx * gap;
-                    const ny = y + dy * gap;
-                    
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                        if (edgeMatrix[ny][nx] === 1 && !visited[ny][nx]) {
-                            return { x: nx, y: ny, dir: (dir + 5) % 8 };
-                        }
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-
-    // Simplifica un contorno usando el algoritmo de Douglas-Peucker
-    simplifyContour(points, epsilon) {
-        if (points.length <= 2) return points;
-        
-        // Encontrar el punto más lejano
-        let maxDistance = 0;
-        let maxIndex = 0;
-        const start = points[0];
-        const end = points[points.length - 1];
-        
-        for (let i = 1; i < points.length - 1; i++) {
-            const dist = this.pointToLineDistance(points[i], start, end);
-            if (dist > maxDistance) {
-                maxDistance = dist;
-                maxIndex = i;
-            }
-        }
-        
-        // Si la distancia máxima es mayor que epsilon, simplificar recursivamente
-        if (maxDistance > epsilon) {
-            const left = this.simplifyContour(points.slice(0, maxIndex + 1), epsilon);
-            const right = this.simplifyContour(points.slice(maxIndex), epsilon);
-            
-            // Combinar resultados, evitando duplicar el punto en maxIndex
-            return left.slice(0, -1).concat(right);
-        } else {
-            // Todos los puntos están cerca, devolver solo los extremos
-            return [start, end];
-        }
-    }
-
-    // Calcula la distancia de un punto a una línea
-    pointToLineDistance(point, lineStart, lineEnd) {
-        const x = point[0], y = point[1];
-        const x1 = lineStart[0], y1 = lineStart[1];
-        const x2 = lineEnd[0], y2 = lineEnd[1];
-        
-        const A = x - x1;
-        const B = y - y1;
-        const C = x2 - x1;
-        const D = y2 - y1;
-        
-        const dot = A * C + B * D;
-        const lenSq = C * C + D * D;
-        let param = -1;
-        
-        if (lenSq !== 0) {
-            param = dot / lenSq;
-        }
-        
-        let xx, yy;
-        
-        if (param < 0) {
-            xx = x1;
-            yy = y1;
-        } else if (param > 1) {
-            xx = x2;
-            yy = y2;
-        } else {
-            xx = x1 + param * C;
-            yy = y1 + param * D;
-        }
-        
-        const dx = x - xx;
-        const dy = y - yy;
-        
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     // Método alternativo: extracción por componentes conectados con brechas
     extractLinesWithGaps(edgeMatrix, minLineLength = 10, maxGap = 2) {
         const height = edgeMatrix.length;
@@ -511,7 +333,6 @@ class deteccionBordes{
         this.agregar_controles_captura(placeholder);
     }
 
-
     agregar_controles_captura(placeholder){        
 
         $(placeholder).html(`
@@ -527,7 +348,6 @@ class deteccionBordes{
         document.getElementById('grosor_slider').addEventListener('input', this.update_grosor.bind(this), false);      
         document.getElementById('unificar_lineas_adyacentes').addEventListener('change', this.update_adyacentes.bind(this), false);                    
     }
-
 
     generar_dibujo(binaryEdges = false,ajuste_inicial_offset_scale = false){          
        
@@ -547,8 +367,6 @@ class deteccionBordes{
         );       
         
     }
-
-
     
     update_grosor(event){   
         this.grosor_value = event.target.value;
