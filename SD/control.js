@@ -263,6 +263,8 @@ class Control {
         document.getElementById("calibrado_inicial").addEventListener('click', () => {this.encolar_tarea('initialCalibrate');}, false);
         document.getElementById("recalibrar").addEventListener('click', () => {this.encolar_tarea('calibrate');}, false);
 
+        document.getElementById("mostrar_mov_pen_up").addEventListener('change', this.guardar_parametros.bind(this), false);        
+      
         // captura
         // listener para elegir con que plugin se va a capturar la imagen
         document.getElementById("select_capturar").addEventListener('change', this.cambio_plugin_captura);
@@ -385,6 +387,7 @@ Doble click: mueve la gondola`;
             mostrar_mapa_tension: $("#mostrar_mapa_tension").prop("checked"),
             tareas_mostradas: parseInt($("#tareas_mostradas").val()),
             mover_gondola: $("#mover_gondola").prop("checked"),
+            mostrar_mov_pen_up: $("#mostrar_mov_pen_up").prop("checked"),
         };
 
         this.machine_specs = machine_specs_tmp;
@@ -468,6 +471,7 @@ Doble click: mueve la gondola`;
 
         $("#mostrar_mapa_tension").prop("checked", this.config.mostrar_mapa_tension);
         $("#mover_gondola").prop("checked", this.config.mover_gondola);
+        $("#mostrar_mov_pen_up").prop("checked", this.config.mostrar_mov_pen_up);
         $("#tareas_mostradas").val(this.config.tareas_mostradas);
 
     }
@@ -609,15 +613,16 @@ Doble click: mueve la gondola`;
             if (this.pen_is_down) {
                 this.ctx.lineTo(x,y);  
                 ant ={x:x,y:y};   // guardo ultima posicion que se dibujo     
-            } else {
+            } else if ( this.config.mostrar_mov_pen_up) {
                 // dibujo el trazado de la gondola mientras no esta dibujando
                 this.ctx.stroke();
                 this.linedash(ant.x,ant.y, x, y,1,1,  colores[0]);
                 this.ctx.strokeStyle ="#aaa";
-                this.ctx.beginPath();                  
-                
+                this.ctx.lineWidth = this.pen.penWidth;
+                this.ctx.beginPath();                                                 
+            }else{ // muevo sin mostrar la gondola
                 // si no dibuja las lineas punteadas muevo directametne al proximo punto
-                //this.ctx.moveTo(x,y);
+                this.ctx.moveTo(x,y);
             }
 
             //  console.log(tarea.nombre);

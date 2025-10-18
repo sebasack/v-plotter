@@ -12,7 +12,9 @@
                     
                     <div class="tab-content active" id="dibujar">
                         <fieldset>
-                            <legend>Interface</legend>
+                            <legend>Interface</legend>    
+                            Mov. sin dibujar:<input type="checkbox" id="mostrar_mov_pen_up"  title="Muestra el trayecto de la maquina cuando no esta dibujando" checked/>
+                            Tareas/logs:<input type="number" id="tareas_mostradas" min="10" max="100000"  step="10" value="30">
                             <button type="button" id="reset_zoom" >Reset zoom</button><br/>   
                         </fieldset>                                                                
                         <fieldset>
@@ -20,7 +22,7 @@
                             <table>                    
                                 <tr><td align="right">X:</td><td><input id="pen_x" size="4" value="441"/></td><td width="60px" id="pen_motorA"></td></tr>                
                                 <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" /></td><td id="pen_motorB"></td></tr>     
-                                <tr><td align="right">Width:</td><td><input id="penWidth" size="4" value="0.5" /></td></tr>               
+                                <tr><td align="right">Grosor:</td><td colspan="2"><input type="number" id="penWidth" size="4" min="0.1" max="10"  step="0.1" value="0.5" /></td></tr>               
                                 <tr><td colspan="3" align="center"><button id="cambiar_status_pen" type="button"  title="Click para cambiar el estado" >Subir Pen</button></td></tr>                                 
                                                                                       
                             </table>
@@ -68,7 +70,6 @@
                         </fieldset>
                          <fieldset>
                             <legend>Interface</legend>
-                            Tareas/logs:<input type="number" id="tareas_mostradas" min="10" max="100000"  step="10" value="30">
                             Mostrar mapa tension:<input type="checkbox" id="mostrar_mapa_tension" />    
                             <button type="button" id="recargar_config_default" >Recargar Config default</button><br/>        
                         </fieldset>
