@@ -854,7 +854,7 @@ Doble click: mueve la gondola`;
         try {
 
             // SE EJECUTA SI ESTA EN DESARROLLO
-            if (location.href.includes('file://') || location.href.includes('http://127.0.0.1') ){
+            if (location.href.includes('file://') || location.href.includes('http://127.0.0.1') || location.href.includes('https://cdn.jsdelivr.net')){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
                 let data = {'result_ok':false};
                 if (parametros == 'getPosition'){
