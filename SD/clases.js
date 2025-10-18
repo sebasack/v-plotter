@@ -1531,8 +1531,7 @@ class ColaTareas {
         let y_ant = false;
         let distancia = 0;
 
-  //      eco('tareas: '+this.tareas.length);
-
+      
         this.tareas.forEach((tarea) => {
             let gcode = tarea.nombre.split(',');
             if (gcode[0] == 'C17'){
@@ -1566,7 +1565,7 @@ class ColaTareas {
         //localStorage.clear();
 
          // recupero los valores anteriores
-        let estadisticas_guardadas = {segundos:1, centimetros:1};
+        let estadisticas_guardadas = {segundos:1, milimetros:1};
         let estadisticas_storeage = localStorage.getItem("estadisticas");
 
         if (estadisticas_storeage !== null){
@@ -1574,7 +1573,7 @@ class ColaTareas {
         }
         //console.log('cargar estadisticas',estadisticas_guardadas);
 
-        this.velocidad = estadisticas_guardadas.centimetros / estadisticas_guardadas.segundos; 
+        this.velocidad = estadisticas_guardadas.milimetros / estadisticas_guardadas.segundos; 
       
     }
 
@@ -1597,7 +1596,7 @@ class ColaTareas {
 
         const estadisticas = {
             segundos : tiempo_transcurrido,
-            centimetros : distancia_recorrida
+            milimetros : distancia_recorrida
         };
 
         this.velocidad = distancia_recorrida / tiempo_transcurrido; 
@@ -1639,7 +1638,7 @@ class ColaTareas {
             velocidad: (this.velocidad>99) ? this.velocidad.toFixed(0) : (this.velocidad>9) ? this.velocidad.toFixed(1) : this.velocidad.toFixed(2),
             tiempo_estimado : FormateartiempoTranscurrido(tiempo_estimado),
             tiempo_restante:  FormateartiempoTranscurrido(tiempo_estimado- tiempo_transcurrido),
-            cm: this.distancia_inicial.toFixed(0)
+            mm: this.distancia_inicial.toFixed(0)
         };
   
         // llamo a la funcion de retorno para actualizar las estadisticas en pantalla

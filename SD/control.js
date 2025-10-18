@@ -737,9 +737,9 @@ Doble click: mueve la gondola`;
 
      
         $("#estadisticas_velocidad").html("<legend>Estadisticas</legend>\
-            Centimetros: "+ estadisticas.cm+ "<br>\
+            Milimetros: "+ estadisticas.mm+ "<br>\
             Estimado: "+ estadisticas.tiempo_estimado+ "<br>\
-            Velocidad (cm/seg): " + estadisticas.velocidad + "<br>\
+            Velocidad (mm/seg): " + estadisticas.velocidad + "<br>\
             Transcurrido: "+estadisticas.tiempo_transcurrido+"<br>\
             Restante: "+ estadisticas.tiempo_restante);                   
     }
@@ -1194,11 +1194,11 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         this.return_to_home();    
      
         //limpio las tareas ejecutadas
-        this.limpiar_ejecutadas();                
+        this.limpiar_ejecutadas();    
         
         //pauso la cola para que no arranque inmediatamente
-        this.tareas.pausar();
-
+        this.tareas.pausar();            
+        
         //voy a la solapa de dibujado
         document.getElementById('tab_dibujar').click();
 
@@ -1228,6 +1228,10 @@ Pausela o elimine las tareas para importar una nueva cola.`);
                // vertice_ant = vertice;         
             });            
         });
+
+        // calculo la distancia inicial del dibujo
+        this.tareas.calcularDistanciaRestante(true);
+
               
         // encolo tarea de volver a home al final
         this.return_to_home();
