@@ -23,7 +23,7 @@ class sobel {
     }
 
     init(){
-         $("#select_capturar").append('<option value="cargar_config_sobel">Sobel</option>');                  
+         $("#select_capturar").append('<option value="cargar_config_sobel">Metodo Sobel</option>');                  
         this.agregar_controles_captura();
     }
   

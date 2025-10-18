@@ -281,7 +281,7 @@ class canny {
     }
 
     init(){
-        $("#select_capturar").append('<option value="cargar_config_canny">Canny</option>');         
+        $("#select_capturar").append('<option value="cargar_config_canny">Metodo Canny</option>');         
         this.agregar_controles_captura();
     }
   

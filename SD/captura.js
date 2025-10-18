@@ -61,7 +61,7 @@ class Captura {
         document.addEventListener('keyup', this.handleKeyUp.bind(this));
 
         document.getElementById("vertices_slider").addEventListener('input', this.cambio_vertices_eliminados.bind(this), false);
-        document.getElementById("angulo_rotarion").addEventListener('input', this.cambio_angulo_rotacion.bind(this), false);       
+        document.getElementById("angulo_rotacion").addEventListener('input', this.cambio_angulo_rotacion.bind(this), false);       
         document.getElementById("mostrar_imagen").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("detalle_lineas").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);
         document.getElementById("mostrar_vertices").addEventListener('change', this.cambio_mostrar_imagen_o_detalle.bind(this), false);        
@@ -84,7 +84,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
                     <label for="vertices_slider">Vertices eliminados: <span id="vertices_value">10%</span></label><br>
                     <input type="range" id="vertices_slider" min="0" max="95"  step="5" value="10">
                 </div>
-                Angulo:<input type="number" id="angulo_rotarion" min="0" max="359"  step="1" value="0">°
+                Rotar:<input type="number" id="angulo_rotacion" min="0" max="359"  step="1" value="0">°
                 <hr>
                 Mostrar imagen:<input type="checkbox" id="mostrar_imagen" checked /><br>
                 Colores lineas:<input type="checkbox" id="detalle_lineas" checked_ />   <br>
@@ -216,10 +216,9 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             this.ajustarDibujoEnPantalla();
 
             // reseteo valores de rotacion
-            $('#rotacion_slider').val(0);
+            $('#angulo_rotacion').val(0);
             this.angulo_rotacion = 0;
             this.angulo_rotacion_nuevo = 0;
-            $('#rotacion_value').html(this.angulo_rotacion + '°');            
         }
   
         // Aplicar transformaciones de vista
@@ -227,7 +226,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCtx.scale(this.scale, this.scale);
 
 
-             // calculo el centro de la imagen
+        // calculo el centro de la imagen
         let centro_rotacionX = this.dibujo.centroX;
         let centro_rotacionY = this.dibujo.centroY;
         if (this.imagen){
