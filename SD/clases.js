@@ -1324,8 +1324,7 @@ class ColaTareas {
         }));
     }
 
-    mostrar() {
-        const maximo_tareas_mostradas = 25;
+    mostrar(maximo_tareas_mostradas = 30) {
         let resultado = "";
         let cant = this.tareas.length;
         if (cant > maximo_tareas_mostradas){

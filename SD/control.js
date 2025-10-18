@@ -78,7 +78,9 @@ class Control {
                             this.tareas.calcularDistanciaRestante(true);
 
                             this.draw_machine();
-                            $("#tareas").val(this.tareas.mostrar());
+
+                            // muestro todas las tareas
+                            $("#tareas").val(this.tareas.mostrar(100000));
 
                         }, 100);
                         
@@ -196,7 +198,7 @@ class Control {
     limpiar_cola(event) {
         this.tareas.limpiar();
         this.draw_machine();
-        $("#tareas").val(this.tareas.mostrar());
+        $("#tareas").val('');
     }
 
     descargar_gcode(event){
@@ -285,7 +287,9 @@ class Control {
         document.getElementById("page_pos_x").addEventListener('click', this.guardar_parametros.bind(this), false);
         document.getElementById("centrar_pagina").addEventListener('click', this.centrar_pagina_x.bind(this), false);
         document.getElementById("page_pos_y").addEventListener('click', this.guardar_parametros.bind(this), false);
-        document.getElementById("home_pos_x").addEventListener('change', this.guardar_parametros.bind(this), false);       
+        document.getElementById("home_pos_x").addEventListener('change', this.guardar_parametros.bind(this), false);     
+
+        document.getElementById("tareas_mostradas").addEventListener('change', this.guardar_parametros.bind(this), false);  
 
         document.getElementById("set_home").addEventListener('click', this.set_home.bind(this), false);      
         document.getElementById("home_pos_y").addEventListener('change',this.guardar_parametros.bind(this), false); 
@@ -379,6 +383,7 @@ Doble click: mueve la gondola`;
 
         const config_tmp = {
             mostrar_mapa_tension: $("#mostrar_mapa_tension").prop("checked"),
+            tareas_mostradas: parseInt($("#tareas_mostradas").val()),
             mover_gondola: $("#mover_gondola").prop("checked"),
         };
 
@@ -463,6 +468,7 @@ Doble click: mueve la gondola`;
 
         $("#mostrar_mapa_tension").prop("checked", this.config.mostrar_mapa_tension);
         $("#mover_gondola").prop("checked", this.config.mover_gondola);
+        $("#tareas_mostradas").val(this.config.tareas_mostradas);
 
     }
 
@@ -875,7 +881,7 @@ Doble click: mueve la gondola`;
                 this.guardarLog(formatTime(ini)+ " (LOCAL) "+ parametros+ "\n" + formatTime(fin) + " (LOCAL) "+ JSON.stringify(data).replaceAll(",", ", ") );
 
                 //actualizo la lista de tareas
-                $("#tareas").val(this.tareas.mostrar());
+                $("#tareas").val(this.tareas.mostrar(this.config.tareas_mostradas));
                 $("#estado_cola").text(this.tareas.obtenerEstado().estado);
                 if (funcionExito && typeof funcionExito === "function") {        
                    // this.guardar_estadisticas = true;
@@ -902,7 +908,7 @@ Doble click: mueve la gondola`;
                 this.guardarLog(formatTime(ini)+ " "+parametros +"\n" +formatTime(ini) + " "+JSON.stringify(data).replaceAll(",", ", "));
 
                 //actualizo la lista de tareas
-                $("#tareas").val(this.tareas.mostrar());
+                $("#tareas").val(this.tareas.mostrar(this.config.tareas_mostradas));
 
                 this.tareas_completadas.push(parametros);
                 // Llama a la función de éxito si existe
@@ -924,9 +930,9 @@ Doble click: mueve la gondola`;
         let textarea = document.getElementById('log');
         const lineas = textarea.value.split('\n');
 
-        // limito el log a las ultimas 20 lineas
-        if (lineas.length > 20) {
-            textarea.value = texto + "\n" + lineas.slice(0, 20).join('\n');
+        // limito el log a las ultimas n lineas
+        if (lineas.length > this.config.tareas_mostradas) {
+            textarea.value = texto + "\n" + lineas.slice(0, this.config.tareas_mostradas).join('\n');
         }else{
              textarea.value = texto + "\n" + textarea.value;
         }
@@ -1205,38 +1211,34 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //this.distancia_dibujado = 0;
 
         // cargo las tareas    
-       // let vertice_ant = false;
         recorrido_optimizado.forEach((linea) => {         
             // subo el pen      
             this.encolar_tarea("C14,END", this.update_pen_position.bind(this),false); 
             
             let pen_is_down = false;
             linea.vertices.forEach((vertice) => {
-
-                //if (vertice_ant){
-                //    this.distancia_dibujado += Math.sqrt((vertice.x - vertice_ant.x) ** 2 + (vertice.y - vertice_ant.y) ** 2);
-                //}                
-
-                // muevo la gondola al proximo punto                       
+                // muevo la gondola al proximo punto
                 let ajustado = this.ajustarOffsetEscala(vertice,captura);
                 this.encolar_tarea('C17,'+ajustado.motorA+','+ajustado.motorB+',2,END', this.update_pen_position.bind(this),false);
                 if (!pen_is_down){
                     // bajo el pen
                     this.encolar_tarea("C13,END", this.update_pen_position.bind(this),false);   
                     pen_is_down = true;
-                }          
-               // vertice_ant = vertice;         
-            });            
+                }
+            });
         });
 
         // calculo la distancia inicial del dibujo
         this.tareas.calcularDistanciaRestante(true);
-
               
         // encolo tarea de volver a home al final
         this.return_to_home();
         
         this.draw_machine();     
+
+
+        // muestro todas las tareas
+        $("#tareas").val(this.tareas.mostrar(100000));
          
     }    
 /*
