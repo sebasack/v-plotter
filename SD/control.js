@@ -851,7 +851,7 @@ Doble click: mueve la gondola`;
         this.ultimo_update = ini;
    
         try {
-eco(location.href);
+
             // SE EJECUTA SI ESTA EN DESARROLLO
             if (location.href.includes('http://127.0.0.1') || location.href.includes('https://cdn.jsdelivr.net')){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
