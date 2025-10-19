@@ -853,7 +853,7 @@ Doble click: mueve la gondola`;
         try {
 
             // SE EJECUTA SI ESTA EN DESARROLLO
-            if (location.href.includes('http://127.0.0.1') || location.href.includes('https://cdn.jsdelivr.net')){
+            if (location.href.includes('http://127.0.0.1') || location.href.includes('https://sebasack.github.io/')){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
                 let data = {'result_ok':false};
                 if (parametros == 'getPosition'){
