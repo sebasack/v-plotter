@@ -305,10 +305,8 @@ class sobel {
     cargar_imagen(e){
 
         let reader = new FileReader();
-        // reader.onload = function(event) {
         reader.onload = (event) => {
             let img = new Image();
-            //img.onload = function() {
             img.onload = () => {
                 this.cambioArchivoImagen(img);
             }

@@ -1,3 +1,168 @@
+
+        class SVGToImage {
+            constructor() {
+                this.imagen = null;
+            }
+
+
+            // Función para extraer dimensiones del contenido SVG
+            obtenerDimensionesSVG(svgContent) {
+                try {
+                    const parser = new DOMParser();
+                    const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                    const svgElement = svgDoc.documentElement;
+                    
+                    // Obtener width y height del elemento SVG
+                    let ancho = parseInt(svgElement.getAttribute('width'));
+                    let alto = parseInt(svgElement.getAttribute('height'));
+                    
+                    // Si no tiene width/height, usar viewBox
+                    if (isNaN(ancho) || isNaN(alto)) {
+                        const viewBox = svgElement.getAttribute('viewBox');
+                        if (viewBox) {
+                            const partes = viewBox.split(' ').map(Number);
+                            if (partes.length === 4) {
+                                ancho = partes[2];
+                                alto = partes[3];
+                            }
+                        }
+                    }
+                    
+                    // Si aún no tenemos dimensiones, usar valores por defecto
+                    if (isNaN(ancho) || ancho === 0) ancho = 300;
+                    if (isNaN(alto) || alto === 0) alto = 150;
+                    
+                    return { ancho, alto };
+                    
+                } catch (error) {
+                    console.warn('Error al obtener dimensiones SVG, usando valores por defecto:', error);
+                    return { ancho: 300, alto: 150 };
+                }
+            }
+            
+            /**
+             * Convierte un SVG a objeto Image
+             * @param {string} svgContent - Contenido del SVG como string
+             * @returns {Promise<Image>} Promise que resuelve con el objeto Image
+             */
+            async convert(svgContent) {
+                return new Promise((resolve, reject) => {
+                    // Validar que el contenido no esté vacío
+                    if (!svgContent || typeof svgContent !== 'string') {
+                        reject(new Error('El contenido SVG no es válido'));
+                        return;
+                    }
+                    
+                    const img = new Image();
+                    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(svgBlob);
+                 
+                    img.onload = () => {
+                        URL.revokeObjectURL(url);
+
+                        // Obtener dimensiones del SVG
+                        const dimensiones = this.obtenerDimensionesSVG(svgContent);
+                        
+                        // Asignar dimensiones manualmente si la imagen no las tiene
+                        if (img.width === 0 || img.height === 0) {
+                            img.width = dimensiones.ancho;
+                            img.height = dimensiones.alto;
+                        }
+eco('pase por aca');
+                        console.log('SVG convertido a imagen exitosamente ('+img.width+','+img.height+')');
+                     
+                        resolve(img);
+                    };
+                    
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        reject(new Error('Error al cargar la imagen SVG'));
+                    };
+                    
+                    img.src = url;
+                });
+            }
+            
+            /**
+             * Convierte SVG a Image y la dibuja en un canvas
+             * @param {string} svgContent - Contenido del SVG
+             * @param {number} width - Ancho del canvas (opcional)
+             * @param {number} height - Alto del canvas (opcional)
+             * @returns {Promise<HTMLCanvasElement>} Canvas con la imagen renderizada
+             */
+            async convertToCanvas(svgContent, width = 400, height = 300) {
+                try {
+                    const imagen = await this.convert(svgContent);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Limpiar canvas
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, width, height);
+                    
+                    // Dibujar manteniendo relación de aspecto
+                    const svgRatio = imagen.width / imagen.height;
+                    const canvasRatio = width / height;
+                    
+                    let renderWidth, renderHeight, x, y;
+                    
+                    if (svgRatio > canvasRatio) {
+                        renderWidth = width;
+                        renderHeight = renderWidth / svgRatio;
+                        x = 0;
+                        y = (height - renderHeight) / 2;
+                    } else {
+                        renderHeight = height;
+                        renderWidth = renderHeight * svgRatio;
+                        x = (width - renderWidth) / 2;
+                        y = 0;
+                    }
+                    
+                    ctx.drawImage(imagen, x, y, renderWidth, renderHeight);
+                    return canvas;
+                    
+                } catch (error) {
+                    throw new Error(`Error al convertir a canvas: ${error.message}`);
+                }
+            }
+            
+            /**
+             * Convierte SVG a data URL (base64)
+             * @param {string} svgContent - Contenido del SVG
+             * @param {string} format - Formato de imagen ('png', 'jpeg', 'webp')
+             * @param {number} quality - Calidad (0-1) para formatos con pérdida
+             * @returns {Promise<string>} Data URL de la imagen
+             */
+            async convertToDataURL(svgContent, format = 'png', quality = 1) {
+                try {
+                    const canvas = await this.convertToCanvas(svgContent);
+                    return canvas.toDataURL(`image/${format}`, quality);
+                } catch (error) {
+                    throw new Error(`Error al convertir a data URL: ${error.message}`);
+                }
+            }
+            
+            /**
+             * Obtiene la imagen actual (si ya fue convertida)
+             * @returns {Image|null} Imagen actual o null si no hay
+             */
+            getCurrentImage() {
+                return this.imagen;
+            }
+            
+            /**
+             * Limpia la imagen actual
+             */
+            clear() {
+                this.imagen = null;
+            }
+        }
+
+//////////////////////////////////////////////////////////////////////        
+
+
 class ClaseReduccionVertices {
 
     constructor(lineas,metodo = 0){

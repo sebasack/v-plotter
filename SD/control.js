@@ -22,7 +22,6 @@ class Control {
         this.init(); 
     }
 
-
     cambio_plugin_captura(event){
         const select = document.getElementById("select_capturar")
         // busco el nombre del plugin seleccionado
@@ -854,7 +853,7 @@ Doble click: mueve la gondola`;
         try {
 
             // SE EJECUTA SI ESTA EN DESARROLLO
-            if (location.href.includes('file://') || location.href.includes('http://127.0.0.1') || location.href.includes('https://cdn.jsdelivr.net')){
+            if (location.href.includes('http://127.0.0.1') || location.href.includes('https://cdn.jsdelivr.net')){
                 //console.log("EJECUTANDO COMANDO EN MODO LOCAL, SE RETORNAN DATOS DE PRUEBA");
                 let data = {'result_ok':false};
                 if (parametros == 'getPosition'){
@@ -1067,9 +1066,7 @@ Doble click: mueve la gondola`;
         let motorB = this.calc_motorB(copia_vertice.x + this.page.page_pos_x ,copia_vertice.y + this.page.page_pos_y);    
 
         return {motorA:motorA,motorB:motorB}
-
     }
-
 
     ajustarOffsetEscalaInverso(vertice) {
         let verticeInverso = new Vertice(vertice.x,vertice.y);
@@ -1213,8 +1210,6 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         //voy a la solapa de dibujado
         document.getElementById('tab_dibujar').click();
 
-        //this.distancia_dibujado = 0;
-
         // cargo las tareas    
         recorrido_optimizado.forEach((linea) => {         
             // subo el pen      
@@ -1241,35 +1236,10 @@ Pausela o elimine las tareas para importar una nueva cola.`);
         
         this.draw_machine();     
 
-
         // muestro todas las tareas
         $("#tareas").val(this.tareas.mostrar(100000));
          
     }    
-/*
-    calcularDistanciaDibujado(cola){
-        let x_ant = false;
-        let y_ant = false;
-        let distancia = 0;
-        cola.tareas.forEach((tarea) => {
-            let gcode = tarea.nombre.split(',');
-            if (gcode[0] == 'C17'){
-                // calculo las coordenadas cartesianas del punto
-                let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
-                let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
-                let x = Math.round(cartesianX*mmPerStep);
-                let y = Math.round(this.getCartesianY(cartesianX,gcode[1])*mmPerStep);
-                
-                if (x_ant && y_ant){
-                    distancia += Math.sqrt((x - x_ant) ** 2 + (y - y_ant) ** 2);
-                }
-                x_ant = x;
-                y_ant = y;
-              //  eco(distancia);       
-            }                      
-        });
-        this.distancia_dibujado = distancia;
-    }*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

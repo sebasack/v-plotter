@@ -514,7 +514,7 @@ class canny {
          
         // Obtener datos de la imagen
         let imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
-              
+           
         const detector = new CannyEdgeDetector();
 
         // Obtener datos de la imagen
@@ -546,6 +546,8 @@ class canny {
 
         // capturo las lineas de la imagen con los parametros seleccionados
         const binaryEdges = this.procesar_imagen();
+
+       // this.mostrar_matriz_debug(binaryEdges);
 
         // guardo el arreglo capturado de la imagen por si cambia de metodo de captura
         this.binaryEdges = binaryEdges;
@@ -592,10 +594,8 @@ class canny {
     cargar_imagen(e){
 
         let reader = new FileReader();
-        // reader.onload = function(event) {
         reader.onload = (event) => {
             let img = new Image();
-            //img.onload = function() {
             img.onload = () => {
                 this.cambioArchivoImagen(img);
             }
