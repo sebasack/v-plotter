@@ -529,29 +529,31 @@ Doble click: mueve la gondola`;
 
 
     linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
+        this.ctx.beginPath();
         this.ctx.lineWidth = 0.5;
         this.ctx.strokeStyle = line_color; 
         this.ctx.fillStyle = line_color;
         this.ctx.setLineDash([ancho_punto,acho_separacion]);
-        this.ctx.beginPath();
         this.ctx.moveTo(x, y);
         this.ctx.lineTo(x1,y1);
         this.ctx.stroke();
+
         this.ctx.setLineDash([]); // reestablezco linea solida
     }
 
-    line(x, y, x1, y1,line_color='#000000', lineWidth=1) {    
+    line(x, y, x1, y1,line_color='#000000', lineWidth=1) {     
+        this.ctx.beginPath();
         this.ctx.lineWidth = lineWidth;
-        this.ctx.strokeStyle = line_color;
+        this.ctx.strokeStyle = line_color;       
         this.ctx.moveTo(x, y);
         this.ctx.lineTo(x1, y1);
         this.ctx.stroke();
     }
 
     circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
+        this.ctx.beginPath(); 
         this.ctx.lineWidth = lineWidth;
         this.ctx.strokeStyle = line_color;    
-        this.ctx.beginPath(); 
         this.ctx.arc(x, y, radio, 0, 2 * Math.PI);     
         if (color){
             this.ctx.fillStyle = color;
@@ -563,7 +565,7 @@ Doble click: mueve la gondola`;
     rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
         this.ctx.lineWidth = lineWidth;
         this.ctx.strokeStyle =line_color;
-        this.ctx.fillStyle = line_color;
+        this.ctx.fillStyle = line_color;    
         if (color){
             this.ctx.fillStyle = color;
             this.ctx.fillRect(x, y, ancho, alto);
@@ -576,6 +578,8 @@ Doble click: mueve la gondola`;
         this.ctx.fillText(text, x, y);
     }
 
+
+
     draw_queue() {
         //dibujo lo que esta guardado en la cola
 
@@ -583,82 +587,63 @@ Doble click: mueve la gondola`;
         //  console.log(lista);
 
         this.pen_is_down = true;
-
-        this.ctx.lineWidth = this.pen.penWidth;
-
+       
         //dibujo las tareas pendientes
-        this.ctx.strokeStyle ="#aaa";
-        this.ctx.beginPath();
 
-        let ant = {x:0,y: 0};
+        let ant = {x:this.pen.x, y:this.pen.y};
+        let x = this.pen.x;
+        let y = this.pen.y;
         // proceso cada tarea de la lista de tareas
-        for (const tarea of lista) {
-            
+        for (const tarea of lista) {           
      
-            let gcode = tarea.nombre.split(',');
+            let gcode = tarea.nombre.split(',');            
             if (gcode[0] == 'C14'){ // es un pen up
                 this.pen_is_down = false;
-            }else  if (gcode[0] == 'C13'){ // es un pen down
+            //    this.circle(ant.x,ant.y,0.5,"#00ff00"); // fin de linea
+            }else if (gcode[0] == 'C13'){ // es un pen down
                 this.pen_is_down = true;
+            //    this.circle(ant.x,ant.y,0.5,"#0000ff"); // inicio de linea
+            }else if (gcode[0] == 'C17'){
+                // calculo las coordenadas cartesianas del punto
+                let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
+                let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
+                x = Math.round(cartesianX*mmPerStep);
+                y = Math.round(this.getCartesianY(cartesianX,gcode[1])*mmPerStep);
+            }             
+
+            if (this.pen_is_down) {      
+                this.line(ant.x,ant.y,x,y,"#aaa", this.pen.penWidth);      
+            } else if (this.config.mostrar_mov_pen_up) {        
+                this.linedash(ant.x,ant.y,x,y,1,1, "#ff0000");                                   
             }
+           
+            ant = {x:x, y:y};   // guardo ultima posicion que se dibujo     
 
-            // calculo las coordenadas cartesianas del punto
-            let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
-            let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
-            let x = Math.round(cartesianX*mmPerStep);
-            let y = Math.round(this.getCartesianY(cartesianX,gcode[1])*mmPerStep);
-            //  circle(x,y,2);
-
-            if (this.pen_is_down) {
-                this.ctx.lineTo(x,y);  
-                ant ={x:x,y:y};   // guardo ultima posicion que se dibujo     
-            } else if ( this.config.mostrar_mov_pen_up) {
-                // dibujo el trazado de la gondola mientras no esta dibujando
-                this.ctx.stroke();
-                this.linedash(ant.x,ant.y, x, y,1,1,  colores[0]);
-                this.ctx.strokeStyle ="#aaa";
-                this.ctx.lineWidth = this.pen.penWidth;
-                this.ctx.beginPath();                                                 
-            }else{ // muevo sin mostrar la gondola
-                // si no dibuja las lineas punteadas muevo directametne al proximo punto
-                this.ctx.moveTo(x,y);
-            }
-
-            //  console.log(tarea.nombre);
         }
-
-        this.ctx.closePath();
-        this.ctx.stroke();
 
         this.pen_is_down = true;
 
         // dibujo las tareas terminadas
-        this.ctx.strokeStyle ="#000";
-        this.ctx.beginPath();
         for (const tarea of this.tareas_completadas) {
             let gcode = tarea.split(',');
             if (gcode[0]=='C14'){ // pen up
                 this.pen_is_down = false;
             }else  if (gcode[0]=='C13'){ // pen down
                 this.pen_is_down = true;
-            }
-
-            // calculo las coordenadas cartesianas del punto
-            let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
-            let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
-            let x = Math.round(cartesianX * mmPerStep);
-            let y = Math.round(this.getCartesianY(cartesianX, gcode[1]) * mmPerStep);
-            //  circle(x,y,2);
+            }else if (gcode[0] == 'C17'){   // calculo las coordenadas cartesianas del punto
+                let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
+                let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
+                x = Math.round(cartesianX * mmPerStep);
+                y = Math.round(this.getCartesianY(cartesianX, gcode[1]) * mmPerStep);
+            }  
 
             if (this.pen_is_down) {
-                this.ctx.lineTo(x, y);
-            } else {
-                this.ctx.moveTo(x, y);
-            }        
+                this.line(ant.x,ant.y,x,y,"#000000", this.pen.penWidth);               
+            }    
+
+            ant = {x:x, y:y};   // guardo ultima posicion que se dibujo     
         }
 
-    //  ctx.closePath();
-        this.ctx.stroke();
     };
 
     draw_machine() {
