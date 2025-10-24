@@ -30,9 +30,7 @@ class svg {
 
 
 
-    obtener_lineas_svg(imagen, svgElement){            
-
-
+    obtener_lineas_svg(imagen, svgElement){
 
         let dibujo = this.analyzeSVGStructure(svgElement) ;
 
@@ -42,7 +40,7 @@ class svg {
               // entrego a captura el dibujo y la imagen que lo genero
             captura.dibujo = dibujo;
             captura.imagen = imagen;
-eco(dibujo);
+            eco(dibujo);
             captura.dibujar_captura(true);
         }, 10);     
  
@@ -406,139 +404,43 @@ eco(dibujo);
 
 
 
-        analyzeSVGStructure(svgElement) { 
+    analyzeSVGStructure(svgElement) { 
 
-            // obtengo la parte que necesito del svg
-            this.svgContainer.innerHTML = svgElement;
-            svgElement = this.svgContainer.querySelector('svg');
-
-
-        // //estructura del svg en json
-        //  const structure = this.getElementStructure(svgElement);
-        // const jsonString = JSON.stringify(structure, null, 2);            
-        //  eco(jsonString);
+        // obtengo la parte que necesito del svg
+        this.svgContainer.innerHTML = svgElement;
+        svgElement = this.svgContainer.querySelector('svg');
 
 
-            // creo el objeto dibujo
-            let dibujo = new Dibujo();
+    // //estructura del svg en json
+    //  const structure = this.getElementStructure(svgElement);
+    // const jsonString = JSON.stringify(structure, null, 2);            
+    //  eco(jsonString);
+
+
+        // creo el objeto dibujo
+        let dibujo = new Dibujo();
+    
+        // Información del elemento SVG raíz
+        this.logElementInfo(svgElement, 0,dibujo);
         
-            // Información del elemento SVG raíz
-            this.logElementInfo(svgElement, 0,dibujo);
-            
-            // Analizar todos los elementos hijos recursivamente
-            this.analyzeChildElements(svgElement, 1,dibujo);
+        // Analizar todos los elementos hijos recursivamente
+        this.analyzeChildElements(svgElement, 1,dibujo);
 
-            return dibujo;
-                    
-        }
+        return dibujo;
+                
+    }
 
-            // Función para extraer dimensiones del contenido SVG
-        obtenerDimensionesSVG(svgContent) {
-            try {
-                const parser = new DOMParser();
-                const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
-                const svgElement = svgDoc.documentElement;
-                
-                // Obtener width y height del elemento SVG
-                let ancho = parseInt(svgElement.getAttribute('width'));
-                let alto = parseInt(svgElement.getAttribute('height'));
-                
-                // Si no tiene width/height, usar viewBox
-                if (isNaN(ancho) || isNaN(alto)) {
-                    const viewBox = svgElement.getAttribute('viewBox');
-                    if (viewBox) {
-                        const partes = viewBox.split(' ').map(Number);
-                        if (partes.length === 4) {
-                            ancho = partes[2];
-                            alto = partes[3];
-                        }
-                    }
-                }
-                
-                // Si aún no tenemos dimensiones, usar valores por defecto
-                if (isNaN(ancho) || ancho === 0) ancho = 300;
-                if (isNaN(alto) || alto === 0) alto = 150;
-                
-                return { ancho, alto };
-                
-            } catch (error) {
-                console.warn('Error al obtener dimensiones SVG, usando valores por defecto:', error);
-                return { ancho: 300, alto: 150 };
-            }
-        }
-
-        async convertSVG(svgContent) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
-            
-                img.onload = () => {
-                    URL.revokeObjectURL(url);
-                    
-                    // Crear canvas con fondo
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    const dimensiones = this.obtenerDimensionesSVG(svgContent);
-                
-                    // Asignar dimensiones manualmente si la imagen no las tiene
-                    if (img.width === 0 || img.height === 0) {
-                        img.width = dimensiones.ancho;
-                        img.height = dimensiones.alto;
-                    }
-
-                    console.log('SVG convertido a imagen exitosamente ('+img.width+','+img.height+')');
-                    
-                    canvas.width = img.width ;
-                    canvas.height = img.height ;
-                    
-                    // Dibujar fondo
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Dibujar SVG sobre el fondo
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Crear nueva imagen desde canvas
-                    const imgConFondo = new Image();
-                    imgConFondo.src = canvas.toDataURL('image/png');
-                    imgConFondo.width = canvas.width;
-                    imgConFondo.height = canvas.height;
-                  
-                    resolve(imgConFondo);
-                };
-                
-                img.onerror = () => {
-                    URL.revokeObjectURL(url);
-                    reject(new Error('Error al cargar la imagen SVG'));
-                };
-                
-                img.src = url;
-            });
-        }
-
-        // Leer archivo SVG
-        leerArchivoSVG(archivo) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
-                reader.readAsText(archivo);
-            });
-        }
-
-
+ 
 
     randomId() {
         return 'l_' + Math.random().toString(36).substring(2,10);
     }
+
     randomColor() {
         return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
     }
 
-
-    async  parseSVG(fileText, step) {
+    async parseSVG(fileText, step) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(fileText, 'image/svg+xml');
         const svg = doc.querySelector('svg');
@@ -598,44 +500,30 @@ eco(dibujo);
     }
 
 
-
     // carga la imagen desde un archivo y la manda a procesar
     async cargar_imagen(e){
-            const archivo = e.target.files[0];
-            this.txt = await archivo.text();
-            showLoading('Cargando archivo svg');
-            try {
-                const contenidoSVG = await this.leerArchivoSVG(archivo);
-                const imagen = await this.convertSVG(contenidoSVG);
-                this.actualizarNombreArchivo(imagen);
-                
-                //////////////////////////////////////////
-                await this.parseSVG(this.txt,5)  // entrego a captura el dibujo y la imagen que lo genero
-                    .then((r) => {
-                        // cuando termina dibuja                      
-                        const dibujo=r;
-                        captura.dibujo = dibujo;
-                        captura.imagen = imagen;
-                        captura.dibujar_captura(true);
-                        hideLoading();
-                    });
+        const archivo = e.target.files[0];
+        this.txt = await archivo.text();
 
-                // captura.dibujo = dibujo;
-                // captura.imagen = imagen;
-
-                // setTimeout(() => {
-                //     captura.dibujar_captura(true);
-                //    // this.obtener_lineas_svg(imagen, contenidoSVG);      
-                // }, 1000);     
-
-             //   console.log(JSON.stringify( dibujo));
-               //////////////////////////////////////////
-                
-            } catch (error) {
-                console.error('Error en test:', error);
-            }
-        }      
-    }
+        showLoading('Cargando archivo svg');     
+        try {            
+            const imagen = await SVGToImage(archivo);
+            this.actualizarNombreArchivo(imagen);
+           
+            await this.parseSVG(this.txt,3)  // entrego a captura el dibujo y la imagen que lo genero
+                .then((dibujo) => {
+                    // cuando termina dibuja                                      
+                    captura.dibujo = dibujo;
+                    captura.imagen = imagen;
+                    captura.dibujar_captura(true);
+                    hideLoading();
+                });
+                    
+        } catch (error) {
+            console.error('Error en test:', error);
+        }
+    }      
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

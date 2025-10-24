@@ -76,29 +76,29 @@ class CannyEdgeDetector {
         const kernelSize = this.gaussianKernel.length;
         const radius = Math.floor(kernelSize / 2);
         const blurred = new Array(height);
-        
+
         for (let y = 0; y < height; y++) {
             blurred[y] = new Array(width);
             for (let x = 0; x < width; x++) {
                 let sum = 0;
-                
+
                 for (let ky = 0; ky < kernelSize; ky++) {
                     for (let kx = 0; kx < kernelSize; kx++) {
                         const ny = y + ky - radius;
                         const nx = x + kx - radius;
-                        
+
                         // Manejar bordes con reflejo
                         const reflectY = Math.max(0, Math.min(height - 1, Math.abs(ny < 0 ? -ny : (ny >= height ? 2 * height - 1 - ny : ny))));
                         const reflectX = Math.max(0, Math.min(width - 1, Math.abs(nx < 0 ? -nx : (nx >= width ? 2 * width - 1 - nx : nx))));
-                        
+
                         sum += data[reflectY][reflectX] * this.gaussianKernel[ky][kx];
                     }
                 }
-                
+
                 blurred[y][x] = sum;
             }
         }
-        
+
         return blurred;
     }
 
@@ -109,7 +109,7 @@ class CannyEdgeDetector {
             [-2, 0, 2],
             [-1, 0, 1]
         ];
-        
+
         const sobelY = [
             [-1, -2, -1],
             [0, 0, 0],
@@ -118,13 +118,13 @@ class CannyEdgeDetector {
 
         const magnitude = new Array(height);
         const direction = new Array(height);
-        
+
         // Inicializar matrices
         for (let y = 0; y < height; y++) {
             magnitude[y] = new Array(width).fill(0);
             direction[y] = new Array(width).fill(0);
         }
-        
+
         // Calcular gradientes para píxeles internos
         for (let y = 1; y < height - 1; y++) {
             for (let x = 1; x < width - 1; x++) {
@@ -139,33 +139,33 @@ class CannyEdgeDetector {
                         gy += pixel * sobelY[ky + 1][kx + 1];
                     }
                 }
-                
+
                 // Calcular magnitud y dirección
                 magnitude[y][x] = Math.sqrt(gx * gx + gy * gy);
                 direction[y][x] = Math.atan2(gy, gx);
             }
         }
-        
+
         return { magnitude, direction };
     }
 
     nonMaximumSuppression(magnitude, direction, width, height) {
         const suppressed = new Array(height);
-        
+
         // Inicializar matriz de salida
         for (let y = 0; y < height; y++) {
             suppressed[y] = new Array(width).fill(0);
         }
-        
+
         for (let y = 1; y < height - 1; y++) {
             for (let x = 1; x < width - 1; x++) {
                 const angle = direction[y][x] * (180 / Math.PI);
                 const mag = magnitude[y][x];
-                
+
                 // Normalizar ángulo a 0, 45, 90, 135 grados
                 let q = 255;
                 let r = 255;
-                
+
                 // Ángulo 0° (horizontal)
                 if ((angle < 22.5 && angle >= -22.5) || angle >= 157.5 || angle < -157.5) {
                     q = magnitude[y][x + 1];
@@ -186,14 +186,14 @@ class CannyEdgeDetector {
                     q = magnitude[y + 1][x - 1];
                     r = magnitude[y - 1][x + 1];
                 }
-                
+
                 // Mantener solo si es máximo local
                 if (mag >= q && mag >= r) {
                     suppressed[y][x] = mag;
                 }
             }
         }
-        
+
         return suppressed;
     }
 
@@ -204,7 +204,7 @@ class CannyEdgeDetector {
         for (let y = 0; y < height; y++) {
             edgeMatrix[y] = new Array(width).fill(0);
         }
-        
+
         // Primera pasada: identificar bordes fuertes y débiles
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -216,7 +216,7 @@ class CannyEdgeDetector {
                 }
             }
         }
-        
+
         // Segunda pasada: conectar bordes débiles a fuertes
         for (let y = 1; y < height - 1; y++) {
             for (let x = 1; x < width - 1; x++) {
@@ -231,7 +231,7 @@ class CannyEdgeDetector {
                         }
                         if (edgeMatrix[y][x] === 2) break;
                     }
-                    
+
                     // Si no está conectado, eliminar
                     if (edgeMatrix[y][x] === 1) {
                         edgeMatrix[y][x] = 0;
@@ -239,7 +239,7 @@ class CannyEdgeDetector {
                 }
             }
         }
-        
+
         // Convertir a matriz binaria (1 = borde, 0 = no borde)
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -268,12 +268,12 @@ class canny {
         this.nombre_archivo_imagen = '';
         this.imagen = false;
         this.lowThreshold = 20;
-        this.highThreshold = 50;     
+        this.highThreshold = 50;
 
         this.binaryEdges = false;
 
-        this.clase_captura_bordes = false;    
-        this.clase_captura_lineas = false;     
+        this.clase_captura_bordes = false;
+        this.clase_captura_lineas = false;
         this.clase_captura_elegida = false;
 
         this.init();
@@ -281,33 +281,33 @@ class canny {
     }
 
     init(){
-        $("#select_capturar").append('<option value="cargar_config_canny">Metodo Canny</option>');         
+        $("#select_capturar").append('<option value="cargar_config_canny">Metodo Canny</option>');
         this.agregar_controles_captura();
     }
   
 
-    agregar_controles_captura(imagen_precargada = false){            
+    agregar_controles_captura(imagen_precargada = false){
 
         $("#parametros_captura").html(`
             <legend>Canny</legend>
 
             <input type="file" id="imageLoader"  style="display: none;" accept="image/*"  />
             <button type="button" class="boton-archivo" onclick="document.getElementById('imageLoader').click()">Examinar</button>
-      
+
             <span id="nombreArchivo" class="nombre-archivo"></span>
-            
+
             <div class="slider-container">
                 <label for="lowThreshold">Umbral Bajo:</label>
                 <input type="range" id="lowThreshold" min="1" max="100" value="20">
                 <span id="lowValue" class="value">20</span>
             </div>
-            
+
             <div class="slider-container">
                 <label for="highThreshold">Umbral Alto:</label>
                 <input type="range" id="highThreshold" min="1" max="100" value="50">
                 <span id="highValue" class="value">50</span>
             </div>
-        
+
             <select id = "select_metodo_captura" class="select-fijo2">     
                 <option value="lineas">Lineas finas</option>
                 <option value="bordes">Bordes gruesos</option>
@@ -320,7 +320,7 @@ class canny {
                 parametros_metodo_captura_bordes
             </div>
 
-            
+
             `);
 
         // listeners de botones y sliders
@@ -330,8 +330,8 @@ class canny {
 
 
         // captura   
-        this.clase_captura_bordes = new deteccionBordes("#parametros_metodo_captura_bordes",this.actualizar_dibujo);    
-        this.clase_captura_lineas = new ImprovedLineExtractor("#parametros_metodo_captura_lineas",this.actualizar_dibujo);     
+        this.clase_captura_bordes = new deteccionBordes("#parametros_metodo_captura_bordes",this.actualizar_dibujo);
+        this.clase_captura_lineas = new ImprovedLineExtractor("#parametros_metodo_captura_lineas",this.actualizar_dibujo);
 
         // listener para elegir con que plugin se va a capturar la imagen
         document.getElementById("select_metodo_captura").addEventListener('change', this.cambio_metodo_captura.bind(this));
@@ -354,13 +354,13 @@ class canny {
     
         // muestro o oculto las configuraciones segun que halla elegido
         if (seleccionado == 'lineas'){
-            this.clase_captura_elegida = this.clase_captura_lineas;   
+            this.clase_captura_elegida = this.clase_captura_lineas;
             $("#parametros_metodo_captura_lineas").show();
             $("#parametros_metodo_captura_bordes").hide();
         }else{  // bordes
-            this.clase_captura_elegida = this.clase_captura_bordes;      
+            this.clase_captura_elegida = this.clase_captura_bordes;
             $("#parametros_metodo_captura_lineas").hide();
-            $("#parametros_metodo_captura_bordes").show();     
+            $("#parametros_metodo_captura_bordes").show();
         }
 
         // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
@@ -383,7 +383,7 @@ class canny {
         this.obtener_lineas();
     }
 
-    update_highThreshold(event){   
+    update_highThreshold(event){
         this.highValue = event.target.value;
 
         $('#highValue').html(this.highValue);
@@ -393,7 +393,7 @@ class canny {
             $('#lowValue').html(this.lowThreshold);
             $('#lowThreshold').val(this.lowThreshold );
         }
-       
+
         this.obtener_lineas();
     }
 
@@ -402,18 +402,15 @@ class canny {
          
         // Obtener datos de la imagen
         let imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
-           
-        const detector = new CannyEdgeDetector();
 
-        // Obtener datos de la imagen
-        const width = this.originalCanvas.width;
-        const height = this.originalCanvas.height;
-                
+       // eco(imageData);
+        const CannyDetector = new CannyEdgeDetector();    
+
         // Detectar bordes
-        return detector.detectEdges(
+        return CannyDetector.detectEdges(
             imageData.data, 
-            width, 
-            height, 
+            imageData.width, 
+            imageData.height, 
             parseInt(this.lowThreshold), 
             parseInt(this.highThreshold)
         );
@@ -421,9 +418,10 @@ class canny {
 
     // a esta funcion la llama la clase que captura el dibujo
     actualizar_dibujo(dibujo, ajuste_inicial_offset_scale = false){
+       // eco(dibujo);
         captura.dibujo = dibujo;
         hideLoading();
-        captura.dibujar_captura(ajuste_inicial_offset_scale,true);       
+        captura.dibujar_captura(ajuste_inicial_offset_scale,true);
     }
 
     obtener_lineas(ajuste_inicial_offset_scale = false){
@@ -431,6 +429,8 @@ class canny {
             //eco('sin imagen que procesar');
             return;
         }
+
+       // eco('inicio obtener_lineas' );
 
         // capturo las lineas de la imagen con los parametros seleccionados
         const binaryEdges = this.procesar_imagen();
@@ -440,14 +440,18 @@ class canny {
         // guardo el arreglo capturado de la imagen por si cambia de metodo de captura
         this.binaryEdges = binaryEdges;
 
+        // copio en captura los datos de la imagen
         captura.imagen = this.imagen;
         captura.nombre_archivo_imagen = this.nombre_archivo_imagen;
 
+
+       // eco('termine obtener lineas, generar_dibujo ');
+
         // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
-        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);    
+        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);
 
     }
-    
+
     actualizarNombreArchivo(img) {
         const input = document.getElementById('imageLoader');
         const nombreSpan = document.getElementById('nombreArchivo');
@@ -462,6 +466,8 @@ class canny {
 
     cambioArchivoImagen(imagen){
 
+        //eco("______________________________\ncambio archivo imagen");
+
         showLoading('Cargando imagen');
        
 
@@ -474,25 +480,36 @@ class canny {
         this.originalCanvas.height = this.imagen.height;
         
         // Dibujar imagen en el canvas original
-        this.originalCtx.drawImage(imagen, 0, 0);     
+        this.originalCtx.drawImage(imagen, 0, 0);
 
         // Procesar imagen y detectar contornos
-        this.obtener_lineas(true);    
+        this.obtener_lineas(true);
 
     }
 
     // carga la imagen desde un archivo y la manda a procesar
-    cargar_imagen(e){       
+    async cargar_imagen(e){       
 
-        let reader = new FileReader();
-        reader.onload = (event) => {
-            let img = new Image();
-            img.onload = () => {
-                this.cambioArchivoImagen(img);
+        const archivo = e.target.files[0];
+        const extension = archivo.name.split('.').pop() ;
+        if (extension == 'svg'){
+            // es un SVG, lo convierto a imagen
+            await SVGToImage(archivo).then( (imagen)=> {
+                    this.cambioArchivoImagen(imagen);
+                }
+            );
+        }else{
+            let reader = new FileReader();
+            reader.onload = (event) => {
+            
+                let img = new Image();
+                img.onload = () => {
+                    this.cambioArchivoImagen(img);
+                }
+                img.src = event.target.result;
             }
-            img.src = event.target.result;
-        }
-        reader.readAsDataURL(e.target.files[0]);            
+            reader.readAsDataURL(e.target.files[0]);
+        }     
     }
 }
 
@@ -503,4 +520,4 @@ function cargar_config_canny(imagen_precargada){
 }
 
 // tengo que dejar disponible el objeto de captura para poder cargar los parametros en el html
-let captureCanny = new canny();   
+let captureCanny = new canny();

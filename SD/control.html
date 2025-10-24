@@ -29,7 +29,6 @@
                                 <tr><td align="right">Y:</td><td><input id="pen_y" size="4" value="200" /></td><td id="pen_motorB"></td></tr>     
                                 <tr><td align="right">Grosor:</td><td colspan="2"><input type="number" id="penWidth" size="4" min="0.1" max="10"  step="0.1" value="0.5" /></td></tr>               
                                 <tr><td colspan="3" align="center"><button id="cambiar_status_pen" type="button"  title="Click para cambiar el estado" >Subir Pen</button></td></tr>                                 
-
                             </table>
                             <button type="button" id="return_to_home" >Return to Home</button><br/>
                             <button type="button" id="posicion_actual">Posicion actual</button><br/>
@@ -138,9 +137,9 @@
             try {
                 await $('<link>', {rel: 'stylesheet', href: `${cdn}styles.css`}).appendTo('head');
                 await $.getScript(`${cdn}clases.js`);
-                await $.getScript(`${cdn}plg_svg.js`);
                 await $.getScript(`${cdn}plg_canny.js`);
                 await $.getScript(`${cdn}plg_sobel.js`);
+                await $.getScript(`${cdn}plg_svg.js`);
                 await $.getScript(`${cdn}captura.js`);
                 await $.getScript(`${cdn}control.js`);
             } catch (error) {
