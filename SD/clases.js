@@ -1566,3 +1566,75 @@ function string_aleatorio(length) {
     }
     return result;
 }
+
+
+let canvas_debug = false;
+
+// funcion que muestra la matriz donde se procesan los graficos
+function mostrar_matriz_debug(matriz){
+    
+    // si el canvas no fue creado lo crea
+    if (!canvas_debug){
+        const contenedor = document.getElementById('id_contenedor_canvas_debug');            
+        canvas_debug = document.createElement('canvas');    
+        
+        // Estilos 
+        Object.assign(canvas_debug.style, {
+            position: 'absolute', 
+            top: '0', 
+            left: '0',
+        });
+
+        contenedor.appendChild(canvas_debug);
+    }
+
+    const debugCtx = canvas_debug.getContext('2d');                             
+
+    let borde = 0;
+    if (matriz[0] === undefined) {
+        borde = 1;
+    }
+
+    let width = matriz[borde].length;
+    let height = matriz.length; 
+
+    canvas_debug.width =  width;
+    canvas_debug.height = height;
+
+    // Dibujar puntos        
+    for (let y = borde; y < height-borde; y++) {
+        for (let x = borde; x < width-borde; x++) {  
+            
+            let color = colores[matriz[y][x]];               
+
+           // debugCtx.lineWidth = 10;
+            debugCtx.strokeStyle = color;
+            debugCtx.fillStyle = color;
+
+            debugCtx.fillStyle = color;
+            debugCtx.fillRect(x, y, 1, 1); // x, y, ancho=1, alto=1
+            debugCtx.stroke(); // Dibujar el punto
+        }
+    }
+};
+
+
+
+
+function showLoading(texto = '') {
+    const loading = document.getElementById('loading');
+    const loadingText = document.getElementById('loadingText');
+    let dots = 0;
+    
+    loading.style.display = 'block';
+    
+    loadingInterval = setInterval(function() {
+        dots = (dots + 1) % 4;
+        loadingText.textContent = texto + '.'.repeat(dots);
+    }, 500);
+}
+
+function hideLoading() {
+    clearInterval(loadingInterval);
+    document.getElementById('loading').style.display = 'none';
+}

@@ -239,7 +239,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         if (this.mostrar_imagen && this.imagen){
             // Guardar el estado del contexto
             this.lineCtx.save();
-            
+
             // Mover el punto de origen al centro de la imagen
             this.lineCtx.translate(this.imagen.width / 2, this.imagen.height / 2);
             
@@ -310,7 +310,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         if (this.dibujo){
             // reduzco cantidad de vertices    
             this.dibujo.reducirVertices(this.vertices_eliminados);
-
+            //console.log(JSON.stringify( this.dibujo));
             // mando a girar el dibujo nuevamente por que los vertices fueron guardados sin girar
             this.angulo_rotacion_nuevo = this.angulo_rotacion;
             this.dibujar_captura();

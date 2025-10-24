@@ -1,54 +1,64 @@
-  textarea {
-        width: 100%;
-        height: 90%;
-    }   
-    body {
-        font-family: Courier, monospaced;
-        font-size: 13px;
-    }
-    input{
-        padding:0px;
-        font-size:12px;
-        line-height:2px;
-        text-align:right;
-    }
+textarea {
+    width: 100%;
+    height: 90%;
+}   
+body {
+    font-family: Courier, monospaced;
+    font-size: 13px;
+}
+input{
+    padding:0px;
+    font-size:12px;
+    line-height:2px;
+    text-align:right;
+}
 
-    .select-fijo {
-        width: 200px; /* Ancho fijo que prefieras */
-        max-width: 200px;
-        min-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-
-    /*estilos de tabs*/
-    .container {width: 230px;}
-    .tabs { display: flex; margin-bottom: -1px; }
-    .tab { 
-        padding: 5px 10px; 
-        cursor: pointer; 
-        border: 1px solid #ccc; 
-        border-bottom: none; 
-        background: #f0f0f0; 
-        margin-right: 5px; 
-        border-radius: 5px 5px 0 0; 
-    }
-    .tab.active { background: white; font-weight: bold; }
-    .content { border: 1px solid #ccc; padding: 5px;  }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }  
+.select-fijo {
+    width: 200px; /* Ancho fijo que prefieras */
+    max-width: 200px;
+    min-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 
-    /*estilos de canvas*/
+.select-fijo2 {
+    width: 180; /* Ancho fijo que prefieras */
+    max-width: 180px;
+    min-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-    .canvas-container { position: absolute; }
-    canvas { border: 1px solid #ccc; }
 
-    /*estilos de las solapas*/
+/*estilos de tabs*/
+.container {width: 230px;}
+.tabs { display: flex; margin-bottom: -1px; }
+.tab { 
+    padding: 5px 10px; 
+    cursor: pointer; 
+    border: 1px solid #ccc; 
+    border-bottom: none; 
+    background: #f0f0f0; 
+    margin-right: 5px; 
+    border-radius: 5px 5px 0 0; 
+}
+.tab.active { background: white; font-weight: bold; }
+.content { border: 1px solid #ccc; padding: 5px;  }
+.tab-content { display: none; }
+.tab-content.active { display: block; }  
 
-  /*  .container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }*/
 
-    #lineCanvas { position: absolute; top: 0; left: 0; }
-    .slider-container { margin: 5px 0; }
+/*estilos de canvas*/
+
+.canvas-container { position: absolute; }
+canvas { border: 1px solid #ccc; }
+
+/*estilos de las solapas*/
+
+/*  .container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }*/
+
+#lineCanvas { position: absolute; top: 0; left: 0; }
+.slider-container { margin: 5px 0; }

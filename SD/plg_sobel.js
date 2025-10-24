@@ -39,10 +39,10 @@ class sobel {
             <span id="nombreArchivo" class="nombre-archivo"></span>
             <div class="slider-container">
                 <label for="umbral_slider">Umbral de detección: <span id="umbral_value">50</span></label><br>
-                <input type="range" id="umbral_slider" min="10" max="500" value="50">
+                <input type="range" id="umbral_slider" min="5" max="500" value="50">
             </div>            
                       
-            <select id = "select_metodo_captura" class="select-fijo">     
+            <select id = "select_metodo_captura" class="select-fijo2">     
                 <option value="bordes">Bordes gruesos</option>
                 <option value="lineas">Lineas finas</option>
             </select>
@@ -113,57 +113,8 @@ class sobel {
         this.obtener_lineas();
     }
     
-    // funcion que muestra la matriz donde se procesan los graficos
-    mostrar_matriz_debug(matriz){
-      
-        // si el canvas no fue creado lo crea
-        if (!this.canvas_debug){
-            const contenedor = document.getElementById('id_contenedor_canvas');            
-            this.canvas_debug = document.createElement('canvas');    
-            
-            // Estilos 
-            Object.assign(this.canvas_debug.style, {
-                position: 'absolute', 
-                top: '0', 
-                left: '0',
-            });
-
-            contenedor.appendChild(this.canvas_debug);
-        }
-
-        const debugCtx = this.canvas_debug.getContext('2d');                             
-
-        this.canvas_debug.width =  this.imagen.width;
-        this.canvas_debug.height = this.imagen.height;
-
-        let borde =0;
-        if (matriz[0] === undefined) {
-            borde =1;
-        }
-
-        let width = matriz[borde].length;
-        let height= matriz.length; 
-                            
-        // Dibujar puntos        
-        for (let y = borde; y < height-borde; y++) {
-            for (let x = borde; x < width-borde; x++) {  
-                
-                let color = colores[matriz[y][x]];               
-
-                debugCtx.lineWidth = 10;
-                debugCtx.strokeStyle =color;
-                debugCtx.fillStyle = color;
-
-                debugCtx.fillStyle =color;
-                debugCtx.fillRect(x, y, 1, 1); // x, y, ancho=1, alto=1
-                debugCtx.stroke(); // Dibujar la línea
-            }
-        }
-    };
-
     //funcion que procesa la imagen poniendola en escala de grises, aplicando filtros sobel y pasandola a blanco y negro, para despues seguir las lineas
     procesar_imagen(){
-
         
         // Obtener datos de la imagen
         let imageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
@@ -185,9 +136,7 @@ class sobel {
                 grayMatrix[y][x] = 0.3 * r + 0.59 * g + 0.11 * b;
             }
         }
-
-        //  mostrar_matriz_debug(grayMatrix);        
-        
+          
         // Aplicar detección de bordes simple (operador Sobel simplificado)
         for (let y = 1; y < this.originalCanvas.height - 1; y++) {
             edgeMatrix[y] = [];
@@ -203,9 +152,7 @@ class sobel {
                 // Calcular magnitud del gradiente
                 edgeMatrix[y][x] = Math.sqrt(gx * gx + gy * gy);
             }
-        }
-        
-        //   mostrar_matriz_debug(edgeMatrix);
+        }        
 
         // Umbralizar para obtener bordes binarios
         let binaryEdges = [];
@@ -221,20 +168,9 @@ class sobel {
             }
         }
 
+        mostrar_matriz_debug(binaryEdges);
+
         return binaryEdges;
-/*
-
-        //this.mostrar_matriz_debug(binaryEdges);
-
-        const lineExtractor = new deteccionBordes();
-
-
-        // Obtener datos de la imagen
-        const width = this.originalCanvas.width;
-        const height = this.originalCanvas.height;
-
-        this.dibujo = lineExtractor.detectarBordes(binaryEdges, width, height, this.grosor_value, this.unificar_adyacentes);
-             */
     }
 
 
@@ -244,6 +180,7 @@ class sobel {
         dibujo.unificarLineas(6);
 
         captura.dibujo = dibujo;
+        hideLoading();
         captura.dibujar_captura(ajuste_inicial_offset_scale,true);
     }
 
@@ -284,6 +221,8 @@ class sobel {
 
 
     cambioArchivoImagen(imagen){
+
+        showLoading('Cargando imagen');
 
         this.imagen = imagen;
 

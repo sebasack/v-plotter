@@ -308,7 +308,7 @@ class canny {
                 <span id="highValue" class="value">50</span>
             </div>
         
-            <select id = "select_metodo_captura" class="select-fijo">     
+            <select id = "select_metodo_captura" class="select-fijo2">     
                 <option value="lineas">Lineas finas</option>
                 <option value="bordes">Bordes gruesos</option>
             </select>
@@ -397,118 +397,6 @@ class canny {
         this.obtener_lineas();
     }
 
-
-
-
-    // funcion que muestra la matriz donde se procesan los graficos
-    mostrar_matriz_debug(matriz){
-      
-        // si el canvas no fue creado lo crea
-        if (!this.canvas_debug){
-            const contenedor = document.getElementById('id_contenedor_canvas');            
-            this.canvas_debug = document.createElement('canvas');    
-            
-            // Estilos 
-            Object.assign(this.canvas_debug.style, {
-                position: 'absolute', 
-                top: '0', 
-                left: '0',
-            });
-
-            contenedor.appendChild(this.canvas_debug);
-        }
-
-        const debugCtx = this.canvas_debug.getContext('2d');                             
-
-        this.canvas_debug.width =  this.imagen.width;
-        this.canvas_debug.height = this.imagen.height;
-
-        let borde =0;
-        if (matriz[0] === undefined) {
-            borde =1;
-        }
-
-        let width = matriz[borde].length;
-        let height= matriz.length; 
-                            
-        // Dibujar puntos        
-        for (let y = borde; y < height-borde; y++) {
-            for (let x = borde; x < width-borde; x++) {  
-                
-                let color = colores[matriz[y][x]];               
-
-                debugCtx.lineWidth = 10;
-                debugCtx.strokeStyle =color;
-                debugCtx.fillStyle = color;
-
-                debugCtx.fillStyle =color;
-                debugCtx.fillRect(x, y, 1, 1); // x, y, ancho=1, alto=1
-                debugCtx.stroke(); // Dibujar la línea
-            }
-        }
-    };
-/*
-      // Visualizar líneas en el canvas
-    visualizeLines(lines, width, height) {
-
-        // si el canvas no fue creado lo crea
-        if (!this.canvas_debug){
-            const contenedor = document.getElementById('id_contenedor_canvas');            
-            this.canvas_debug = document.createElement('canvas');    
-            
-            // Estilos 
-            Object.assign(this.canvas_debug.style, {
-                position: 'absolute', 
-                top: '0', 
-                left: '0',
-            });
-
-            contenedor.appendChild(this.canvas_debug);
-        }
-
-        const debugCtx = this.canvas_debug.getContext('2d');                  
-        this.canvas_debug.width =  this.imagen.width;
-        this.canvas_debug.height = this.imagen.height;
-
-
-        // Limpiar canvas
-        debugCtx.fillStyle = 'black';
-        debugCtx.fillRect(0, 0, width, height);
-        
-
-        // Dibujar cada línea
-        lines.forEach((line, index) => {
-            if (line.length < 2) return;
-            
-            // Color diferente para cada línea
-            const hue = (index * 137.5) % 360; // Ángulo dorado
-           // debugCtx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
-            debugCtx.strokeStyle = colores[Math.floor(Math.random() * colores.length - 2) + 2];
-            debugCtx.lineWidth = 1;
-            debugCtx.beginPath();
-                        
-            // Mover al primer punto
-            debugCtx.moveTo(line[0][0], line[0][1]);
-            
-            // Dibujar línea a través de todos los puntos
-            for (let i = 1; i < line.length; i++) {
-                debugCtx.lineTo(line[i][0], line[i][1]);
-            }
-            
-            debugCtx.stroke();
-           
-            return;
-            // Dibujar vértices
-            debugCtx.fillStyle = 'white';
-            line.forEach(point => {
-                debugCtx.beginPath();
-                debugCtx.arc(point[0], point[1], 1, 0, Math.PI * 2);
-                debugCtx.fill();
-            });
-        });
-    }
-*/
-
     //funcion que procesa la imagen poniendola en escala de grises, aplicando filtros sobel y pasandola a blanco y negro, para despues seguir las lineas
     procesar_imagen(){
          
@@ -528,14 +416,14 @@ class canny {
             height, 
             parseInt(this.lowThreshold), 
             parseInt(this.highThreshold)
-        );                     
-            
+        );
     }
 
     // a esta funcion la llama la clase que captura el dibujo
     actualizar_dibujo(dibujo, ajuste_inicial_offset_scale = false){
         captura.dibujo = dibujo;
-        captura.dibujar_captura(ajuste_inicial_offset_scale,true);
+        hideLoading();
+        captura.dibujar_captura(ajuste_inicial_offset_scale,true);       
     }
 
     obtener_lineas(ajuste_inicial_offset_scale = false){
@@ -547,7 +435,7 @@ class canny {
         // capturo las lineas de la imagen con los parametros seleccionados
         const binaryEdges = this.procesar_imagen();
 
-       // this.mostrar_matriz_debug(binaryEdges);
+        mostrar_matriz_debug(binaryEdges);
 
         // guardo el arreglo capturado de la imagen por si cambia de metodo de captura
         this.binaryEdges = binaryEdges;
@@ -556,7 +444,7 @@ class canny {
         captura.nombre_archivo_imagen = this.nombre_archivo_imagen;
 
         // esta funcion cuando termine llamara a la funcion actualizar_dibujo() con el resultado de la captura
-        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);      
+        this.clase_captura_elegida.generar_dibujo(binaryEdges, ajuste_inicial_offset_scale);    
 
     }
     
@@ -573,6 +461,9 @@ class canny {
     }
 
     cambioArchivoImagen(imagen){
+
+        showLoading('Cargando imagen');
+       
 
         this.imagen = imagen;
 
@@ -591,7 +482,7 @@ class canny {
     }
 
     // carga la imagen desde un archivo y la manda a procesar
-    cargar_imagen(e){
+    cargar_imagen(e){       
 
         let reader = new FileReader();
         reader.onload = (event) => {

@@ -29,19 +29,20 @@ class svg {
 
 
 
+
     obtener_lineas_svg(imagen, svgElement){            
 
 
 
         let dibujo = this.analyzeSVGStructure(svgElement) ;
 
-//eco(dibujo.lineas);                  
+        eco(JSON.stringify( dibujo.lineas));                  
         // lo meto dentro de un timeout por que si no no llega a crearse la imagen
         setTimeout(() => {
               // entrego a captura el dibujo y la imagen que lo genero
             captura.dibujo = dibujo;
             captura.imagen = imagen;
-
+eco(dibujo);
             captura.dibujar_captura(true);
         }, 10);     
  
@@ -80,12 +81,26 @@ class svg {
         let previousCommand = '';
 
         this.comandos = {
-                    'M': 'moveTo', 'L': 'lineTo', 'H': 'horizontalLineTo', 'V': 'verticalLineTo',
-                    'C': 'curveTo', 'S': 'smoothCurveTo', 'Q': 'quadraticCurveTo', 'T': 'smoothQuadraticCurveTo',
-                    'A': 'arcTo', 'Z': 'closePath', 'm': 'moveToRelative', 'l': 'lineToRelative',
-                    'h': 'horizontalLineToRelative', 'v': 'verticalLineToRelative', 'c': 'curveToRelative',
-                    's': 'smoothCurveToRelative', 'q': 'quadraticCurveToRelative', 't': 'smoothQuadraticCurveToRelative',
-                    'a': 'arcToRelative', 'z': 'closePath'
+                    'M': 'moveTo', 
+                    'L': 'lineTo', 
+                    'H': 'horizontalLineTo', 
+                    'V': 'verticalLineTo',
+                    'C': 'curveTo', 
+                    'S': 'smoothCurveTo', 
+                    'Q': 'quadraticCurveTo', 
+                    'T': 'smoothQuadraticCurveTo',
+                    'A': 'arcTo', 
+                    'Z': 'closePath', 
+                    'm': 'moveToRelative', 
+                    'l': 'lineToRelative',
+                    'h': 'horizontalLineToRelative', 
+                    'v': 'verticalLineToRelative', 
+                    'c': 'curveToRelative',
+                    's': 'smoothCurveToRelative', 
+                    'q': 'quadraticCurveToRelative', 
+                    't': 'smoothQuadraticCurveToRelative',
+                    'a': 'arcToRelative', 
+                    'z': 'closePath'
                 };
         
         const normalized = d
@@ -117,7 +132,7 @@ class svg {
             const metodo = this.comandos[comando];
             
             switch (metodo) {
-                case 'moveTo':
+                case 'moveTo':// M
                     currentPoint = this.parsePoint(tokens, i);
                     startPoint = { ...currentPoint };
                     puntos.push({ ...currentPoint, tipo: 'M' });
@@ -128,7 +143,7 @@ class svg {
                     linea.agregarVertice(currentPoint.x, currentPoint.y);
                     i += 2;
                     break;
-                case 'moveToRelative':
+                case 'moveToRelative':// m
                     currentPoint.x += parseFloat(tokens[i]);
                     currentPoint.y += parseFloat(tokens[i + 1]);
                     startPoint = { ...currentPoint };
@@ -186,7 +201,7 @@ class svg {
                     linea.agregarVertice(currentPoint.x, currentPoint.y);
                     i += 6;
                     break;
-                case 'closePath':
+                case 'closePath': //Z
                     if (puntos.length > 0) {
                         puntos.push({ ...startPoint, tipo: 'Z' });
                         currentPoint = { ...startPoint };
@@ -199,7 +214,7 @@ class svg {
                     break;
             }
         }
-        
+        eco(puntos);
         return puntos;
     }
     
@@ -216,6 +231,12 @@ class svg {
         return paramCounts[comando] || 0;
     }
     
+
+
+
+
+
+
         
     logElementInfo(element, depth, dibujo) {
         const indent = '  '.repeat(depth);
@@ -249,6 +270,7 @@ class svg {
                     });
 
                     this.parsePath(d,dibujo);
+                  //this.pathToLines(d,dibujo);
                 }
                 break;
                 
@@ -377,8 +399,13 @@ class svg {
             });
             
             return structure;
-        }
-*/
+        }*/
+
+
+
+
+
+
         analyzeSVGStructure(svgElement) { 
 
             // obtengo la parte que necesito del svg
@@ -477,7 +504,7 @@ class svg {
                     const imgConFondo = new Image();
                     imgConFondo.src = canvas.toDataURL('image/png');
                     imgConFondo.width = canvas.width;
-                    imgConFondo.height = canvas.height;                    
+                    imgConFondo.height = canvas.height;
                   
                     resolve(imgConFondo);
                 };
@@ -501,14 +528,109 @@ class svg {
             });
         }
 
-        // carga la imagen desde un archivo y la manda a procesar
-       async cargar_imagen(e){
-            const archivo = e.target.files[0];                 
+
+
+    randomId() {
+        return 'l_' + Math.random().toString(36).substring(2,10);
+    }
+    randomColor() {
+        return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+    }
+
+
+    async  parseSVG(fileText, step) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(fileText, 'image/svg+xml');
+        const svg = doc.querySelector('svg');
+        const all = [...doc.querySelectorAll('path,rect,circle,ellipse,line,polyline,polygon')];
+        const holder = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        document.body.appendChild(holder); holder.style.display = 'none';
+      //  const results = [];
+
+
+        // creo el objeto dibujo
+        let dibujo = new Dibujo();
+
+        function rectToPath(x,y,w,h){return `M${x},${y}h${w}v${h}h${-w}Z`;}
+        function circleToPath(cx,cy,r){return `M${cx-r},${cy}a${r},${r} 0 1,0 ${2*r},0a${r},${r} 0 1,0 ${-2*r},0`; }
+        function lineToPath(x1,y1,x2,y2){return `M${x1},${y1}L${x2},${y2}`;}
+
+        for (const el of all) {
+            let d=null;
+            const tag=el.tagName.toLowerCase();
+            if(tag==='path') d=el.getAttribute('d');
+            else if(tag==='rect') d=rectToPath(el.x.baseVal.value, el.y.baseVal.value, el.width.baseVal.value, el.height.baseVal.value);
+            else if(tag==='circle') d=circleToPath(el.cx.baseVal.value, el.cy.baseVal.value, el.r.baseVal.value);
+            else if(tag==='line') d=lineToPath(el.x1.baseVal.value, el.y1.baseVal.value, el.x2.baseVal.value, el.y2.baseVal.value);
+            else if(tag==='polyline'||tag==='polygon'){
+                const pts=(el.getAttribute('points')||'').trim().replace(/\s+/g,' ');
+                d='M'+pts+(tag==='polygon'?' Z':'');
+            }
+            if(!d) continue;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+       
+            path.setAttribute('d', d);
+            const t = el.getAttribute('transform'); if(t) path.setAttribute('transform', t);
+            holder.appendChild(path);
+
+            const color = el.getAttribute('stroke') || this.randomColor();
+            const total = path.getTotalLength();
+         //   const pts=[];
+            const linea = dibujo.crearLinea();
+            for(let s = 0; s <= total; s += step){
+                const p=path.getPointAtLength(s);
+              //  pts.push({x:p.x, y:p.y});
+                linea.agregarVertice(p.x, p.y);
+
+                if (s % 1000 == 0){// Permitir que la página responda                    
+                    await new Promise(r => setTimeout(r, 0));                 
+                }
+               
+            }
+            holder.removeChild(path);
+           // results.push({color, vertices:pts});
+          
+        }
+        holder.remove();
+        return dibujo;
+      //  return results;
+    }
+
+
+
+    // carga la imagen desde un archivo y la manda a procesar
+    async cargar_imagen(e){
+            const archivo = e.target.files[0];
+            this.txt = await archivo.text();
+            showLoading('Cargando archivo svg');
             try {
-                const contenidoSVG = await this.leerArchivoSVG(archivo);                  
+                const contenidoSVG = await this.leerArchivoSVG(archivo);
                 const imagen = await this.convertSVG(contenidoSVG);
                 this.actualizarNombreArchivo(imagen);
-                this.obtener_lineas_svg(imagen, contenidoSVG);                      
+                
+                //////////////////////////////////////////
+                await this.parseSVG(this.txt,5)  // entrego a captura el dibujo y la imagen que lo genero
+                    .then((r) => {
+                        // cuando termina dibuja                      
+                        const dibujo=r;
+                        captura.dibujo = dibujo;
+                        captura.imagen = imagen;
+                        captura.dibujar_captura(true);
+                        hideLoading();
+                    });
+
+                // captura.dibujo = dibujo;
+                // captura.imagen = imagen;
+
+                // setTimeout(() => {
+                //     captura.dibujar_captura(true);
+                //    // this.obtener_lineas_svg(imagen, contenidoSVG);      
+                // }, 1000);     
+
+             //   console.log(JSON.stringify( dibujo));
+               //////////////////////////////////////////
+                
             } catch (error) {
                 console.error('Error en test:', error);
             }

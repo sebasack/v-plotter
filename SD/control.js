@@ -528,7 +528,7 @@ Doble click: mueve la gondola`;
     }
 
 
-    linedash(x, y, x1, y1,ancho_punto=2,acho_separacion=2,line_color='#000000') {   
+    linedash(x, y, x1, y1, ancho_punto=2, acho_separacion=2, line_color='#000000') {   
         this.ctx.beginPath();
         this.ctx.lineWidth = 0.5;
         this.ctx.strokeStyle = line_color; 
@@ -541,7 +541,7 @@ Doble click: mueve la gondola`;
         this.ctx.setLineDash([]); // reestablezco linea solida
     }
 
-    line(x, y, x1, y1,line_color='#000000', lineWidth=1) {     
+    line(x, y, x1, y1, line_color='#000000', lineWidth=1) {     
         this.ctx.beginPath();
         this.ctx.lineWidth = lineWidth;
         this.ctx.strokeStyle = line_color;       
@@ -550,7 +550,7 @@ Doble click: mueve la gondola`;
         this.ctx.stroke();
     }
 
-    circle(x, y, radio,line_color='#000000',color=false,lineWidth=1) {
+    circle(x, y, radio, line_color='#000000', color=false, lineWidth=1) {
         this.ctx.beginPath(); 
         this.ctx.lineWidth = lineWidth;
         this.ctx.strokeStyle = line_color;    
@@ -562,7 +562,7 @@ Doble click: mueve la gondola`;
         this.ctx.stroke();    
     }
 
-    rectangle(x, y, ancho, alto,line_color='#000000',color=false,lineWidth=1) {
+    rectangle(x, y, ancho, alto, line_color='#000000', color=false, lineWidth=1) {
         this.ctx.lineWidth = lineWidth;
         this.ctx.strokeStyle =line_color;
         this.ctx.fillStyle = line_color;    
@@ -573,7 +573,7 @@ Doble click: mueve la gondola`;
         this.ctx.strokeRect(x, y, ancho, alto);
     }
 
-    text(text, x, y,line_color='#000000') {
+    text(text, x, y, line_color='#000000') {
         this.ctx.fillStyle = line_color;
         this.ctx.fillText(text, x, y);
     }
@@ -593,6 +593,7 @@ Doble click: mueve la gondola`;
         let ant = {x:this.pen.x, y:this.pen.y};
         let x = this.pen.x;
         let y = this.pen.y;
+
         // proceso cada tarea de la lista de tareas
         for (const tarea of lista) {           
      
@@ -612,12 +613,12 @@ Doble click: mueve la gondola`;
             }             
 
             if (this.pen_is_down) {      
-                this.line(ant.x,ant.y,x,y,"#aaa", this.pen.penWidth);      
+                this.line(ant.x, ant.y, x, y, "#aaa", this.pen.penWidth);      
             } else if (this.config.mostrar_mov_pen_up) {        
-                this.linedash(ant.x,ant.y,x,y,1,1, "#ff0000");                                   
+                this.linedash(ant.x, ant.y, x, y, 1, 1, "#ff0000");                                   
             }
            
-            ant = {x:x, y:y};   // guardo ultima posicion que se dibujo     
+            ant = {x:x, y:y};   // guardo ultima posicion
 
         }
 
@@ -632,16 +633,16 @@ Doble click: mueve la gondola`;
                 this.pen_is_down = true;
             }else if (gcode[0] == 'C17'){   // calculo las coordenadas cartesianas del punto
                 let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
-                let cartesianX = this.getCartesianX(gcode[1],gcode[2]);
+                let cartesianX = this.getCartesianX(gcode[1], gcode[2]);
                 x = Math.round(cartesianX * mmPerStep);
                 y = Math.round(this.getCartesianY(cartesianX, gcode[1]) * mmPerStep);
             }  
 
             if (this.pen_is_down) {
-                this.line(ant.x,ant.y,x,y,"#000000", this.pen.penWidth);               
+                this.line(ant.x, ant.y, x, y, "#000000", this.pen.penWidth);               
             }    
 
-            ant = {x:x, y:y};   // guardo ultima posicion que se dibujo     
+            ant = {x:x, y:y};   // guardo ultima posicion
         }
 
     };
