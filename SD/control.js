@@ -16,9 +16,7 @@ class Control {
         this.offsetY = 0;
         this.scale = 1;
         this.pen_down = true; // down
-      
-      //  this.distancia_dibujado = 0;
-     
+           
         this.init(); 
     }
 
@@ -489,97 +487,6 @@ Doble click: mueve la gondola`;
         };
     }
 
-    worldToScreen(x, y, offsetX = this.offsetX, offsetY = this.offsetY,scale = this.scale) {
-        return {
-            x: (x * scale) + offsetX,
-            y: (y * scale) + offsetY
-        };
-    }
-
-    draw_image(src,x,y,width,height,globalAlpha=1){
-        const img = new Image();
-        img.onload = (event) => {
-            // Establecer transparencia global
-            this.ctx.globalAlpha = globalAlpha;
-        
-            // Calcular dimensiones manteniendo la proporcion
-            let aspectRatio = 1;
-            if(!width){
-                width= img.width;
-            }
-
-            if(!height){
-                height= img.height;
-            }
-
-            if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
-                height=width;
-                aspectRatio = img.height / img.width;
-            }        
-    
-            // Dibujar la imagen manteniendo proporcion
-            let s = this.worldToScreen(x, y);
-            this.ctx.drawImage(img,s.x, s.y, width*this.scale, (height * aspectRatio)*this.scale);
-
-            // Restaurar opacidad para las lineas
-            this.ctx.globalAlpha = 1.0;        
-        };
-        img.src = src;
-    }
-
-
-    linedash(x, y, x1, y1, ancho_punto=2, acho_separacion=2, line_color='#000000') {   
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 0.5;
-        this.ctx.strokeStyle = line_color; 
-        this.ctx.fillStyle = line_color;
-        this.ctx.setLineDash([ancho_punto,acho_separacion]);
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x1,y1);
-        this.ctx.stroke();
-
-        this.ctx.setLineDash([]); // reestablezco linea solida
-    }
-
-    line(x, y, x1, y1, line_color='#000000', lineWidth=1) {     
-        this.ctx.beginPath();
-        this.ctx.lineWidth = lineWidth;
-        this.ctx.strokeStyle = line_color;       
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x1, y1);
-        this.ctx.stroke();
-    }
-
-    circle(x, y, radio, line_color='#000000', color=false, lineWidth=1) {
-        this.ctx.beginPath(); 
-        this.ctx.lineWidth = lineWidth;
-        this.ctx.strokeStyle = line_color;    
-        this.ctx.arc(x, y, radio, 0, 2 * Math.PI);     
-        if (color){
-            this.ctx.fillStyle = color;
-            this.ctx.fill(); 
-        }     
-        this.ctx.stroke();    
-    }
-
-    rectangle(x, y, ancho, alto, line_color='#000000', color=false, lineWidth=1) {
-        this.ctx.lineWidth = lineWidth;
-        this.ctx.strokeStyle =line_color;
-        this.ctx.fillStyle = line_color;    
-        if (color){
-            this.ctx.fillStyle = color;
-            this.ctx.fillRect(x, y, ancho, alto);
-        }
-        this.ctx.strokeRect(x, y, ancho, alto);
-    }
-
-    text(text, x, y, line_color='#000000') {
-        this.ctx.fillStyle = line_color;
-        this.ctx.fillText(text, x, y);
-    }
-
-
-
     draw_queue() {
         //dibujo lo que esta guardado en la cola
 
@@ -589,7 +496,6 @@ Doble click: mueve la gondola`;
         this.pen_is_down = true;
        
         //dibujo las tareas pendientes
-
         let ant = {x:this.pen.x, y:this.pen.y};
         let x = this.pen.x;
         let y = this.pen.y;
@@ -600,10 +506,8 @@ Doble click: mueve la gondola`;
             let gcode = tarea.nombre.split(',');            
             if (gcode[0] == 'C14'){ // es un pen up
                 this.pen_is_down = false;
-            //    this.circle(ant.x,ant.y,0.5,"#00ff00"); // fin de linea
             }else if (gcode[0] == 'C13'){ // es un pen down
                 this.pen_is_down = true;
-            //    this.circle(ant.x,ant.y,0.5,"#0000ff"); // inicio de linea
             }else if (gcode[0] == 'C17'){
                 // calculo las coordenadas cartesianas del punto
                 let mmPerStep = this.machine_specs.mmPerRev / this.multiplier(this.machine_specs.stepsPerRev);
@@ -613,9 +517,9 @@ Doble click: mueve la gondola`;
             }             
 
             if (this.pen_is_down) {      
-                this.line(ant.x, ant.y, x, y, "#aaa", this.pen.penWidth);      
+                line(this.ctx, ant.x, ant.y, x, y, "#aaa", this.pen.penWidth);      
             } else if (this.config.mostrar_mov_pen_up) {        
-                this.linedash(ant.x, ant.y, x, y, 1, 1, "#ff0000");                                   
+                linedash(this.ctx, ant.x, ant.y, x, y, 1, 1, "#ff0000");                                   
             }
            
             ant = {x:x, y:y};   // guardo ultima posicion
@@ -639,7 +543,7 @@ Doble click: mueve la gondola`;
             }  
 
             if (this.pen_is_down) {
-                this.line(ant.x, ant.y, x, y, "#000000", this.pen.penWidth);               
+                line(this.ctx, ant.x, ant.y, x, y, "#000000", this.pen.penWidth);               
             }    
 
             ant = {x:x, y:y};   // guardo ultima posicion
@@ -653,85 +557,41 @@ Doble click: mueve la gondola`;
         
             // muestra el mapa de tension si esta habilitado
             if (this.config.mostrar_mapa_tension) {        
-                this.draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,0.1);  
+                draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,0.1,this.offsetX,this.offsetY, this.scale);  
             }
 
-            // dibujo el contorno de la maquina maquina
-            this.rectangle(1,1,this.machine_specs.machineSizeMm_x-1,this.machine_specs.machineSizeMm_y-1,'#000000',"#FFE6C9");
-            //text("Machine: " +machine_specs.machineSizeMm_x +"x" +machine_specs.machineSizeMm_y,10,10);
-
+            // dibujo el contorno de la maquina maquina        
+            rectangle(this.ctx, 1,1,this.machine_specs.machineSizeMm_x-1,this.machine_specs.machineSizeMm_y-1,'#000000',"#FFE6C9");
+         
             // dibujo la hoja
-            this.rectangle(this.page.page_pos_x, this.page.page_pos_y,this.page.page_width, this.page.page_height,'#000000','#ffffff');
+            rectangle(this.ctx, this.page.page_pos_x, this.page.page_pos_y,this.page.page_width, this.page.page_height,'#000000','#ffffff');
 
             this.draw_queue();
 
             //dibujo las lineas que indican el home
-            this.linedash(0,this.home.y,this.machine_specs.machineSizeMm_x,this.home.y,5,5,"#777");
-            this.linedash(this.home.x,0,this.home.x,this.machine_specs.machineSizeMm_y,5,5,"#777");
+            linedash(this.ctx, 0,this.home.y,this.machine_specs.machineSizeMm_x,this.home.y,5,5,"#777");
+            linedash(this.ctx, this.home.x,0,this.home.x,this.machine_specs.machineSizeMm_y,5,5,"#777");
 
             // dibujo la gondola y el marcador
-            this.rectangle(this.pen.x - 10, this.pen.y - 10, 20, 30, "#000000");
-            this.circle(this.pen.x, this.pen.y, 3, "#000000", "#000000");
+            rectangle(this.ctx, this.pen.x - 10, this.pen.y - 10, 20, 30, "#000000");
+            circle(this.ctx, this.pen.x, this.pen.y, 3, "#000000", "#000000");
             if (!this.pen_down){ // el pen esta up, lo dibujo levantado           
-                this.circle(this.pen.x, this.pen.y-10, 3, "#000000", "#000000");
-                this.rectangle(this.pen.x-3, this.pen.y-10,6,10,'#000000',"#000000");
+                circle(this.ctx, this.pen.x, this.pen.y-10, 3, "#000000", "#000000");
+                rectangle(this.ctx, this.pen.x-3, this.pen.y-10,6,10,'#000000',"#000000");
             }
 
             //dibujo los motores
-            this.rectangle(-20,-20,20,20,'#000000',"#000000");
-            this.rectangle(this.machine_specs.machineSizeMm_x,-20,20,20,'#000000',"#000000");
+            rectangle(this.ctx, -20,-20,20,20,'#000000',"#000000");
+            rectangle(this.ctx, this.machine_specs.machineSizeMm_x,-20,20,20,'#000000',"#000000");
 
             // dibujo los hilos de los motores a la gondola
-            this.line(0, 0, this.pen.x, this.pen.y);
-            this.line(this.machine_specs.machineSizeMm_x, 0, this.pen.x, this.pen.y);                                 
+            line(this.ctx, 0, 0, this.pen.x, this.pen.y);
+            line(this.ctx, this.machine_specs.machineSizeMm_x, 0, this.pen.x, this.pen.y);                                 
             this.ctx.restore();
         }
     }
-
-/*
-    guardar_tiempo_trabajo(milimetros = 0){
-
-        //localStorage.removeItem('estadisticas');
-
-        if (this.guardar_estadisticas){
-            let act = new Date();
-            const milisegundos = act - this.ultimo_update;
-        
-            // recupero los valores anteriores
-            let estadisticas_guardadas = {milisegundos:0,milimetros:0};
-            let estadisticas_storeage = localStorage.getItem("estadisticas");
-
-            if (estadisticas_storeage !== null){
-                estadisticas_guardadas = JSON.parse(estadisticas_storeage);
-            }
-            
-            // si no trae valor en milimetros lo pongo en 0 para que no me blanquee las estadisticas
-            if (isNaN(milimetros)){
-                milimetros = 0;
-            }
-
-            const estadisticas = {           
-                milisegundos : milisegundos + estadisticas_guardadas.milisegundos,
-                milimetros : milimetros + estadisticas_guardadas.milimetros 
-            };         
-
-            if (!this.ciclo || this.ciclo == 500){
-                this.actualizarEstadisticasEnPantalla(estadisticas);
-                this.ciclo =0;
-            }
-            this.ciclo++;
-
-            localStorage.setItem("estadisticas", JSON.stringify(estadisticas));
-        };
-        this.guardar_estadisticas = false;
-    }*/
     
-    actualizarEstadisticasEnPantalla(estadisticas){       
-        //  eco('actualizo tiempo estimado '+ string_aleatorio(2));
-      //  console.log(formatTime(new Date()),estadisticas);
-      //  this.calcularDistanciaDibujado(this.tareas);
-
-     
+    actualizarEstadisticasEnPantalla(estadisticas){            
         $("#estadisticas_velocidad").html("<legend>Estadisticas</legend>\
             Milimetros: "+ estadisticas.mm+ "<br>\
             Estimado: "+ estadisticas.tiempo_estimado+ "<br>\
@@ -761,10 +621,7 @@ Doble click: mueve la gondola`;
             $("#pen_x").val(this.pen.x);
             $("#pen_y").val(this.pen.y);
 
-            this.guardar_parametros();
-                        
-            let distancia = Math.sqrt((this.pen.x - ultimo_x) ** 2 + (this.pen.y - ultimo_y) ** 2);
-         //   this.guardar_tiempo_trabajo(distancia);                   
+            this.guardar_parametros();                                       
 
         }
     }
@@ -775,8 +632,7 @@ Doble click: mueve la gondola`;
         }else{
             $("#cambiar_status_pen").html("Bajar marcador");
         }  
-        this.draw_machine();   
-      //  this.guardar_tiempo_trabajo(0);           
+        this.draw_machine();       
     }
 
     cambiar_status_pen() {

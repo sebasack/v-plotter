@@ -2,7 +2,7 @@ class Captura {
     constructor(canvasId) {
         this.lineCanvas = document.getElementById(canvasId);
         this.lineCtx = this.lineCanvas.getContext('2d');
-        
+
         // Estados de interacción
         this.isDrawing = false;
         this.isPanning = false;
@@ -98,13 +98,13 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         this.lineCanvas.width = control.canvas.width;
         this.lineCanvas.height = control.canvas.height;
 
-        // limpio el canvas
-        this.lineCtx.clearRect(0, 0,this.lineCanvas.width,this.lineCanvas.height);
+       // limpio el canvas
+       // this.lineCtx.clearRect(0, 0,this.lineCanvas.width,this.lineCanvas.height);
+        this.lineCtx.clearRect(this.lineCtx, 0, 0,this.lineCanvas.width,this.lineCanvas.height);
         this.lineCtx.save();
 
         // muestro la maquina y la pagina centradas, lo hago antes del escalado para que quede en posicion fija
-        this.lineCtx.fillStyle = "#FFE6C9";
-        this.lineCtx.fillRect(0,0, this.lineCanvas.width,this.lineCanvas.height);
+        rectangle(this.lineCtx, 0, 0,this.lineCanvas.width,this.lineCanvas.height,"#000000", "#FFE6C9") ;
 
         // Calcular el 99% del espacio disponible
         const maxWidth = control.canvas.width * 0.95;
@@ -113,8 +113,7 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         // Calcular la escala para mantener la proporción
         const scaleX = maxWidth / control.page.page_width ;
         const scaleY = maxHeight/ control.page.page_height;
-        const scale = Math.min(scaleX, scaleY);
-        
+        const scale = Math.min(scaleX, scaleY);        
 
         // Calcular las dimensiones escaladas
         const scaledWidth = control.page.page_width * scale;
@@ -125,17 +124,9 @@ Shift + click izquierdo: Zoom al área seleccionada`;
         const y = (this.lineCanvas.height - scaledHeight) / 2;                
 
         // Dibujar fondo del cuadro
-        this.lineCtx.fillStyle = '#ffffff';
-        this.lineCtx.fillRect(x, y, scaledWidth, scaledHeight);
+        rectangle(this.lineCtx, x, y, scaledWidth, scaledHeight, '#000000', '#ffffff', 3);
         
-        // Dibujar borde del cuadro
-        this.lineCtx.strokeStyle = '#000000';
-        this.lineCtx.lineWidth = 3;
-        this.lineCtx.strokeRect(x, y, scaledWidth, scaledHeight);
-     
         // dibujar lineas de home
-
-
         this.offsetX_pagina = x;
         this.offsetY_pagina = y;
         this.width_pagina = scaledWidth;
@@ -259,42 +250,30 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             this.dibujo.rotarVertices(this.angulo_rotacion_nuevo, centro_rotacionX, centro_rotacionY);   
             this.angulo_rotacion_nuevo = 0;
         }
-
-
-        this.lineCtx.lineWidth = 1;
-
-        // si no esta activado el mostrado de detalle de  lineas lo dibujo en negro
-        if (!this.detalle_lineas){
-            this.lineCtx.strokeStyle ="#000000";                
-        }       
-
+     
+       
         // dibujo las lineas generadas
         this.dibujo.lineas.forEach((linea) => {
         
+            let color_linea="#000000";
             if (this.detalle_lineas){  
-                this.lineCtx.strokeStyle = linea.color;
-            }else{
-                this.lineCtx.strokeStyle = '#000000';
+                color_linea= linea.color;
             }
-                      
-            this.lineCtx.beginPath();        
-            this.lineCtx.moveTo(linea.vertices[0].x, linea.vertices[0].y);          
+                                 
+            for (let i=1;i< linea.vertices.length;i++){
+                line(this.lineCtx, linea.vertices[i-1].x,linea.vertices[i-1].y,linea.vertices[i].x,linea.vertices[i].y,color_linea);                                             
+            }      
+            
            
-            for (let i=1;i< linea.vertices.length;i++){                           
-                this.lineCtx.lineTo(linea.vertices[i].x,linea.vertices[i].y);
-                this.lineCtx.stroke();                                                  
-            }        
         });
 
         //dibujo vertices 
         this.dibujo.lineas.forEach((linea) => {                                           
             for (let i = 0; i < linea.vertices.length; i++){   
                 if (linea.vertices[i].elegido){
-                    this.lineCtx.strokeStyle ='#ff0000';                         
-                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.1, 0.1); 
+                    rectangle(this.lineCtx, linea.vertices[i].x,linea.vertices[i].y,0.1,0.1,'#ff0000');
                 }else if (this.mostrar_vertices){
-                    this.lineCtx.strokeStyle ='#00ff00';     
-                    this.lineCtx.strokeRect(linea.vertices[i].x,linea.vertices[i].y, 0.1, 0.1); 
+                    rectangle(this.lineCtx, linea.vertices[i].x,linea.vertices[i].y,0.1,0.1,'#00ff00');
                 }                                 
             }        
         });            
@@ -400,7 +379,6 @@ Shift + click izquierdo: Zoom al área seleccionada`;
             this.lastY = mouseY;
             
             this.dibujar_captura();
-        //   this.updateUI();
         }
     }
 

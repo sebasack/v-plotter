@@ -164,12 +164,23 @@ class ImprovedLineExtractor {
             return;            
         }        
 
-        // llamo a la funcion de retorno para entregarle el digujo generado
-        this.funcion_retorno(
-              // envio una copia por que podria modifica el arreglo   
-             this.extractLinesWithGaps(this.binaryEdges.map(innerArray => [...innerArray]), this.minLineLength, this.gapValue),
-             ajuste_inicial_offset_scale
-        );
+         // envio una copia por que podria modifica el arreglo   
+        this.extractLinesWithGaps(this.binaryEdges.map(innerArray => [...innerArray]), this.minLineLength, this.gapValue, (progress) => {
+          //  console.log(`Progreso: ${progress.toFixed(1)}%`);
+            showLoading(`Progreso: ${progress.toFixed(0)}%`,false);
+            // Actualizar barra de progreso en la UI
+        }).then(dibujo => {
+           // console.log('Completado!', dibujo);   
+            this.funcion_retorno(               
+                dibujo,
+                ajuste_inicial_offset_scale
+            );
+        });
+
+
+
+
+     
     }
 
 
@@ -185,6 +196,90 @@ class ImprovedLineExtractor {
         this.generar_dibujo(); 
     }
 
+    extractLinesWithGaps(edgeMatrix, minLineLength = 10, maxGap = 2, onProgress = null) {
+        return new Promise((resolve, reject) => {
+            try {
+                const height = edgeMatrix.length;
+                const width = edgeMatrix[0].length;
+                const totalPixels = height * width;
+                let processedPixels = 0;
+                
+                let dibujo = new Dibujo();
+                const visited = Array(height).fill().map(() => Array(width).fill(false));
+                
+                let currentY = 0;
+                let currentX = 0;
+                const chunkSize = 1000;
+                
+                const processChunk = () => {
+                    const startTime = performance.now();
+                    let processed = 0;
+                    
+                    for (; currentY < height; currentY++) {
+                        for (; currentX < width; currentX++) {
+                            if (edgeMatrix[currentY][currentX] === 1 && !visited[currentY][currentX]) {
+                                const component = this.findConnectedComponentWithGaps(edgeMatrix, visited, currentX, currentY, maxGap);
+                                
+                                if (component.length >= minLineLength) {
+                                    const orderedLine = this.orderPointsToLine(component);
+                                    let color = 2;
+                                    let linea = dibujo.crearLinea(colores[color]);
+                                    
+                                    for (let i = 0; i < orderedLine.length; i++) {
+                                        if (i > 0 && this.distance(orderedLine[i-1], orderedLine[i]) > maxGap) {
+                                            if (linea.vertices.length < 2) {
+                                                dibujo.eliminarLinea(linea.id);
+                                            }
+                                            linea = dibujo.crearLinea(colores[color]);
+                                        }
+                                        linea.agregarVertice(orderedLine[i][0], orderedLine[i][1]);
+                                        color = (color % (colores.length - 1)) + 2;
+                                    }
+                                    
+                                    if (linea.vertices.length < 2) {
+                                        dibujo.eliminarLinea(linea.id);
+                                    }
+                                }
+                            }
+                            
+                            processed++;
+                            processedPixels++;
+                            
+                            if (processed >= chunkSize || performance.now() - startTime > 16) {
+                                currentX++;
+                                if (currentX >= width) {
+                                    currentX = 0;
+                                    currentY++;
+                                }
+                                break;
+                            }
+                        }
+                        
+                        if (currentX < width) break;
+                        else currentX = 0;
+                    }
+                    
+                    // Reportar progreso
+                    if (onProgress) {                       
+                        const progress = (processedPixels / totalPixels) * 100;                       
+                        onProgress(Math.min(progress, 100));
+                    }
+                    
+                    if (currentY >= height) {                    
+                        resolve(dibujo);
+                    } else {
+                        setTimeout(processChunk, 0);
+                    }
+                };
+                
+                processChunk();
+                
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+/*
     // Método alternativo: extracción por componentes conectados con brechas
     extractLinesWithGaps(edgeMatrix, minLineLength = 10, maxGap = 2) {
         const height = edgeMatrix.length;
@@ -236,6 +331,7 @@ class ImprovedLineExtractor {
         
         return dibujo;
     }
+*/
 
     // Encuentra componentes conectados permitiendo brechas
     findConnectedComponentWithGaps(edgeMatrix, visited, startX, startY, maxGap) {
@@ -1621,17 +1717,22 @@ function mostrar_matriz_debug(matriz){
 
 
 
-function showLoading(texto = '') {
+function showLoading(texto = '', mostrar_puntos = true) {
     const loading = document.getElementById('loading');
     const loadingText = document.getElementById('loadingText');
     let dots = 0;
+
+    loadingText.textContent = texto;   
     
     loading.style.display = 'block';
+    if (mostrar_puntos){         
+         loadingInterval = setInterval(function() {
+            dots = (dots + 1) % 4;
+            loadingText.textContent = texto + '.'.repeat(dots);
+        }, 500);  
+    }
     
-    loadingInterval = setInterval(function() {
-        dots = (dots + 1) % 4;
-        loadingText.textContent = texto + '.'.repeat(dots);
-    }, 500);
+   
 }
 
 function hideLoading() {
@@ -1674,7 +1775,6 @@ function obtenerDimensionesSVG(svgContent) {
         return { ancho: 300, alto: 150 };
     }
 }
-
 
 
 
@@ -1748,4 +1848,94 @@ async function convertSVGToImage(svgContent) {
     });
 }
     
+
+function worldToScreen(x, y, offsetX, offsetY, scale) {
+    return {
+        x: (x * scale) + offsetX,
+        y: (y * scale) + offsetY
+    };
+}
+
+function draw_image(ctx, src, x, y, width, height, globalAlpha = 1, offsetX=0, offsetY=0, scale = 1.0){
+    const img = new Image();
+    img.onload = (event) => {
+        // Establecer transparencia global
+        this.ctx.globalAlpha = globalAlpha;
+    
+        // Calcular dimensiones manteniendo la proporcion
+        let aspectRatio = 1;
+        if(!width){
+            width = img.width;
+        }
+
+        if(!height){
+            height = img.height;
+        }
+
+        if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
+            height = width;
+            aspectRatio = img.height / img.width;
+        }        
+
+        // Dibujar la imagen manteniendo proporcion
+        let s = worldToScreen(x, y, offsetX, offsetY, scale);
+        ctx.drawImage(img,s.x, s.y, width * scale, (height * aspectRatio) * scale);
+
+        // Restaurar opacidad para las lineas
+        ctx.globalAlpha = 1.0;        
+    };
+    img.src = src;
+}
+
+
+function linedash(ctx, x, y, x1, y1, ancho_punto=2, acho_separacion=2, line_color='#000000') {   
+    ctx.beginPath();
+    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = line_color; 
+    ctx.fillStyle = line_color;
+    ctx.setLineDash([ancho_punto,acho_separacion]);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+
+    ctx.setLineDash([]); // reestablezco linea solida
+}
+
+function line(ctx, x, y, x1, y1, line_color='#000000', lineWidth=1) {     
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = line_color;       
+    ctx.moveTo(x, y);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+}
+
+function circle(ctx, x, y, radio, line_color='#000000', color=false, lineWidth=1) {
+    ctx.beginPath(); 
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = line_color;    
+    ctx.arc(x, y, radio, 0, 2 * Math.PI);     
+    if (color){
+        ctx.fillStyle = color;
+        ctx.fill(); 
+    }     
+    ctx.stroke();    
+}
+
+function rectangle(ctx, x, y, ancho, alto, line_color='#000000', color=false, lineWidth=1) {
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle =line_color;
+    ctx.fillStyle = line_color;    
+    if (color){
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, ancho, alto);
+    }
+    ctx.strokeRect(x, y, ancho, alto);
+}
+
+function text(ctx,text, x, y, line_color='#000000') {
+    ctx.fillStyle = line_color;
+    ctx.fillText(text, x, y);
+}
+
 
