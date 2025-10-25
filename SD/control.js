@@ -551,13 +551,46 @@ Doble click: mueve la gondola`;
 
     };
 
+
+draw_image(src, x, y, width, height, globalAlpha = 1, offsetX=0, offsetY=0, scale = 1.0){
+    const img = new Image();
+    img.onload = (event) => {
+        // Establecer transparencia global
+        this.ctx.globalAlpha = globalAlpha;
+    
+        // Calcular dimensiones manteniendo la proporcion
+        let aspectRatio = 1;
+        if(!width){
+            width = img.width;
+        }
+
+        if(!height){
+            height = img.height;
+        }
+
+        if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
+            height = width;
+            aspectRatio = img.height / img.width;
+        }        
+
+        // Dibujar la imagen manteniendo proporcion
+        let s = worldToScreen(x, y, offsetX, offsetY, scale);
+        this.ctx.drawImage(img,s.x, s.y, width * scale, (height * aspectRatio) * scale);
+
+        // Restaurar opacidad para las lineas
+        this.ctx.globalAlpha = 1.0;        
+    };
+    img.src = src;
+}
+
+
     draw_machine() {
         if (this.canvas.getContext) {
             this.aplicar_offset_scale();
         
             // muestra el mapa de tension si esta habilitado
             if (this.config.mostrar_mapa_tension) {        
-                draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,0.1,this.offsetX,this.offsetY, this.scale);  
+                this.draw_image("https://cdn.jsdelivr.net/gh/sebasack/v-plotter@latest/SD/vPlotterMap.png",-15,-20,this.machine_specs.machineSizeMm_x + 30,false,0.1,this.offsetX,this.offsetY, this.scale);  
             }
 
             // dibujo el contorno de la maquina maquina        
@@ -724,7 +757,7 @@ Doble click: mueve la gondola`;
                 // logueo llamado y respuesta
                 const fin = new Date();               
 
-                this.guardarLog(formatTime(ini)+ " (LOCAL) "+ parametros+ "\n" + formatTime(fin) + " (LOCAL) "+ JSON.stringify(data).replaceAll(",", ", ") );
+                this.guardarLog(formatTime(ini)+ " (DEMO) "+ parametros+ "\n" + formatTime(fin) + " (DEMO) "+ JSON.stringify(data).replaceAll(",", ", ") );
 
                 //actualizo la lista de tareas
                 $("#tareas").val(this.tareas.mostrar(this.config.tareas_mostradas));
@@ -780,7 +813,7 @@ Doble click: mueve la gondola`;
         if (lineas.length > this.config.tareas_mostradas) {
             textarea.value = texto + "\n" + lineas.slice(0, this.config.tareas_mostradas).join('\n');
         }else{
-             textarea.value = texto + "\n" + textarea.value;
+            textarea.value = texto + "\n" + textarea.value;
         }
     }
 

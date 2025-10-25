@@ -6,6 +6,8 @@ class svg {
         this.imagen = false;
         this.nombre_archivo_imagen = '';
 
+        this.pasos =3;
+
         this.init();
     }
     
@@ -21,14 +23,25 @@ class svg {
             
             <input type="file" id="imageLoader"  style="display: none;" accept=".svg"  />
             <button type="button" class="boton-archivo" onclick="document.getElementById('imageLoader').click()">Examinar</button>
-    
-            <span id="nombreArchivo" class="nombre-archivo"></span>`);
+                <span id="nombreArchivo" class="nombre-archivo"></span><br>
+                
+                Pasos:<input type="number" id="pasos" min="1" max="10"  step="1" value="3">
+                `);
             
         document.getElementById('imageLoader').addEventListener('change', this.cargar_imagen.bind(this), false);
+
+        document.getElementById("pasos").addEventListener('input', this.cambio_pasos.bind(this), false);       
     }
 
 
+    cambio_pasos(event){        
+        // guardo el nuevo angulo
+        this.pasos = parseInt(event.target.value);
 
+        this.parsearSVG();
+       
+     //   this.dibujar_captura();
+    }
 
     obtener_lineas_svg(imagen, svgElement){
 
@@ -231,10 +244,6 @@ class svg {
     
 
 
-
-
-
-
         
     logElementInfo(element, depth, dibujo) {
         const indent = '  '.repeat(depth);
@@ -352,29 +361,29 @@ class svg {
                 }
                 break;
         }
-        /*
-        // Información de estilo
-        const style = element.getAttribute('style');
-        if (style) {
-            eco(`${indent}  🎨 Estilos CSS:`, 'style');
-            const styleRules = style.split(';').filter(rule => rule.trim());
-            styleRules.forEach(rule => {
-                eco(`${indent}    • ${rule.trim()}`, 'css');
-            });
-        }
-        */
-       /*
-        // Contenido de texto (si existe)
-        const childNodes = Array.from(element.childNodes);
-        const textNodes = childNodes.filter(node => node.nodeType === Node.TEXT_NODE);
-        const textContent = textNodes.map(node => node.textContent.trim()).filter(text => text).join(' ');
         
-        if (textContent && !['text', 'tspan'].includes(tagName)) {
-            eco(`${indent}  📄 Contenido: "${textContent}"`, 'content');
-        }
+        // // Información de estilo
+        // const style = element.getAttribute('style');
+        // if (style) {
+        //     eco(`${indent}  🎨 Estilos CSS:`, 'style');
+        //     const styleRules = style.split(';').filter(rule => rule.trim());
+        //     styleRules.forEach(rule => {
+        //         eco(`${indent}    • ${rule.trim()}`, 'css');
+        //     });
+        // }
         
-        eco('', 'spacer');
-        */
+       
+        // // Contenido de texto (si existe)
+        // const childNodes = Array.from(element.childNodes);
+        // const textNodes = childNodes.filter(node => node.nodeType === Node.TEXT_NODE);
+        // const textContent = textNodes.map(node => node.textContent.trim()).filter(text => text).join(' ');
+        
+        // if (textContent && !['text', 'tspan'].includes(tagName)) {
+        //     eco(`${indent}  📄 Contenido: "${textContent}"`, 'content');
+        // }
+        
+        // eco('', 'spacer');
+        
     }
         
         
@@ -499,26 +508,33 @@ class svg {
       //  return results;
     }
 
+    async parsearSVG(){
+
+        showLoading('Cargando archivo svg');   
+        await this.parseSVG(this.txt, this.pasos)  // entrego a captura el dibujo y la imagen que lo genero
+            .then((dibujo) => {
+                // cuando termina dibuja                                      
+                captura.dibujo = dibujo;
+                captura.dibujar_captura(true);
+                hideLoading();
+            });
+                
+
+    }
 
     // carga la imagen desde un archivo y la manda a procesar
     async cargar_imagen(e){
         const archivo = e.target.files[0];
         this.txt = await archivo.text();
-
-        showLoading('Cargando archivo svg');     
+        
         try {            
             const imagen = await SVGToImage(archivo);
             this.actualizarNombreArchivo(imagen);
-           
-            await this.parseSVG(this.txt,3)  // entrego a captura el dibujo y la imagen que lo genero
-                .then((dibujo) => {
-                    // cuando termina dibuja                                      
-                    captura.dibujo = dibujo;
-                    captura.imagen = imagen;
-                    captura.dibujar_captura(true);
-                    hideLoading();
-                });
-                    
+
+            captura.imagen = imagen;
+
+            this.parsearSVG();
+         
         } catch (error) {
             console.error('Error en test:', error);
         }

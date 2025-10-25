@@ -1856,37 +1856,6 @@ function worldToScreen(x, y, offsetX, offsetY, scale) {
     };
 }
 
-function draw_image(ctx, src, x, y, width, height, globalAlpha = 1, offsetX=0, offsetY=0, scale = 1.0){
-    const img = new Image();
-    img.onload = (event) => {
-        // Establecer transparencia global
-        this.ctx.globalAlpha = globalAlpha;
-    
-        // Calcular dimensiones manteniendo la proporcion
-        let aspectRatio = 1;
-        if(!width){
-            width = img.width;
-        }
-
-        if(!height){
-            height = img.height;
-        }
-
-        if (aspectRatio){ // si conserva el aspect ratio ignora el alto y usa el proporsional al ancho
-            height = width;
-            aspectRatio = img.height / img.width;
-        }        
-
-        // Dibujar la imagen manteniendo proporcion
-        let s = worldToScreen(x, y, offsetX, offsetY, scale);
-        ctx.drawImage(img,s.x, s.y, width * scale, (height * aspectRatio) * scale);
-
-        // Restaurar opacidad para las lineas
-        ctx.globalAlpha = 1.0;        
-    };
-    img.src = src;
-}
-
 
 function linedash(ctx, x, y, x1, y1, ancho_punto=2, acho_separacion=2, line_color='#000000') {   
     ctx.beginPath();

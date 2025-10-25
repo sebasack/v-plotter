@@ -419,6 +419,7 @@ class canny {
     // a esta funcion la llama la clase que captura el dibujo
     actualizar_dibujo(dibujo, ajuste_inicial_offset_scale = false){
        // eco(dibujo);
+        //eco('actualizar dibujo');
         captura.dibujo = dibujo;
         hideLoading();
         captura.dibujar_captura(ajuste_inicial_offset_scale,true);
