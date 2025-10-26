@@ -39,7 +39,7 @@ void wifiAP(){
 
   WiFi.mode(WIFI_AP_STA);
 
-  WiFi.softAP(IOTname, "carbondioxide");
+  WiFi.softAP(IOTname, "1234567890");
 
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
@@ -151,7 +151,7 @@ void wifiTaskCreate(){
     Serial.printf("| SSID: %s PSK: %s                                                        |\n", WiFi.SSID().c_str(), WiFi.psk().c_str());
     Serial.printf("| Unable to connect, setting up Access Point: %s (192.168.4.1) |\n", IOTname);
     Serial.printf("| Deshabilite datos moviles y conectese al WIFI v-plotter             |\n", WiFi.status());
-    Serial.printf("| Utilice el password 'carbondioxide' para conectarse                 |\n");
+    Serial.printf("| Utilice el password '1234567890' para conectarse                 |\n");
     Serial.printf("| Abra un navegador y ponga la URL 192.168.4.1/config                 |\n");
     Serial.printf("| Ingrese el ssid y pass de su wifi y guarde los cambios              |\n");
     Serial.printf("| Si todo esta bien el v-plotter ya estara conectado a su wifi        |\n");

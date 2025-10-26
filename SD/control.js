@@ -763,7 +763,6 @@ draw_image(src, x, y, width, height, globalAlpha = 1, offsetX=0, offsetY=0, scal
                 $("#tareas").val(this.tareas.mostrar(this.config.tareas_mostradas));
                 $("#estado_cola").text(this.tareas.obtenerEstado().estado);
                 if (funcionExito && typeof funcionExito === "function") {        
-                   // this.guardar_estadisticas = true;
                     funcionExito(data); 
                 }
                 return;
@@ -789,10 +788,18 @@ draw_image(src, x, y, width, height, globalAlpha = 1, offsetX=0, offsetY=0, scal
                 //actualizo la lista de tareas
                 $("#tareas").val(this.tareas.mostrar(this.config.tareas_mostradas));
 
+                let params = parametros.split(","); // Splits by space
+                if (params[0] == 'C13' ){ // pen down                    
+                    this.pen_down = true;
+                    funcionExito = this.actualizar_estado_pen.bind(this);
+                }else if (params[0] == 'C14'){ // pen up                       
+                    this.pen_down = false;
+                    funcionExito = this.actualizar_estado_pen.bind(this);
+                }
+
                 this.tareas_completadas.push(parametros);
                 // Llama a la función de éxito si existe
                 if (funcionExito && typeof funcionExito === "function") {
-                //    this.guardar_estadisticas = true;
                     funcionExito(data);
                 }
                 return data;
