@@ -8,7 +8,7 @@ vertical plotter esp32 + wifi polargraph
       -----------------------------------------------
 
       1. Deshabilitar datos moviles del celular.
-      2. Buscar la red llamada v-plotter y tratar de conecarse usando el pass 'carbondioxide' .
+      2. Buscar la red llamada v-plotter y tratar de conecarse usando el pass '1234567890' .
       3. Entrar en la ip 192.168.4.1/config y configurar ssid y pass, presionar connect
       4. el AP v-plotter deberia desconectarse y deberia conectarse al wifi asignado.
       5. reiniciar el v-plotter
